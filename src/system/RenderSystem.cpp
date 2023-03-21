@@ -1,103 +1,37 @@
 #include "RenderSystem.h"
 #include <GLFW/glfw3.h>
-#include "linmath.h"
-
-
-// static const char* vertex_shader_text =
-// "#version 110\n"
-// "uniform mat4 MVP;\n"
-// "attribute vec3 vCol;\n"
-// "attribute vec2 vPos;\n"
-// "varying vec3 color;\n"
-// "void main()\n"
-// "{\n"
-// "    gl_Position = MVP * vec4(vPos, 0.0, 1.0);\n"
-// "    color = vCol;\n"
-// "}\n";
-
-// static const char* fragment_shader_text =
-// "#version 110\n"
-// "varying vec3 color;\n"
-// "void main()\n"
-// "{\n"
-// "    gl_FragColor = vec4(color, 1.0);\n"
-// "}\n";
-
-// static const struct
-// {
-//     float x, y;
-//     float r, g, b;
-// } vertices[3] =
-// {
-//     { -0.6f, -0.4f, 1.f, 0.f, 0.f },
-//     {  0.6f, -0.4f, 0.f, 1.f, 0.f },
-//     {   0.f,  0.6f, 0.f, 0.f, 1.f }
-// };
+#include "../core/Window.h"
+// #include "linmath.h"
 
 void RenderSystem::init() {
+    set_viewport_size(Window::width(), Window::height());
+}
 
-    // glGenBuffers(1, &vertex_buffer);
-    // glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-    // glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+void RenderSystem::set_viewport_size(int width, int height) {
+    viewport_width = width;
+    viewport_height = height;
+    aspect_ratio = static_cast<float>(viewport_width) / static_cast<float>(viewport_height);
+}
 
-    // vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-    // glShaderSource(vertex_shader, 1, &vertex_shader_text, NULL);
-    // glCompileShader(vertex_shader);
-
-    // fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-    // glShaderSource(fragment_shader, 1, &fragment_shader_text, NULL);
-    // glCompileShader(fragment_shader);
-
-    // program = glCreateProgram();
-    // glAttachShader(program, vertex_shader);
-    // glAttachShader(program, fragment_shader);
-    // glLinkProgram(program);
-    
-    // mvp_location = glGetUniformLocation(program, "MVP");
-    // vpos_location = glGetAttribLocation(program, "vPos");
-    // vcol_location = glGetAttribLocation(program, "vCol");
-
-    // glEnableVertexAttribArray(vpos_location);
-    // glVertexAttribPointer(vpos_location, 2, GL_FLOAT, GL_FALSE,
-    //                       sizeof(vertices[0]), (void*) 0);
-    // glEnableVertexAttribArray(vcol_location);
-    // glVertexAttribPointer(vcol_location, 3, GL_FLOAT, GL_FALSE,
-    //                       sizeof(vertices[0]), (void*) (sizeof(float) * 2));
-    
-    // glfwMakeContextCurrent(window);
-    // gladLoadGL(glfwGetProcAddress);
-    // glfwSwapInterval(1);
+void RenderSystem::attach_camera(Camera *cam) {
+    camera = cam;
 }
 
 void RenderSystem::render(Entity* entity) {
     auto color_component = entity->getComponent<ColorComponent>();
     if(color_component) {
-        float r = color_component->r;
-        float g = color_component->g;
-        float b = color_component->b;
+        glColor3f(color_component->r, color_component->g, color_component->b);
+
+        auto world_rect = color_component->rect;
+        auto eye_rect = world_rect.get_translated(camera->position.get_negated()).get_scaled(camera->zoom);
+        auto proj_rect = Rect2F{eye_rect.top_left.x, -eye_rect.top_left.y, eye_rect.size.w, eye_rect.size.h}.get_scaled(Size2F{1.0F/aspect_ratio, 1.0F});
 
 
-        // float ratio;
-        // int width = 800;
-        // int height = 600;
-        // mat4x4 m, p, mvp;
-
-        // // glfwGetFramebufferSize(window, &width, &height);
-        // ratio = width / (float) height;
-
-        // glViewport(0, 0, width, height);
-        // glClear(GL_COLOR_BUFFER_BIT);
-
-        // mat4x4_identity(m);
-        // mat4x4_rotate_Z(m, m, (float) glfwGetTime());
-        // mat4x4_ortho(p, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);
-        // mat4x4_mul(mvp, p, m);
-
-        // glUseProgram(program);
-        // glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*) mvp);
-        // glDrawArrays(GL_TRIANGLES, 0, 3);
-
-
-        // std::cout << r << std::endl;
+        glBegin(GL_QUADS);
+        glVertex2f(proj_rect.left(), proj_rect.bottom());
+        glVertex2f(proj_rect.left(), proj_rect.top());
+        glVertex2f(proj_rect.right(), proj_rect.top());
+        glVertex2f(proj_rect.right(), proj_rect.bottom());
+        glEnd();
     }
 }

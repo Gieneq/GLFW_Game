@@ -2,6 +2,7 @@
 #include <vector>
 #include <iostream>
 
+#include "Camera.h"
 #include "../core/Core.h"
 #include "../entity/Entity.h"
 
@@ -21,6 +22,7 @@ public:
     virtual void update(float dt) override;
     virtual void render() override;
 
+    Camera camera;
     std::vector<Entity*> entities;
     RenderSystem render_system;
 

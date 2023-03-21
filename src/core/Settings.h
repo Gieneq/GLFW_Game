@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "../utils/Maths.h"
 
 namespace Settings {
     struct Window
@@ -7,6 +8,18 @@ namespace Settings {
         static constexpr char* TITLE = "Some title";
         static constexpr int WIDTH{800};
         static constexpr int HEIGHT{600};
+        static constexpr float ASPECT_RATIO{static_cast<float>(WIDTH) / static_cast<float>(HEIGHT)};
+        struct ClearColor {
+            static constexpr float r{0.0};
+            static constexpr float g{0.0};
+            static constexpr float b{1.0};
+            static constexpr float a{1.0};
+        };
+    };
+
+    struct Camera {
+        static constexpr float ZOOM = 0.25f;
+        // static constexpr float ZOOM2F = Size2F{ZOOM, ZOOM};
     };
     
     struct General {

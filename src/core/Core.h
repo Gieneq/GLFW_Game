@@ -1,4 +1,5 @@
 #pragma once
+// #include "Graphics.h"
 #include <iostream>
 #include <GLFW/glfw3.h>
 
@@ -18,6 +19,7 @@ public:
 
 private:
     double last_time{0.0};
+    double accumulated_time{0.0};
     int frame_count{0};
     double fps_evaluated{0.0};
 };

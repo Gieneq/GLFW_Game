@@ -48,6 +48,8 @@ set( GLFW-CMAKE-STARTER-SRC
     src/core/Window.cpp
 
     src/game/Game.cpp
+    src/game/Camera.cpp
+
     src/utils/Maths.cpp
 
     src/entity/Entity.cpp

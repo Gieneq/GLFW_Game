@@ -1,7 +1,13 @@
 #include "Window.h"
-
+// #include "glad/gl.h"
+// // #endif
+// #define GLFW_INCLUDE_NONE
+#include "GLFW/glfw3.h"
 
 static GLFWwindow *window;
+static int window_width{Settings::Window::WIDTH};
+static int window_height{Settings::Window::HEIGHT};
+
 static void error(int error, const char *desc) {
         fputs(desc, stderr);
 }
@@ -27,10 +33,20 @@ void Window::init() {
     
     glfwMakeContextCurrent(window);
     glfwSetKeyCallback(window, key_callback);
+
+    glfwGetFramebufferSize(window, &window_width, &window_height);
 }
 
 bool Window::should_not_be_closed() {
     return !glfwWindowShouldClose(window);
+}
+
+void Window::prepare() {
+    glClearColor(Settings::Window::ClearColor::r,
+    Settings::Window::ClearColor::g,
+    Settings::Window::ClearColor::b,
+    Settings::Window::ClearColor::a);
+    glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void Window::update() {
@@ -45,6 +61,14 @@ void Window::destroy() {
 
     glfwTerminate();
 }
+
+    int Window::width() {
+        return window_width;
+    }
+
+    int Window::height() {
+        return window_height;
+    }
 
 
 //         int width, height;
