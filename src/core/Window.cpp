@@ -34,6 +34,8 @@ void Window::init() {
     glfwMakeContextCurrent(window);
     glfwSetKeyCallback(window, key_callback);
 
+    glfwSwapInterval(1);
+
     glfwGetFramebufferSize(window, &window_width, &window_height);
 }
 
