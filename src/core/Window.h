@@ -4,7 +4,7 @@
 
 #include "Errors.h"
 #include "Settings.h"
-
+class KeyboardEvent;
 namespace Window
 {
     void init();
@@ -15,4 +15,5 @@ namespace Window
 
     int width();
     int height();
+    void add_keyboard_listener(KeyboardEvent* ke);
 } // namespace Window

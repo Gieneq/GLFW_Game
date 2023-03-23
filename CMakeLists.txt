@@ -58,9 +58,12 @@ set( GLFW-CMAKE-STARTER-SRC
     src/component/TransformComponent.cpp
     src/component/FoodComponent.cpp
     src/component/SpriteComponent.cpp
+    src/component/ControllableComponent.cpp
 
     src/system/SystemBase.cpp
     src/system/RenderSystem.cpp
+    src/system/UserInputSystem.cpp
+    src/system/TransformSystem.cpp
 
     src/main.cpp 
     )

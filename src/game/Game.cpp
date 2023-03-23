@@ -1,10 +1,17 @@
 #include "Game.h"
+#include "../core/Window.h"
+#include "../core/Callbacks.h"
 
 
 void Game::init() {
     Core::init();
     render_system.init();
     render_system.attach_camera(&camera);
+
+    user_input_system.init();
+    Window::add_keyboard_listener(&user_input_system);
+
+    transform_system.init();
 
     int size = 100;
 
@@ -24,20 +31,33 @@ void Game::init() {
     
     Entity *player = new Entity();
     auto color = new ColorComponent(player);
+    auto trsf_ctrl = new TransformComponent(player, color->rect.top_left);
     color->r = 1.0F;
     color->b = 0.0F;
     color->rect.top_left.x = 0.5F;
     player->addComponent(color);
+    player->addComponent(trsf_ctrl);
+
+    auto wsad_ctrl = new WSADControllableComponent(player);
+    player->addComponent(wsad_ctrl);
+
     entities.push_back(player);
+    
+    user_input_system.attach_controllabe(player);
 }
 
 
 bool Game::input() {
-
+    // user_input_system.process_keyboard();
 }
 
 void Game::update(float dt) {
-    camera.position.x += dt * 0.5F;
+    // camera.position.x += dt * 0.5F;
+    // camera.update(dt);
+    for(auto entity: entities) {
+        transform_system.update(entity, dt);
+    }
+    
 }
 
 void Game::render() {

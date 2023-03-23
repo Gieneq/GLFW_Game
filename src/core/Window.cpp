@@ -4,18 +4,49 @@
 // #define GLFW_INCLUDE_NONE
 #include "GLFW/glfw3.h"
 
+#include <vector>
+
+#include "Callbacks.h"
+
 static GLFWwindow *window;
 static int window_width{Settings::Window::WIDTH};
 static int window_height{Settings::Window::HEIGHT};
+static std::vector<KeyboardEvent*> keyboard_callbacks;
+
+
 
 static void error(int error, const char *desc) {
         fputs(desc, stderr);
 }
 
+//todo make vector of callback handlers - attach them, sort somehow
+
 static void key_callback(GLFWwindow *w, int key, int scancode, int action, int mods) {
         // See http://www.glfw.org/docs/latest/group__keys.html
-        if ((key == GLFW_KEY_ESCAPE || key == GLFW_KEY_Q) && action == GLFW_PRESS)
-                glfwSetWindowShouldClose(w, GL_TRUE);
+        if ((key == GLFW_KEY_ESCAPE) && action == GLFW_PRESS) {
+            glfwSetWindowShouldClose(w, GL_TRUE);
+            return;
+        }
+
+        if (action == GLFW_PRESS) {
+            for(auto keyboard_callback : keyboard_callbacks) {
+                keyboard_callback->on_key_press(key);
+                //todo eval bool
+            }
+        }
+        
+        if (action == GLFW_RELEASE) {
+            for(auto keyboard_callback : keyboard_callbacks) {
+                keyboard_callback->on_key_release(key);
+                //todo eval bool
+            }
+        }
+
+        
+}
+
+void Window::add_keyboard_listener(KeyboardEvent* ke) {
+    keyboard_callbacks.push_back(ke);
 }
 
 void Window::init() {
@@ -32,6 +63,7 @@ void Window::init() {
 
     
     glfwMakeContextCurrent(window);
+    // gladLoadGL(glfwGetProcAddress);
     glfwSetKeyCallback(window, key_callback);
 
     glfwSwapInterval(1);

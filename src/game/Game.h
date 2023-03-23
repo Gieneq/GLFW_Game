@@ -11,6 +11,8 @@
 #include "../component/TransformComponent.h"
 
 #include "../system/RenderSystem.h"
+#include "../system/UserInputSystem.h"
+#include "../system/TransformSystem.h"
 
 
 class Game : public Core {
@@ -24,6 +26,8 @@ public:
 
     Camera camera;
     std::vector<Entity*> entities;
+    
     RenderSystem render_system;
-
+    UserInputSystem user_input_system;
+    TransformSystem transform_system;
 };
