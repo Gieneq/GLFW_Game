@@ -42,6 +42,8 @@ void Game::init() {
     player->addComponent(wsad_ctrl);
 
     entities.push_back(player);
+
+    camera.focus_on(player);
     
     user_input_system.attach_controllabe(player);
 }
@@ -52,12 +54,11 @@ bool Game::input() {
 }
 
 void Game::update(float dt) {
-    // camera.position.x += dt * 0.5F;
-    // camera.update(dt);
     for(auto entity: entities) {
         transform_system.update(entity, dt);
     }
     
+    camera.update(dt);
 }
 
 void Game::render() {
