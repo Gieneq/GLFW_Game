@@ -9,6 +9,7 @@
 #include "../component/SpriteComponent.h"
 #include "../entity/Entity.h"
 #include "../game/Camera.h"
+#include "ImageLoader.h"
 
 class RenderSystem : public SystemBase {
 public:

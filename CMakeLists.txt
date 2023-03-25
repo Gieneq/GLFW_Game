@@ -1,4 +1,6 @@
 cmake_minimum_required( VERSION 3.1 )
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project( GLFW-CMake-starter )
 
@@ -9,6 +11,10 @@ include_directories( ${OPENGL_INCLUDE_DIRS} )
 if (MATH_LIBRARY)
     link_libraries("${MATH_LIBRARY}")
 endif()
+
+# Copy content of res to build
+file(COPY res DESTINATION ${CMAKE_BINARY_DIR})
+
 
 # set( GLFW_BUILD_DOCS OFF CACHE BOOL  "GLFW lib only" )
 # set( GLFW_INSTALL OFF CACHE BOOL  "GLFW lib only" )
@@ -41,16 +47,27 @@ else()
 
 endif()
 
+
+include_directories(src/utils)
+include_directories(src/entity)
+include_directories(src/core)
+include_directories(src/system)
+include_directories(src/game)
+include_directories(src/loader)
+
 set( GLFW-CMAKE-STARTER-SRC
     src/core/Core.cpp
     src/core/Settings.cpp
     src/core/Errors.cpp
     src/core/Window.cpp
+    
+    src/loader/ImageLoader.cpp
 
     src/game/Game.cpp
     src/game/Camera.cpp
 
     src/utils/Maths.cpp
+    src/utils/IO.cpp
 
     src/entity/Entity.cpp
 
@@ -77,6 +94,25 @@ target_link_libraries( GLFW-CMake-starter ${OPENGL_LIBRARIES} glfw )
 # set_target_properties(${GUI_ONLY_BINARIES} ${CONSOLE_BINARIES} PROPERTIES
 #                       FOLDER "GLFW3/Tests")
 
+
+
+
+
+include_directories(libs/lodepng)
+# file(GLOB PNGDECODER_SOURCES "libs/lodepng/*.cpp")
+# file(GLOB PNGDECODER_HEADERS "libs/lodepng/*.h")
+set(PNGDECODER_SOURCES "libs/lodepng/lodepng.cpp")
+set(PNGDECODER_HEADERS "libs/lodepng/lodepng.h")
+
+add_library(lodepng ${PNGDECODER_SOURCES} ${PNGDECODER_HEADERS})
+target_link_libraries(GLFW-CMake-starter lodepng)
+
+
+
+
+
+
+
 if( MSVC )
     if(${CMAKE_VERSION} VERSION_LESS "3.6.0") 
         message( "\n\t[ WARNING ]\n\n\tCMake version lower than 3.6.\n\n\t - Please update CMake and rerun; OR\n\t - Manually set 'GLFW-CMake-starter' as StartUp Project in Visual Studio.\n" )
@@ -85,3 +121,6 @@ if( MSVC )
         set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT GLFW-CMake-starter )
     endif()
 endif()
+
+
+

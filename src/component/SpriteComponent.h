@@ -1,7 +1,8 @@
 #pragma once
 #include <iostream>
 #include "Component.h"
-#include "../utils/Maths.h"
+#include "Maths.h"
+#include "ImageData.h"
 
 class ColorComponent : public Component {
 public:
@@ -13,8 +14,11 @@ public:
     Rect2F rect{0.0F,0.0F,1.0F,1.0F};
 };
 
-class SpriteComponent : public Component {
+class TextureComponent : public Component {
 public:
-    virtual ~SpriteComponent() = default;
+    virtual ~TextureComponent() = default;
 
+    TextureComponent(Entity* e, const ImageId& id) : Component(e), image_id{id} {}
+    ImageId image_id;
+    Rect2F rect{0.0F,0.0F,1.0F,1.0F};
 };

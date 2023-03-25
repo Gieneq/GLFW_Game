@@ -1,6 +1,7 @@
 #include "Game.h"
-#include "../core/Window.h"
-#include "../core/Callbacks.h"
+#include "Window.h"
+#include "Callbacks.h"
+#include "ImageLoader.h"
 
 
 void Game::init() {
@@ -30,14 +31,29 @@ void Game::init() {
 
     
     Entity *player = new Entity();
-    auto color = new ColorComponent(player);
-    auto trsf_ctrl = new TransformComponent(player, color->rect.top_left);
-    color->r = 1.0F;
-    color->b = 0.0F;
-    color->rect.top_left.x = 0.5F;
-    player->addComponent(color);
-    player->addComponent(trsf_ctrl);
+    auto& image_loader = ImageLoader::get_loader();
+    if(image_loader.has_image(ImageId("tileset"))) {
+        std::cout << "has image" << std::endl;
+        auto texture = new TextureComponent(player, ImageId("tileset"));
+        std::cout << "texture: " << texture->image_id.id << ": " << ImageLoader::get_loader().get_image(texture->image_id).texture_id << std::endl;
+        player->addComponent(texture);
+        auto trsf_ctrl = new TransformComponent(player, texture->rect.top_left);
+        player->addComponent(trsf_ctrl);
+    } else {
+        std::cout << "no image" << std::endl;
+        auto color = new ColorComponent(player);
+        color->r = 1.0F;
+        color->g = 0.0F;
+        color->b = 1.0F;
+        color->rect.top_left.x = 0.5F;
+        player->addComponent(color);
 
+        auto trsf_ctrl = new TransformComponent(player, color->rect.top_left);
+        player->addComponent(trsf_ctrl);
+    }
+
+    // todo add some templating or whatever - it is not obvious
+    // that player sam some component to be controlled
     auto wsad_ctrl = new WSADControllableComponent(player);
     player->addComponent(wsad_ctrl);
 

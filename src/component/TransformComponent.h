@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 #include "Component.h"
-#include "../utils/Maths.h"
+#include "Maths.h"
 
 class TransformComponent : public Component {
 public:

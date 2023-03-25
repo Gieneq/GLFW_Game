@@ -2,7 +2,7 @@
 #include <iostream>
 #include "Component.h"
 #include "TransformComponent.h"
-#include "../entity/Entity.h"
+#include "Entity.h"
 
 class WSADControllableComponent : public Component {
 public:

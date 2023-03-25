@@ -66,7 +66,9 @@ void Window::init() {
     // gladLoadGL(glfwGetProcAddress);
     glfwSetKeyCallback(window, key_callback);
 
-    glfwSwapInterval(1);
+    if(Settings::Window::ENABLE_VSYNC) {
+        glfwSwapInterval(1);
+    }
 
     glfwGetFramebufferSize(window, &window_width, &window_height);
 }
