@@ -1,7 +1,9 @@
 #include "Game.h"
 #include "Window.h"
 #include "Callbacks.h"
-#include "ImageLoader.h"
+#include "Loader.h"
+#include "IO.h"
+#include "World.h"
 
 
 void Game::init() {
@@ -13,6 +15,18 @@ void Game::init() {
     Window::add_keyboard_listener(&user_input_system);
 
     transform_system.init();
+
+    World world;
+    try
+    {
+        Loader::get_loader().load_map(world, "testmap");
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    
+
 
     int size = 100;
 
@@ -31,11 +45,11 @@ void Game::init() {
 
     
     Entity *player = new Entity();
-    auto& image_loader = ImageLoader::get_loader();
-    if(image_loader.has_image(ImageId("tileset"))) {
+    auto texture_id = Loader::get_loader().get_texture_id("some_tiles");
+    if(texture_id.has_id()) {
         std::cout << "has image" << std::endl;
-        auto texture = new TextureComponent(player, ImageId("tileset"));
-        std::cout << "texture: " << texture->image_id.id << ": " << ImageLoader::get_loader().get_image(texture->image_id).texture_id << std::endl;
+        auto texture = new TextureComponent(player, texture_id);
+        // std::cout << "texture: " << texture->image_id.id << ": " << Loader::get_loader().get_image(texture->image_id).texture_id << std::endl;
         player->addComponent(texture);
         auto trsf_ctrl = new TransformComponent(player, texture->rect.top_left);
         player->addComponent(trsf_ctrl);

@@ -1,13 +1,21 @@
 #include "RenderSystem.h"
 #include <GLFW/glfw3.h>
 #include "Window.h"
-#include "ImageLoader.h"
+#include "Loader.h"
 // #include "linmath.h"
 
 void RenderSystem::init() {
     set_viewport_size(Window::width(), Window::height());
 
-    ImageLoader::get_loader().load_image(ImageId("tileset"), "tiles.png");
+    auto texture_id = Loader::get_loader().load_image_from_resources("tiles.png");
+    auto texture_data = Loader::get_loader().get_texture_data(texture_id);
+    std::string texture_name{"some_tiles"};
+    if(Loader::get_loader().register_texture_name(texture_name, texture_id)) {
+        std::cout << "Registered texture: " << texture_id << "as " << texture_name << std::endl;
+    }
+    else {
+        std::cout << "Failed to register texture name: " << texture_id << std::endl;
+    }
 }
 
 void RenderSystem::set_viewport_size(int width, int height) {
@@ -46,11 +54,13 @@ void RenderSystem::render(Entity* entity) {
         auto eye_rect = world_rect.get_translated(camera->position.get_negated()).get_scaled(camera->zoom);
         auto proj_rect = Rect2F{eye_rect.top_left.x, -eye_rect.top_left.y, eye_rect.size.w, eye_rect.size.h}.get_scaled(Size2F{1.0F/aspect_ratio, 1.0F});
 
-        auto& loader = ImageLoader::get_loader();
-        auto texture_id = loader.get_image(texture_component->image_id).texture_id;
+        // auto& loader = Loader::get_loader();
+        // texture_id = texture_component->texture_id;
+
+        // auto texture_id = loader.get_image(texture_component->).texture_id;
         glColor3f(1.0F, 1.0F, 1.0F);
 
-        glBindTexture(GL_TEXTURE_2D, texture_id);
+        glBindTexture(GL_TEXTURE_2D, texture_component->texture_id.id);
         glEnable(GL_TEXTURE_2D);
         
         float corner = 1.0f/64;

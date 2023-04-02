@@ -1,0 +1,87 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "tilesets/details.tsx",
+    "expandedProjectPaths": [
+        ".",
+        "maps",
+        "entities",
+        "tilesets"
+    ],
+    "fileStates": {
+        "entities/player.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "maps/testmap.tmx": {
+            "expandedGroupLayers": [
+                5,
+                2,
+                3,
+                7
+            ],
+            "scale": 1.5,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 452,
+                "y": 289.6666666666667
+            }
+        },
+        "tilesets/details.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 2
+        },
+        "tilesets/floor.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 2
+        },
+        "tilesets/objects.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 2
+        },
+        "tilesets/objects_1x2.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 2
+        },
+        "tilesets/objects_2x2.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1.5
+        },
+        "tilesets/particles.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 32
+        }
+    },
+    "frame.defaultDuration": 2000,
+    "last.imagePath": "C:/Users/Lenovo/Documents/_Moje/Piotr/Pyrograf/LochPythonWS/LochPythonRPG/data/tilesets",
+    "map.lastUsedFormat": "tmx",
+    "map.tileHeight": 20,
+    "map.tileWidth": 20,
+    "openFiles": [
+        "maps/testmap.tmx",
+        "tilesets/objects.tsx",
+        "tilesets/details.tsx",
+        "tilesets/floor.tsx",
+        "tilesets/objects_1x2.tsx",
+        "tilesets/objects_2x2.tsx"
+    ],
+    "project": "LochPython.tiled-project",
+    "property.type": "int",
+    "recentFiles": [
+        "maps/testmap.tmx",
+        "tilesets/objects.tsx",
+        "tilesets/objects_2x2.tsx",
+        "tilesets/objects_1x2.tsx",
+        "tilesets/floor.tsx",
+        "tilesets/details.tsx",
+        "tilesets/particles.tsx",
+        "entities/player.tsx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 2,
+        "width": 2
+    }
+}

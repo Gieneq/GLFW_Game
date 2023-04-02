@@ -53,6 +53,7 @@ include_directories(src/entity)
 include_directories(src/core)
 include_directories(src/system)
 include_directories(src/game)
+include_directories(src/world)
 include_directories(src/loader)
 
 set( GLFW-CMAKE-STARTER-SRC
@@ -61,10 +62,13 @@ set( GLFW-CMAKE-STARTER-SRC
     src/core/Errors.cpp
     src/core/Window.cpp
     
-    src/loader/ImageLoader.cpp
+    src/loader/Loader.cpp
 
     src/game/Game.cpp
     src/game/Camera.cpp
+
+
+    src/world/World.cpp
 
     src/utils/Maths.cpp
     src/utils/IO.cpp
@@ -109,6 +113,24 @@ target_link_libraries(GLFW-CMake-starter lodepng)
 
 
 
+include_directories(libs/pugixml/src)
+set(PUGIXML_SOURCES "libs/pugixml/src/pugixml.cpp")
+set(PUGIXML_HEADERS "libs/pugixml/src/pugixml.hpp")
+
+add_library(pugixml ${PUGIXML_SOURCES} ${PUGIXML_HEADERS})
+target_link_libraries(GLFW-CMake-starter pugixml)
+
+# add .hpp files from libs/rapidxml to GLFW-CMake-starter project
+# set_target_properties(rapidxml PROPERTIES LINKER_LANGUAGE CXX)
+# file(GLOB RAPIDXML_HEADERS "libs/rapidxml/*.hpp")
+# add_library(rapidxml ${RAPIDXML_HEADERS})
+# target_link_libraries(GLFW-CMake-starter rapidxml)
+
+
+
+# set(RAPIDXML_HEADERS "libs/rapidxml/rapidxml.h")
+# add_library(rapidxml ${RAPIDXML_HEADERS})
+# target_link_libraries(GLFW-CMake-starter rapidxml)
 
 
 

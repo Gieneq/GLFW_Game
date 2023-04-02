@@ -14,6 +14,10 @@ The most recent screenshot
 - 23.03.2023: Colored tiles rendering
 - 25.03.2023: Textured tiles rendering
 
+## Dependencies:
+- https://rapidxml.sourceforge.net/
+
+
 ## Resources
 
 Texture loading/rendering:

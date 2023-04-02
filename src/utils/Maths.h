@@ -30,3 +30,10 @@ struct Rect2F {
     Vect2F top_left;
     Size2F size;
 };
+
+template<typename T>
+T constrain(T value, T min, T max) {
+    value = value < min ? min : value;
+    value = value > max ? max : value;
+    return value;
+}

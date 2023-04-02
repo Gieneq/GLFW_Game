@@ -5,8 +5,8 @@
 
 class TransformComponent : public Component {
 public:
-    virtual ~TransformComponent() = default;
     TransformComponent(Entity* e, Vect2F& target) : Component(e), target{target} {}
+    virtual ~TransformComponent() = default;
 
     void update(float dt);
     void direction_north();
@@ -20,4 +20,8 @@ public:
     Vect2F direction{0.0F, 1.0F};
     bool moving{false};
     Vect2F& target;
+
+    TransformComponent* clone(Entity* new_parent) override {
+        return new TransformComponent(new_parent, target);
+    }
 };

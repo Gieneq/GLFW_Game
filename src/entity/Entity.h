@@ -41,6 +41,16 @@ public:
         }
         return result;
     }
+
+    Entity* clone() {
+        Entity* entity = new Entity();
+        for (auto component : components) {
+            auto new_component = component->clone(entity);
+            entity->addComponent(new_component);
+        }
+        return entity;
+    }
+
 private:
     std::vector<Component*> components;
 };

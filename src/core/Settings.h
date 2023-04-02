@@ -19,6 +19,15 @@ namespace Settings {
         };
     };
 
+    struct Map {
+        static constexpr int TILE_SIZE{20};
+        static constexpr int WIDTH{32};
+        static constexpr int HEIGHT{16};
+        static constexpr int ORIGIN_X{0};
+        static constexpr int ORIGIN_Y{0};
+        static constexpr int MAX_GID{2<<16-1};
+    };
+
     struct Camera {
         static constexpr float ZOOM = 0.25f;
         // static constexpr float ZOOM2F = Size2F{ZOOM, ZOOM};
