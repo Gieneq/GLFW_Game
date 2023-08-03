@@ -25,7 +25,7 @@ namespace Settings {
         static constexpr int HEIGHT{16};
         static constexpr int ORIGIN_X{0};
         static constexpr int ORIGIN_Y{0};
-        static constexpr int MAX_GID{2<<16-1};
+        static constexpr int MAX_GID{(2<<16)-1};
     };
 
     struct Camera {

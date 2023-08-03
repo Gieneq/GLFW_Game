@@ -81,6 +81,7 @@ void Game::init() {
 
 bool Game::input() {
     // user_input_system.process_keyboard();
+    return false;
 }
 
 void Game::update(float dt) {

@@ -15,13 +15,19 @@ The most recent screenshot
 - 25.03.2023: Textured tiles rendering
 
 ## Dependencies:
+- https://github.com/glfw/glfw
+- https://github.com/lvandeve/lodepng
 - https://rapidxml.sourceforge.net/
+- https://github.com/zeux/pugixml
 
 
 ## Resources
 
 Texture loading/rendering:
+- https://www.glfw.org/documentation.html
 - https://docs.gl/es2/glTexImage2D
 - https://learnopengl.com/Getting-started/Textures
 - https://doc.magnum.graphics/magnum/examples-texturedquad.html
 - https://learnopengl.com/Getting-started/Hello-Triangle
+
+## How to setup environment
