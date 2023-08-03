@@ -1,36 +1,18 @@
-cmake_minimum_required( VERSION 3.1 )
+cmake_minimum_required(VERSION 3.6)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-project( GLFW-CMake-starter )
+project(GWorld VERSION 0.0.0)
 
+# Setup OpenGL, GLFW, GLAD
 find_package( OpenGL REQUIRED )
-
 include_directories( ${OPENGL_INCLUDE_DIRS} )
-
 if (MATH_LIBRARY)
     link_libraries("${MATH_LIBRARY}")
 endif()
-
-# Copy content of res to build
-file(COPY res DESTINATION ${CMAKE_BINARY_DIR})
-
-
-# set( GLFW_BUILD_DOCS OFF CACHE BOOL  "GLFW lib only" )
-# set( GLFW_INSTALL OFF CACHE BOOL  "GLFW lib only" )
-
 add_subdirectory( glfw )
 link_libraries(glfw)
-include_directories("${GLFW_SOURCE_DIR}/deps")
 
-# set(c "${GLFW_SOURCE_DIR}/deps/glad/gl.h"
-#             "${GLFW_SOURCE_DIR}/deps/glad_gl.c")
-# set(GLAD_VULKAN "${GLFW_SOURCE_DIR}/deps/glad/vulkan.h"
-#                 "${GLFW_SOURCE_DIR}/deps/glad_vulkan.c")
-set(GETOPT "${GLFW_SOURCE_DIR}/deps/getopt.h"
-           "${GLFW_SOURCE_DIR}/deps/getopt.c")
-set(TINYCTHREAD "${GLFW_SOURCE_DIR}/deps/tinycthread.h"
-                "${GLFW_SOURCE_DIR}/deps/tinycthread.c")
 
 if( MSVC )
     SET( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ENTRY:mainCRTStartup" )
@@ -48,50 +30,57 @@ else()
 endif()
 
 
-include_directories(src/utils)
-include_directories(src/entity)
-include_directories(src/core)
-include_directories(src/system)
-include_directories(src/game)
-include_directories(src/world)
-include_directories(src/loader)
+# Add libraries
+add_subdirectory(libs)
+add_subdirectory(src)
 
-set( GLFW-CMAKE-STARTER-SRC
-    src/core/Core.cpp
-    src/core/Settings.cpp
-    src/core/Errors.cpp
-    src/core/Window.cpp
+
+
+# include_directories(src/utils)
+# include_directories(src/entity)
+# include_directories(src/core)
+# include_directories(src/system)
+# include_directories(src/game)
+# include_directories(src/world)
+# include_directories(src/loader)
+
+# set( GWorld-SRC
+#     src/core/Core.cpp
+#     src/core/Settings.cpp
+#     src/core/Errors.cpp
+#     src/core/Window.cpp
     
-    src/loader/Loader.cpp
+#     src/loader/Loader.cpp
 
-    src/game/Game.cpp
-    src/game/Camera.cpp
+#     src/game/GameBase.cpp
+#     src/game/Game.cpp
+#     src/game/Camera.cpp
 
 
-    src/world/World.cpp
+#     src/world/World.cpp
 
-    src/utils/Maths.cpp
-    src/utils/IO.cpp
+#     src/utils/Maths.cpp
+#     src/utils/IO.cpp
 
-    src/entity/Entity.cpp
+#     src/entity/Entity.cpp
 
-    src/component/Component.cpp
-    src/component/TransformComponent.cpp
-    src/component/FoodComponent.cpp
-    src/component/SpriteComponent.cpp
-    src/component/ControllableComponent.cpp
+#     src/component/Component.cpp
+#     src/component/TransformComponent.cpp
+#     src/component/FoodComponent.cpp
+#     src/component/SpriteComponent.cpp
+#     src/component/ControllableComponent.cpp
 
-    src/system/SystemBase.cpp
-    src/system/RenderSystem.cpp
-    src/system/UserInputSystem.cpp
-    src/system/TransformSystem.cpp
+#     src/system/SystemBase.cpp
+#     src/system/RenderSystem.cpp
+#     src/system/UserInputSystem.cpp
+#     src/system/TransformSystem.cpp
 
-    src/main.cpp 
-    )
+#     src/main.cpp 
+#     )
      
-add_executable( GLFW-CMake-starter ${GLFW-CMAKE-STARTER-SRC} ${GETOPT} ${GLAD_GL} )
+# add_executable( GWorld ${GWorld-SRC} ${GETOPT} ${GLAD_GL} )
 # add_executable( GLFW-CMake-starter WIN32 ${GLFW-CMAKE-STARTER-SRC} )
-target_link_libraries( GLFW-CMake-starter ${OPENGL_LIBRARIES} glfw )
+# target_link_libraries( GWorld ${OPENGL_LIBRARIES} glfw )
 
 # set(CONSOLE_BINARIES GLFW-CMake-starter)
 
@@ -101,24 +90,23 @@ target_link_libraries( GLFW-CMake-starter ${OPENGL_LIBRARIES} glfw )
 
 
 
+# include_directories(libs/lodepng)
+# # file(GLOB PNGDECODER_SOURCES "libs/lodepng/*.cpp")
+# # file(GLOB PNGDECODER_HEADERS "libs/lodepng/*.h")
+# set(PNGDECODER_SOURCES "libs/lodepng/lodepng.cpp")
+# set(PNGDECODER_HEADERS "libs/lodepng/lodepng.h")
 
-include_directories(libs/lodepng)
-# file(GLOB PNGDECODER_SOURCES "libs/lodepng/*.cpp")
-# file(GLOB PNGDECODER_HEADERS "libs/lodepng/*.h")
-set(PNGDECODER_SOURCES "libs/lodepng/lodepng.cpp")
-set(PNGDECODER_HEADERS "libs/lodepng/lodepng.h")
-
-add_library(lodepng ${PNGDECODER_SOURCES} ${PNGDECODER_HEADERS})
-target_link_libraries(GLFW-CMake-starter lodepng)
-
+# add_library(lodepng ${PNGDECODER_SOURCES} ${PNGDECODER_HEADERS})
+# target_link_libraries(GLFW-CMake-starter lodepng)
 
 
-include_directories(libs/pugixml/src)
-set(PUGIXML_SOURCES "libs/pugixml/src/pugixml.cpp")
-set(PUGIXML_HEADERS "libs/pugixml/src/pugixml.hpp")
 
-add_library(pugixml ${PUGIXML_SOURCES} ${PUGIXML_HEADERS})
-target_link_libraries(GLFW-CMake-starter pugixml)
+# include_directories(libs/pugixml/src)
+# set(PUGIXML_SOURCES "libs/pugixml/src/pugixml.cpp")
+# set(PUGIXML_HEADERS "libs/pugixml/src/pugixml.hpp")
+
+# add_library(pugixml ${PUGIXML_SOURCES} ${PUGIXML_HEADERS})
+# target_link_libraries(GLFW-CMake-starter pugixml)
 
 # add .hpp files from libs/rapidxml to GLFW-CMake-starter project
 # set_target_properties(rapidxml PROPERTIES LINKER_LANGUAGE CXX)
@@ -135,14 +123,14 @@ target_link_libraries(GLFW-CMake-starter pugixml)
 
 
 
-if( MSVC )
-    if(${CMAKE_VERSION} VERSION_LESS "3.6.0") 
-        message( "\n\t[ WARNING ]\n\n\tCMake version lower than 3.6.\n\n\t - Please update CMake and rerun; OR\n\t - Manually set 'GLFW-CMake-starter' as StartUp Project in Visual Studio.\n" )
-    else()
+# if( MSVC )
+#     if(${CMAKE_VERSION} VERSION_LESS "3.6.0") 
+#         message( "\n\t[ WARNING ]\n\n\tCMake version lower than 3.6.\n\n\t - Please update CMake and rerun; OR\n\t - Manually set 'GLFW-CMake-starter' as StartUp Project in Visual Studio.\n" )
+#     else()
     
-        set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT GLFW-CMake-starter )
-    endif()
-endif()
+#         set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT GLFW-CMake-starter )
+#     endif()
+# endif()
 
 
 

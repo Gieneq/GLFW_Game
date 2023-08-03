@@ -1,0 +1,14 @@
+message(STATUS " * Building world")
+
+list(APPEND LIB_DEPENDENCIES 
+  utils
+)
+
+message(STATUS "   -> ${LIB_DEPENDENCIES}")
+
+add_library(world 
+  World.cpp
+)
+
+target_link_libraries(world PUBLIC ${LIB_DEPENDENCIES})
+target_include_directories(world INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

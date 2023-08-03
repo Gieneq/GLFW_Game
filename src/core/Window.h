@@ -1,6 +1,4 @@
 #pragma once
-// #include "Graphics.h"
-// #include <GLFW/glfw3.h>
 
 #include "Errors.h"
 #include "Settings.h"
@@ -8,7 +6,7 @@ class KeyboardEvent;
 namespace Window
 {
     void init();
-    bool should_not_be_closed();
+    bool shouldNotBeClosed();
     void prepare();
     void update();
     void destroy();

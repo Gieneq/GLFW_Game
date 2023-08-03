@@ -1,17 +1,28 @@
 #include "Core.h"
+
+
+// #include "glad/glad.h"
+#include "GLFW/glfw3.h"
+
+// #include "glad/glad.h"
+// #define GLFW_INCLUDE_NONE
+// #include "GLFW/glfw3.h"
+
+#include <iostream>
 #include "Window.h"
+#include "Settings.h"
 
 void Core::init() {
-    last_time = glfwGetTime();
-    frame_count = 0;
+    lastTime = glfwGetTime();
+    frameCount = 0;
 }
 
 
 void Core::loop() {
     double current_time = glfwGetTime();
-    double delta_time = current_time - last_time;
-    accumulated_time += delta_time;
-    last_time = current_time;
+    double delta_time = current_time - lastTime;
+    accumulatedTime += delta_time;
+    lastTime = current_time;
 
     input();
     update(static_cast<float>(delta_time));
@@ -20,15 +31,15 @@ void Core::loop() {
     render();
     Window::update();
 
-    frame_count++;
-    if (accumulated_time >= Settings::General::FPS_MEASURING_INTERVAL) {
-        fps_evaluated = static_cast<double>(frame_count) / accumulated_time;
-        accumulated_time = 0;
-        frame_count = 0;
+    frameCount++;
+    if (accumulatedTime >= Settings::General::FPS_MEASURING_INTERVAL) {
+        calculatedFPS = static_cast<double>(frameCount) / accumulatedTime;
+        accumulatedTime = 0;
+        frameCount = 0;
     }
 
 }
 
-double Core::get_fps() const {
-    return fps_evaluated;
+double Core::getFPS() const {
+    return calculatedFPS;
 }

@@ -22,12 +22,17 @@ The most recent screenshot
 
 
 ## Resources
+Get started:
+- https://www.glfw.org/documentation.html
 
 Texture loading/rendering:
-- https://www.glfw.org/documentation.html
 - https://docs.gl/es2/glTexImage2D
 - https://learnopengl.com/Getting-started/Textures
 - https://doc.magnum.graphics/magnum/examples-texturedquad.html
 - https://learnopengl.com/Getting-started/Hello-Triangle
+
+Setup GLAD:
+- https://learnopengl.com/Getting-started/Creating-a-window
+- https://glad.dav1d.de/
 
 ## How to setup environment
