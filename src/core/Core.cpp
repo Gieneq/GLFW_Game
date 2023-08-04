@@ -45,9 +45,17 @@ void Core::logState() {
 
         if(Settings::General::LOG_STATE) {
             /* Build LOG message */
-            std::cout << "[Core " << std::round(getTime() * 100.0) / 100.0 << " s] " << "FPS: " << std::round(getFPS() * 10.0) / 10.0 << " Hz " << ", msgs:" << std::endl;
-            for(auto & msg : logMessages) {
-                std::cout << " - " << msg << ", " << std::endl;
+            std::cout << "[Core " << std::round(getTime() * 100.0) / 100.0 << " s] " << "FPS: " << std::round(getFPS() * 10.0) / 10.0 << " Hz" << 
+            ", usage: " << std::round(Window::getUsagePercentage() * 10.0) / 10.0 << "%";
+            
+            if(logMessages.empty()) {
+                std::cout << std::endl;
+            }
+            else {
+                std::cout << ", messages: " << std::endl;
+                for(const auto& msg : logMessages) {
+                    std::cout << " - " << msg << std::endl;
+                }
             }
         }
         logMessages.clear();

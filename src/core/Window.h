@@ -12,5 +12,7 @@ namespace Window
 
     int width();
     int height();
+    double getUsagePercentage();
+
     void addKeyboardListener(KeyboardEvent* ke);
 } // namespace Window

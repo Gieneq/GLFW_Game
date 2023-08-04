@@ -6,6 +6,9 @@
 #include "Settings.h"
 
 static GLFWwindow *window;
+static double vsyncLastTime;
+static double vsyncStopTime;
+static double usagePercentage;
 
 /**
  * List of key click receivers. If keybord's key is clicked, 
@@ -79,7 +82,12 @@ void Window::prepare() {
 }
 
 void Window::update() {
+    usagePercentage = 100.0 - ((vsyncStopTime - vsyncLastTime) / (glfwGetTime() - vsyncLastTime)) * 100.0;
+    vsyncLastTime = glfwGetTime();
+    /* Here is waiting for vsync */
     glfwSwapBuffers(window);
+    vsyncStopTime = glfwGetTime();
+
     glfwPollEvents();
 }
 
@@ -103,3 +111,6 @@ int Window::height() {
     return window_height;
 }
 
+double Window::getUsagePercentage() {
+    return usagePercentage;
+}

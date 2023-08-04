@@ -19,6 +19,9 @@ public:
 
 private:
     void logState();
+    // double loopStartTime{0.0};
+    // double loopStopTime{0.0};
+    // double loopUsagePercentage{0.0};
     double lastTime{0.0};
     double FPSAccumulatedTime{0.0};
     double logAccumulatedTime{0.0};
