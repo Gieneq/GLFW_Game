@@ -13,8 +13,9 @@ public:
     int system_id;
     void init();
     void render(Entity* entity);
-    void set_viewport_size(int width, int height);
-    void attach_camera(Camera *cam);
+    void setViewportDimensions(int width, int height);
+    void attachCamera(Camera *cam);
+
 private:
     Camera *camera;
     int viewport_width{Settings::Window::WIDTH};

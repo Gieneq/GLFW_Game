@@ -8,4 +8,12 @@ public:
     virtual bool input() override;
     virtual void update(float dt) override;
     virtual void render() override;
+
+protected:
+    World world;
+    Entity player;
+
+private:
+    bool createWorld();
+    bool createPlayer();
 };

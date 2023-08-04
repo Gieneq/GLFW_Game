@@ -8,6 +8,7 @@ class WSADControllableComponent : public Component {
 public:
     WSADControllableComponent(Entity* e) : Component(e) {
         transform_cmpnt = e->getComponent<TransformComponent>();
+        //raise exception if nullptr
     }
     virtual ~WSADControllableComponent() = default;
 

@@ -4,26 +4,16 @@
 #include "Loader.h"
 
 void RenderSystem::init() {
-    set_viewport_size(Window::width(), Window::height());
-
-    auto texture_id = Loader::get_loader().load_image_from_resources("tiles.png");
-    auto texture_data = Loader::get_loader().get_texture_data(texture_id);
-    std::string texture_name{"some_tiles"};
-    if(Loader::get_loader().register_texture_name(texture_name, texture_id)) {
-        std::cout << "Registered texture: " << texture_id << "as " << texture_name << std::endl;
-    }
-    else {
-        std::cout << "Failed to register texture name: " << texture_id << std::endl;
-    }
+    setViewportDimensions(Window::width(), Window::height());
 }
 
-void RenderSystem::set_viewport_size(int width, int height) {
+void RenderSystem::setViewportDimensions(int width, int height) {
     viewport_width = width;
     viewport_height = height;
     aspect_ratio = static_cast<float>(viewport_width) / static_cast<float>(viewport_height);
 }
 
-void RenderSystem::attach_camera(Camera *cam) {
+void RenderSystem::attachCamera(Camera *cam) {
     camera = cam;
 }
 

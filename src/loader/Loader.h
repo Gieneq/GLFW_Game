@@ -21,11 +21,12 @@ private:
     Loader() = default;
     ~Loader() = default;
 public:
-    static Loader& get_loader() {
+    static Loader& getLoader() {
         static Loader loader;
         return loader;
     }
 
+    bool loadData();
     TextureId load_image(std::string abs_path);
     TextureId load_image_from_resources(std::string res_path);
     bool register_texture_name(const std::string& name, const TextureId& id);
@@ -47,7 +48,7 @@ public:
     void load_map(World& world, std::string map_name);
 
 private:
-    TextureData store_in_gpu_memory(std::vector<unsigned char>& pixels, int width, int height, std::string abs_path);
+    TextureData storeInGPUMemory(std::vector<unsigned char>& pixels, int width, int height, std::string abs_path);
 
     std::unordered_map<TextureId, TextureData, TextureId> images{};
     std::unordered_map<std::string, TextureId> texture_names{};

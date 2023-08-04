@@ -8,7 +8,7 @@ namespace Settings {
         static constexpr int WIDTH{800};
         static constexpr int HEIGHT{600};
         static constexpr float ASPECT_RATIO{static_cast<float>(WIDTH) / static_cast<float>(HEIGHT)};
-        static constexpr bool ENABLE_VSYNC{false};
+        static constexpr bool ENABLE_VSYNC{true};
 
         struct ClearColor {
             static constexpr float r{0.0};
@@ -36,7 +36,9 @@ namespace Settings {
     };
     
     struct General {
-        static constexpr double FPS_MEASURING_INTERVAL{1.0};
+        static constexpr double FPS_MEASURE_INTERVAL{0.5};
+        static constexpr double LOG_STATE_INTERVAL{1.0};
+        static constexpr bool LOG_STATE{true};
         struct Version {
             static constexpr int MAJOR{1};
             static constexpr int MINOR{0};

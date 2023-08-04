@@ -1,6 +1,7 @@
 #pragma once
 
 class KeyboardEvent;
+
 namespace Window
 {
     void init();
@@ -11,5 +12,5 @@ namespace Window
 
     int width();
     int height();
-    void add_keyboard_listener(KeyboardEvent* ke);
+    void addKeyboardListener(KeyboardEvent* ke);
 } // namespace Window

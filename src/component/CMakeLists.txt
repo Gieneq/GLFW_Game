@@ -8,7 +8,6 @@ list(APPEND LIB_DEPENDENCIES
 message(STATUS "   -> ${LIB_DEPENDENCIES}")
 
 add_library(component 
-  Component.cpp
   ControllableComponent.cpp
   FoodComponent.cpp
   SpriteComponent.cpp

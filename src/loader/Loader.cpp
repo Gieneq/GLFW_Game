@@ -5,9 +5,24 @@
 #include <IO.h>
 #include <pugixml.hpp>
 
-//store image data in GPU memory
-// bool Loader::store_in_gpu_memory(std::vector<unsigned char>& pixels, int width, int height, GLuint& texture_id) {
-TextureData Loader::store_in_gpu_memory(std::vector<unsigned char>& pixels, int width, int height, std::string abs_path) {
+bool Loader::loadData() {
+    std::cout << "Loading data..." << std::endl;
+    
+    auto texture_id = Loader::getLoader().load_image_from_resources("tiles.png");
+    auto texture_data = Loader::getLoader().get_texture_data(texture_id);
+    std::string texture_name{"some_tiles"};
+    if(Loader::getLoader().register_texture_name(texture_name, texture_id)) {
+        std::cout << "Registered texture: " << texture_id << "as " << texture_name << std::endl;
+    }
+    else {
+        std::cout << "Failed to register texture name: " << texture_id << std::endl;
+    }
+
+    std::cout << "Loader done!" << std::endl;
+    return true;
+}
+
+TextureData Loader::storeInGPUMemory(std::vector<unsigned char>& pixels, int width, int height, std::string abs_path) {
     GLuint tid;
     glGenTextures(1, &tid);
     glBindTexture(GL_TEXTURE_2D, tid);
@@ -21,7 +36,6 @@ TextureData Loader::store_in_gpu_memory(std::vector<unsigned char>& pixels, int 
         return TextureData::corrupted();
     }
  
-    // texture_id = tid;
     TextureData texture_data{abs_path, width, height, tid};
     std::cout << "Texture created successfully with id: " << texture_data.id << "." << std::endl;
     return texture_data;
@@ -64,8 +78,8 @@ TextureId Loader::load_image(std::string abs_path) {
     // }
 
     // GLuint texture_id{0};
-    auto texture_data = store_in_gpu_memory(image, width, height, absolute_path);
-    if(!texture_data.id.has_id()) {
+    auto texture_data = storeInGPUMemory(image, width, height, absolute_path);
+    if(!texture_data.id.hasID()) {
         std::cout << "Error storing image in GPU memory" << std::endl;
         return false;
     }

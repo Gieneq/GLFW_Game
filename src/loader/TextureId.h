@@ -8,7 +8,7 @@ public:
     TextureId(GLuint id) : id(id) {}
     GLuint id{0};
 
-    bool has_id() const {
+    bool hasID() const {
         return id != 0;
     }
 

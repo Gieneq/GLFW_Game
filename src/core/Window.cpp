@@ -6,41 +6,43 @@
 #include "Settings.h"
 
 static GLFWwindow *window;
-static int window_width{Settings::Window::WIDTH};
-static int window_height{Settings::Window::HEIGHT};
+
+/**
+ * List of key click receivers. If keybord's key is clicked, 
+ * listeners callback function will be executed.
+ * 
+ * TODO - some fort of prioritazing, sorting, disabling 
+ * and receive response (bool return)
+*/
 static std::vector<KeyboardEvent*> keyboard_callbacks;
 
 static void onErrorCallback(int error, const char *desc) {
         fputs(desc, stderr);
 }
 
-//todo make vector of callback handlers - attach them, sort somehow
-
 static void key_callback(GLFWwindow *w, int key, int scancode, int action, int mods) {
-        // See http://www.glfw.org/docs/latest/group__keys.html
-        if ((key == GLFW_KEY_ESCAPE) && action == GLFW_PRESS) {
-            glfwSetWindowShouldClose(w, GL_TRUE);
-            return;
-        }
+    // See http://www.glfw.org/docs/latest/group__keys.html
+    if ((key == GLFW_KEY_ESCAPE) && action == GLFW_PRESS) {
+        glfwSetWindowShouldClose(w, GL_TRUE);
+        return;
+    }
 
-        if (action == GLFW_PRESS) {
-            for(auto keyboard_callback : keyboard_callbacks) {
-                keyboard_callback->on_key_press(key);
-                //todo eval bool
-            }
+    if (action == GLFW_PRESS) {
+        for(auto keyboard_callback : keyboard_callbacks) {
+            keyboard_callback->on_key_press(key);
+            //todo eval bool
         }
-        
-        if (action == GLFW_RELEASE) {
-            for(auto keyboard_callback : keyboard_callbacks) {
-                keyboard_callback->on_key_release(key);
-                //todo eval bool
-            }
+    }
+    
+    if (action == GLFW_RELEASE) {
+        for(auto keyboard_callback : keyboard_callbacks) {
+            keyboard_callback->on_key_release(key);
+            //todo eval bool
         }
-
-        
+    }
 }
 
-void Window::add_keyboard_listener(KeyboardEvent* ke) {
+void Window::addKeyboardListener(KeyboardEvent* ke) {
     keyboard_callbacks.push_back(ke);
 }
 
@@ -56,16 +58,12 @@ void Window::init() {
         throw WindowException("Cannot create window!");
     }
 
-    
     glfwMakeContextCurrent(window);
-    // gladLoadGL(glfwGetProcAddress);
     glfwSetKeyCallback(window, key_callback);
 
     if(Settings::Window::ENABLE_VSYNC) {
         glfwSwapInterval(1);
     }
-
-    glfwGetFramebufferSize(window, &window_width, &window_height);
 }
 
 bool Window::shouldNotBeClosed() {
@@ -94,10 +92,14 @@ void Window::destroy() {
 }
 
 int Window::width() {
+    int window_width;
+    glfwGetFramebufferSize(window, &window_width, NULL);
     return window_width;
 }
 
 int Window::height() {
+    int window_height;
+    glfwGetFramebufferSize(window, NULL, &window_height);
     return window_height;
 }
 
