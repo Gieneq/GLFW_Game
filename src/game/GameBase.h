@@ -5,21 +5,21 @@
 #include "RenderSystem.h"
 #include "UserInputSystem.h"
 #include "TransformSystem.h"
-
+#include "World.h"
+#include "Entity.h"
 
 class GameBase : public Core {
 public:
     virtual ~GameBase() = default;
 
-    virtual void init() override;
+    virtual bool init() override;
     virtual bool input() override;
     virtual void update(float dt) override;
     virtual void render() override;
 
 protected:
     Camera camera;
-    std::vector<Entity*> entities;
-    
+    World world;
     RenderSystem render_system;
     UserInputSystem user_input_system;
     TransformSystem transform_system;

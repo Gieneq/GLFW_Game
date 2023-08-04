@@ -26,12 +26,7 @@ int main(int argc, char **argv) {
      * gladLoadGL(glfwGetProcAddress);
     */
     std::cout << "OpenGL: " << glGetString(GL_VERSION) << std::endl;
-    bool result = Loader::getLoader().loadData();
-    if(!result) {
-        std::cerr << "Failed to load data!" << std::endl;
-        Window::destroy();
-        return 1;
-    }
+    
     game.init();
     
     while(Window::shouldNotBeClosed()) {

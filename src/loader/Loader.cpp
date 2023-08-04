@@ -1,17 +1,21 @@
 #include "Loader.h"
 
 #include <iostream>
-#include <Settings.h>
-#include <IO.h>
-#include <pugixml.hpp>
+#include "Settings.h"
+#include "pugixml.hpp"
+#include "lodepng.h"
+#include "IO.h"
+#include "TransformComponent.h"
+#include "SpriteComponent.h"
+#include "ControllableComponent.h"
 
-bool Loader::loadData() {
-    std::cout << "Loading data..." << std::endl;
+bool Loader::loadAssets() {
+    std::cout << "Loading assets data..." << std::endl;
     
-    auto texture_id = Loader::getLoader().load_image_from_resources("tiles.png");
-    auto texture_data = Loader::getLoader().get_texture_data(texture_id);
+    auto texture_id = Loader::getLoader().loadTextureFromAssets("tiles.png");
+    // auto texture_data = Loader::getLoader().getTextureDataByID(texture_id);
     std::string texture_name{"some_tiles"};
-    if(Loader::getLoader().register_texture_name(texture_name, texture_id)) {
+    if(Loader::getLoader().registerTextureStringName(texture_name, texture_id)) {
         std::cout << "Registered texture: " << texture_id << "as " << texture_name << std::endl;
     }
     else {
@@ -20,6 +24,93 @@ bool Loader::loadData() {
 
     std::cout << "Loader done!" << std::endl;
     return true;
+}
+
+bool Loader::loadWorld(World& world) {
+    std::cout << "Loading world data..." << std::endl;
+    
+    try
+    {
+        Loader::getLoader().__load_map(world, "testmap");
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    
+
+
+    int size = 10;
+
+    for(int y = -size; y < size+1; y++) {
+        for(int x = -size; x < size+1; x++) {
+            Entity *junk = new Entity();
+            auto color_comp = new ColorComponent(junk);
+            color_comp->rect.top_left.x = static_cast<float>(x);
+            color_comp->rect.top_left.y = static_cast<float>(y);
+            color_comp->r = 0.5F + (y % 2) / 2.0F;
+            color_comp->g = 0.5F + (x % 2) / 2.0F;
+            junk->addComponent(color_comp);
+            world.entities.push_back(junk);
+        }
+    }
+
+
+    return true;
+}
+
+bool Loader::loadPlayer(World& world) {
+    std::cout << "Loading player data..." << std::endl;
+    Entity* player = &world.player;
+
+   /**
+     * Create players look.
+     * Load texture or replace with placeholde color.
+     */
+    auto playersTextureID = Loader::getLoader().getTextureIDByName("some_tiles");
+
+    if(playersTextureID) {
+        std::cout << "has image" << std::endl;
+        auto texture = new TextureComponent(player, *playersTextureID);
+        // std::cout << "texture: " << texture->image_id.id << ": " << Loader::get_loader().get_image(texture->image_id).texture_id << std::endl;
+        player->addComponent(texture);
+        auto trsf_ctrl = new TransformComponent(player, texture->rect.top_left);
+        player->addComponent(trsf_ctrl);
+    } else {
+        std::cout << "no image" << std::endl;
+        auto color = new ColorComponent(player);
+        color->r = 1.0F;
+        color->g = 0.0F;
+        color->b = 1.0F;
+        color->rect.top_left.x = 0.5F;
+        player->addComponent(color);
+
+        auto trsf_ctrl = new TransformComponent(player, color->rect.top_left);
+        player->addComponent(trsf_ctrl);
+    }
+
+    // todo add some templating or whatever - it is not obvious
+    // that player sam some component to be controlled
+    auto wsad_ctrl = new WSADControllableComponent(player);
+    player->addComponent(wsad_ctrl);
+
+    world.entities.push_back(player);
+
+    return true;
+}
+
+std::optional<TextureData> Loader::getTextureDataByID(TextureId key_texture_id) {
+    if (hasTextureDataWithID(key_texture_id)) {
+        return textureDatas[key_texture_id];
+    }
+    return std::nullopt;
+}
+
+std::optional<TextureId> Loader::getTextureIDByName(const std::string& name) {
+    if (hasTextureIDWithName(name)) {
+        return texturesIDsRegister[name];
+    }
+    return std::nullopt;
 }
 
 TextureData Loader::storeInGPUMemory(std::vector<unsigned char>& pixels, int width, int height, std::string abs_path) {
@@ -41,16 +132,16 @@ TextureData Loader::storeInGPUMemory(std::vector<unsigned char>& pixels, int wid
     return texture_data;
 }
 
-TextureId Loader::load_image_from_resources(std::string res_path) {
+TextureId Loader::loadTextureFromAssets(std::string res_path) {
     std::string absolute_path = IO::get_absolute_path(Settings::Resources::ASSETS_PATH + res_path);
     return load_image(absolute_path);
 }
 
-bool Loader::register_texture_name(const std::string& name, const TextureId& id) {
-    if (texture_names.find(name) != texture_names.end()) {
+bool Loader::registerTextureStringName(const std::string& name, const TextureId& id) {
+    if (texturesIDsRegister.find(name) != texturesIDsRegister.end()) {
         return false;
     }
-    texture_names[name] = id;
+    texturesIDsRegister[name] = id;
     return true;    
 }
 
@@ -92,7 +183,7 @@ TextureId Loader::load_image(std::string abs_path) {
     // image_data.height = height;
 
     image.clear();
-    Loader::images[texture_data.id] = texture_data;
+    Loader::textureDatas[texture_data.id] = texture_data;
     std::cout << "Loaded image: '" << texture_data.id << "' with width: " << texture_data.width << " and height: " << texture_data.height << ", from: " << texture_data.absolute_path << std::endl;
     return true;
 }
@@ -146,7 +237,7 @@ TextureId Loader::load_image(std::string abs_path) {
 // }
 
 
-void Loader::load_map(World& world, std::string map_name) {
+void Loader::__load_map(World& world, std::string map_name) {
     // std::string maps_dir{"res/data/maps/"};
     // auto path = IO::get_absolute_path(maps_dir + map_name + ".tmx");
     // pugi::xml_document doc;

@@ -2,6 +2,7 @@ message(STATUS " * Building world")
 
 list(APPEND LIB_DEPENDENCIES 
   utils
+  entity
 )
 
 message(STATUS "   -> ${LIB_DEPENDENCIES}")

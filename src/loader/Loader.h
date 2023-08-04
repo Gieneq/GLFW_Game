@@ -1,20 +1,13 @@
 #pragma once
-#include "lodepng.h"
-#include <GLFW/glfw3.h>
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>
+#include "lodepng.h"
 #include "World.h"
 #include "TilesetData.h"
 #include "TileId.h"
-#include "TilesetRange.h"
-#include "EntityRegister.h"
-#include "EntityTemplate.h"
-#include "TextureId.h"
-#include "EntityGlobalId.h"
 #include "TextureData.h"
-
-
+#include <optional>
 
 class Loader {
 private:
@@ -26,32 +19,38 @@ public:
         return loader;
     }
 
-    bool loadData();
+    bool loadAssets();
+    bool loadWorld(World& world);
+    bool loadPlayer(World& world);
     TextureId load_image(std::string abs_path);
-    TextureId load_image_from_resources(std::string res_path);
-    bool register_texture_name(const std::string& name, const TextureId& id);
+    TextureId loadTextureFromAssets(std::string res_path);
 
-    bool has_image(TextureId key_texture_id) {
-        return images.find(key_texture_id) != images.end();
+    bool hasTextureDataWithID(TextureId textureID) {
+        return textureDatas.find(textureID) != textureDatas.end();
     }
+    std::optional<TextureData> getTextureDataByID(TextureId key_texture_id);
 
-    TextureData& get_texture_data(TextureId key_texture_id) {
-        return images[key_texture_id];
+    bool hasTextureIDWithName(const std::string& name) {
+        return texturesIDsRegister.find(name) != texturesIDsRegister.end();
     }
+    std::optional<TextureId> getTextureIDByName(const std::string& name);
 
-    TextureId& get_texture_id(const std::string& name) {
-        return texture_names[name];
-    }
-
-    // Tileset load_tileset(const Range_i& gids_range, const std::string& absolute_path_tls);
-
-    void load_map(World& world, std::string map_name);
+    void __load_map(World& world, std::string map_name);
 
 private:
+    bool registerTextureStringName(const std::string& name, const TextureId& id);
     TextureData storeInGPUMemory(std::vector<unsigned char>& pixels, int width, int height, std::string abs_path);
 
-    std::unordered_map<TextureId, TextureData, TextureId> images{};
-    std::unordered_map<std::string, TextureId> texture_names{};
-    std::unordered_map<TextureId, TilesetData, TextureId> tilesets{};
+    /**
+     * IDs for textures.
+     * 
+     * Texture IDs are used to identify textures in the GPU.
+     * They are mapped to string keys.
+     * 
+     * TextureData and TilesetData have additional information, e.g. width and height.
+    */
+    std::unordered_map<TextureId, TextureData, TextureId> textureDatas{};
+    std::unordered_map<std::string, TextureId> texturesIDsRegister{};
+    std::unordered_map<TextureId, TilesetData, TextureId> tilesetDatas{};
 
 };

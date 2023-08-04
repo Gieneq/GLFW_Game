@@ -5,7 +5,7 @@
 class Core {
 public:
     virtual ~Core() = default;
-    virtual void init();
+    virtual bool init();
     void loop();
 
     virtual bool input() {

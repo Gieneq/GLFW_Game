@@ -5,9 +5,10 @@
 #include "Window.h"
 #include "Settings.h"
 
-void Core::init() {
+bool Core::init() {
     lastTime = glfwGetTime();
     frameCount = 0;
+    return true;
 }
 
 void Core::loop() {

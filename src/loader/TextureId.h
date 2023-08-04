@@ -23,6 +23,10 @@ public:
     bool operator<(const TextureId& other) const {
         return id < other.id;
     }
+
+    static TextureId corrupted() {
+        return TextureId{0};
+    }
     
 
     friend std::ostream& operator<<(std::ostream& os, const TextureId& id) {
