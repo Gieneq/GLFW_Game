@@ -7,8 +7,7 @@
 #include "IO.h"
 #include "LocationComponent.h"
 #include "GraphicsComponent.h"
-#include "TransformComponent.h"
-#include "ControllableComponent.h"
+#include "MovementComponent.h"
 #include <algorithm>
 
 bool Loader::loadAssets() {
@@ -82,6 +81,11 @@ bool Loader::loadPlayer(World& world) {
         color->b = 1.0F;
         player->addComponent(color);
     }
+
+    /* Movement option */
+    auto movementCmp = new MovementComponent(player, locatiomCmp);
+    player->addComponent(movementCmp);
+    movementCmp->setDirection(Direction::SOUTH);
 
     /* WSAD to control player */
     // auto wsad_ctrl = new WSADControllableComponent(player);

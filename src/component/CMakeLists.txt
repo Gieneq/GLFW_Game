@@ -9,6 +9,7 @@ message(STATUS "   -> ${LIB_DEPENDENCIES}")
 
 add_library(component 
   GraphicsComponent.cpp
+  MovementComponent.cpp
 )
 
 target_link_libraries(component PUBLIC ${LIB_DEPENDENCIES})

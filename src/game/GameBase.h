@@ -4,7 +4,7 @@
 #include "Core.h"
 #include "RenderSystem.h"
 #include "UserInputSystem.h"
-#include "TransformSystem.h"
+#include "MovementSystem.h"
 #include "World.h"
 #include "Entity.h"
 
@@ -22,5 +22,5 @@ protected:
     World world;
     RenderSystem render_system;
     UserInputSystem user_input_system;
-    TransformSystem transform_system;
+    MovementSystem movementSystem;
 };

@@ -12,7 +12,7 @@ message(STATUS "   -> ${LIB_DEPENDENCIES}")
 add_library(system 
   SystemBase.cpp
   RenderSystem.cpp
-  TransformSystem.cpp
+  MovementSystem.cpp
   UserInputSystem.cpp
 )
 

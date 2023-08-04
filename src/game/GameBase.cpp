@@ -7,7 +7,7 @@
 #include "World.h"
 #include "Component.h"
 #include "FoodComponent.h"
-#include "TransformComponent.h"
+#include "LocationComponent.h"
 #include "Entity.h"
 
 bool GameBase::init() {
@@ -24,7 +24,7 @@ bool GameBase::init() {
     user_input_system.init();
     Window::addKeyboardListener(&user_input_system);
 
-    transform_system.init();
+    movementSystem.init();
     
     /* Loader loading */
     result = Loader::getLoader().loadAssets();
@@ -46,7 +46,7 @@ bool GameBase::init() {
     }
 
     /* Set camera on just loaded player */
-    camera.focus_on(&world.player);
+    camera.focusOn(world.player.getComponent<LocationComponent>());
 
     /* Attach controller to just loaded player */
     user_input_system.attach_controllabe(&world.player);
@@ -62,7 +62,7 @@ bool GameBase::input() {
 
 void GameBase::update(float dt) {
     for(auto entity: world.entities) {
-        transform_system.update(entity, dt);
+        movementSystem.update(entity, dt);
     }
     
     camera.update(dt);
