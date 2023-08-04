@@ -1,12 +1,10 @@
 #pragma once
 #include <string>
-#include <unordered_map>
 #include <vector>
 #include "lodepng.h"
 #include "World.h"
-#include "TilesetData.h"
-#include "TileId.h"
 #include "TextureData.h"
+#include "TextureId.h"
 #include <optional>
 
 class Loader {
@@ -22,35 +20,18 @@ public:
     bool loadAssets();
     bool loadWorld(World& world);
     bool loadPlayer(World& world);
-    TextureId load_image(std::string abs_path);
-    TextureId loadTextureFromAssets(std::string res_path);
 
-    bool hasTextureDataWithID(TextureId textureID) {
-        return textureDatas.find(textureID) != textureDatas.end();
-    }
-    std::optional<TextureData> getTextureDataByID(TextureId key_texture_id);
+protected:
+    bool Loader::loadTextureFromAbsolutePath(const std::string& abs_path, int div_w, int div_h, const std::string& name);
+    bool Loader::loadTextureFromAssets(const std::string& relativePath, int div_w, int div_h, const std::string& name);
 
-    bool hasTextureIDWithName(const std::string& name) {
-        return texturesIDsRegister.find(name) != texturesIDsRegister.end();
-    }
-    std::optional<TextureId> getTextureIDByName(const std::string& name);
+    bool hasTextureDataWithID(TextureId textureID);
+    std::optional<TextureData> getTextureDataByID(TextureId textureID);
+    bool hasTextureDataWithName(const std::string& name);
+    std::optional<TextureData> getTextureDataByName(const std::string& name);
 
-    void __load_map(World& world, std::string map_name);
 
 private:
-    bool registerTextureStringName(const std::string& name, const TextureId& id);
-    TextureData storeInGPUMemory(std::vector<unsigned char>& pixels, int width, int height, std::string abs_path);
-
-    /**
-     * IDs for textures.
-     * 
-     * Texture IDs are used to identify textures in the GPU.
-     * They are mapped to string keys.
-     * 
-     * TextureData and TilesetData have additional information, e.g. width and height.
-    */
-    std::unordered_map<TextureId, TextureData, TextureId> textureDatas{};
-    std::unordered_map<std::string, TextureId> texturesIDsRegister{};
-    std::unordered_map<TextureId, TilesetData, TextureId> tilesetDatas{};
-
+    std::optional<TextureId> Loader::storeInGPUMemory(std::vector<unsigned char>& pixels, int width, int height);
+    std::vector<TextureData> textureDatas{};
 };

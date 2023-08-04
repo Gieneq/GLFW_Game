@@ -24,11 +24,6 @@ public:
         return id < other.id;
     }
 
-    static TextureId corrupted() {
-        return TextureId{0};
-    }
-    
-
     friend std::ostream& operator<<(std::ostream& os, const TextureId& id) {
         os << id.id;
         return os;
