@@ -4,7 +4,7 @@
 #include "SystemBase.h"
 #include "Settings.h"
 #include "Callbacks.h"
-#include "ControllableComponent.h"
+// #include "ControllableComponent.h"
 #include "Entity.h"
 
 class UserInputSystem : public SystemBase, public KeyboardEvent {
@@ -16,6 +16,6 @@ public:
     virtual bool on_key_release(int key);
 private:
     Entity *controllable_entity{nullptr};
-    WSADControllableComponent * wsad_controllable{nullptr};
+    // WSADControllableComponent * wsad_controllable{nullptr};
 };
 

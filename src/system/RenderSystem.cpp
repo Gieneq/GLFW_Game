@@ -2,6 +2,7 @@
 #include "GLCommon.h"
 #include "Window.h"
 #include "Loader.h"
+#include "GraphicsComponent.h"
 
 void RenderSystem::init() {
     setViewportDimensions(Window::width(), Window::height());
@@ -74,17 +75,17 @@ void RenderSystem::render(Entity* entity) {
         auto textureData = Loader::getLoader().getTextureDataByID(texture_component->textureID);
         if(!textureData) {
             /* Corrupted */
-            renderFilledBox(texture_component->worldRect, 1.0F, 0.0F, 0.0F);
+            renderFilledBox(texture_component->getWorldRect(), 1.0F, 0.0F, 0.0F);
         }
         else {
-            renderTexturedBox(*textureData, texture_component->worldRect, texture_component->tilesetIndex);
+            renderTexturedBox(*textureData, texture_component->getWorldRect(), texture_component->tilesetIndex);
         }
     }
 
     /* Colored quad rendering */
     auto color_component = entity->getComponent<ColorComponent>();
     if(color_component) {
-        renderFilledBox(color_component->worldRect, color_component->r, color_component->g, color_component->b);
+        renderFilledBox(color_component->getWorldRect(), color_component->r, color_component->g, color_component->b);
     }
 }
 

@@ -8,10 +8,7 @@ list(APPEND LIB_DEPENDENCIES
 message(STATUS "   -> ${LIB_DEPENDENCIES}")
 
 add_library(component 
-  ControllableComponent.cpp
-  FoodComponent.cpp
-  SpriteComponent.cpp
-  TransformComponent.cpp
+  GraphicsComponent.cpp
 )
 
 target_link_libraries(component PUBLIC ${LIB_DEPENDENCIES})

@@ -3,12 +3,15 @@
 #include "Component.h"
 #include "TransformComponent.h"
 #include "Entity.h"
+#include <stdexcept>
 
 class WSADControllableComponent : public Component {
 public:
     WSADControllableComponent(Entity* e) : Component(e) {
         transform_cmpnt = e->getComponent<TransformComponent>();
-        //raise exception if nullptr
+        if(transform_cmpnt == nullptr) {
+            throw std::runtime_error("WSADControllableComponent requires TransformComponent!");
+        }
     }
     virtual ~WSADControllableComponent() = default;
 

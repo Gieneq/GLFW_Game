@@ -5,8 +5,9 @@
 #include "pugixml.hpp"
 #include "lodepng.h"
 #include "IO.h"
+#include "LocationComponent.h"
+#include "GraphicsComponent.h"
 #include "TransformComponent.h"
-#include "SpriteComponent.h"
 #include "ControllableComponent.h"
 #include <algorithm>
 
@@ -30,14 +31,21 @@ bool Loader::loadWorld(World& world) {
     int size = 10;
     for(int y = -size; y < size+1; y++) {
         for(int x = -size; x < size+1; x++) {
-            Entity *junk = new Entity();
-            auto color_comp = new ColorComponent(junk);
-            color_comp->worldRect.top_left.x = static_cast<float>(x);
-            color_comp->worldRect.top_left.y = static_cast<float>(y);
-            color_comp->r = 0.5F + (y % 2) / 2.0F;
-            color_comp->g = 0.5F + (x % 2) / 2.0F;
-            junk->addComponent(color_comp);
-            world.entities.push_back(junk);
+            Entity *someTile = new Entity();
+
+            auto locationCmp = new LocationComponent(someTile);
+            locationCmp->worldRect.top_left.x = static_cast<float>(x);
+            locationCmp->worldRect.top_left.y = static_cast<float>(y);
+            locationCmp->worldRect.size.w = 1;
+            locationCmp->worldRect.size.h = 1;
+            someTile->addComponent(locationCmp);
+
+            auto colorCmp = new ColorComponent(someTile, locationCmp);
+            colorCmp->r = 0.5F + (y % 2) / 2.0F;
+            colorCmp->g = 0.5F + (x % 2) / 2.0F;
+            
+            someTile->addComponent(colorCmp);
+            world.entities.push_back(someTile);
         }
     }
 
@@ -48,37 +56,36 @@ bool Loader::loadPlayer(World& world) {
     std::cout << "Loading player data..." << std::endl;
     Entity* player = &world.player;
 
+    /* Add player location component */
+    auto locatiomCmp = new LocationComponent(player);
+    player->addComponent(locatiomCmp);
+
+    /* Set starting position */
+    locatiomCmp->worldRect.top_left.x = 1.2F;
+    locatiomCmp->worldRect.top_left.y = 0.0F;
+
     /* Try adding texture to player */
     auto playersTextureID = Loader::getLoader().getTextureDataByName("some_tiles");
 
     if(playersTextureID) {
         /* Texture */
         std::cout << "Player has texture" << std::endl;
-        auto texture = new TextureComponent(player, (*playersTextureID).id);
+        auto texture = new TextureComponent(player, locatiomCmp, (*playersTextureID).id);
         player->addComponent(texture);
-
-        /* Option to move object. Has starting position */
-        auto trsf_ctrl = new TransformComponent(player, texture->worldRect.top_left);
-        player->addComponent(trsf_ctrl);
     } 
     else {
         /* Color */
         std::cout << "Player has no texture, add placeholder color" << std::endl;
-        auto color = new ColorComponent(player);
+        auto color = new ColorComponent(player, locatiomCmp);
         color->r = 1.0F;
         color->g = 0.0F;
         color->b = 1.0F;
-        color->worldRect.top_left.x = 0.5F;
         player->addComponent(color);
-
-        /* Option to move object. Has starting position */
-        auto trsf_ctrl = new TransformComponent(player, color->worldRect.top_left);
-        player->addComponent(trsf_ctrl);
     }
 
     /* WSAD to control player */
-    auto wsad_ctrl = new WSADControllableComponent(player);
-    player->addComponent(wsad_ctrl);
+    // auto wsad_ctrl = new WSADControllableComponent(player);
+    // player->addComponent(wsad_ctrl);
 
     /* Yes, player is one of entities - 
      * easier to sort in rendering and similar. */

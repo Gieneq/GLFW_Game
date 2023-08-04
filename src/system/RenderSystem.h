@@ -3,7 +3,6 @@
 #include <vector>
 #include "SystemBase.h"
 #include "Settings.h"
-#include "SpriteComponent.h"
 #include "Entity.h"
 #include "Camera.h"
 #include "Loader.h"
