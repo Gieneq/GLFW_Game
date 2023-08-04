@@ -2,30 +2,30 @@
 #include "GLCommon.h"
 #include <iostream>
 
-class TextureId {
+class TextureID {
 public:
-    TextureId() = default;
-    TextureId(GLuint id) : id(id) {}
-    GLuint id{0};
+    TextureID() = default;
+    TextureID(GLuint id) : value(id) {}
+    GLuint value{0};
 
     bool hasID() const {
-        return id != 0;
+        return value != 0;
     }
 
-    size_t operator()(const TextureId& id) const {
-        return std::hash<GLuint>()(id.id);
+    size_t operator()(const TextureID& id) const {
+        return std::hash<GLuint>()(id.value);
     }
     
-    bool operator==(const TextureId& other) const {
-        return id == other.id;
+    bool operator==(const TextureID& other) const {
+        return value == other.value;
     }
 
-    bool operator<(const TextureId& other) const {
-        return id < other.id;
+    bool operator<(const TextureID& other) const {
+        return value < other.value;
     }
 
-    friend std::ostream& operator<<(std::ostream& os, const TextureId& id) {
-        os << id.id;
+    friend std::ostream& operator<<(std::ostream& os, const TextureID& id) {
+        os << id.value;
         return os;
     }
 };

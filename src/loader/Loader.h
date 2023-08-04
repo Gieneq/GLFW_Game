@@ -21,17 +21,24 @@ public:
     bool loadWorld(World& world);
     bool loadPlayer(World& world);
 
+    friend std::ostream& operator<<(std::ostream& os, const Loader& loader) {
+        os << "Loader: " << loader.textureDatas.size() << " textures:" << std::endl;
+        for(const auto& textureData : loader.textureDatas) {
+            os << " - " << textureData << ", " << std::endl;
+        }
+        return os;
+    }
+
+    bool hasTextureDataWithID(TextureID textureID);
+    std::optional<TextureData> getTextureDataByID(TextureID textureID);
+    bool hasTextureDataWithName(const std::string& name);
+    std::optional<TextureData> getTextureDataByName(const std::string& name);
+    
 protected:
     bool Loader::loadTextureFromAbsolutePath(const std::string& abs_path, int div_w, int div_h, const std::string& name);
     bool Loader::loadTextureFromAssets(const std::string& relativePath, int div_w, int div_h, const std::string& name);
 
-    bool hasTextureDataWithID(TextureId textureID);
-    std::optional<TextureData> getTextureDataByID(TextureId textureID);
-    bool hasTextureDataWithName(const std::string& name);
-    std::optional<TextureData> getTextureDataByName(const std::string& name);
-
-
 private:
-    std::optional<TextureId> Loader::storeInGPUMemory(std::vector<unsigned char>& pixels, int width, int height);
+    std::optional<TextureID> Loader::storeInGPUMemory(std::vector<unsigned char>& pixels, int width, int height);
     std::vector<TextureData> textureDatas{};
 };

@@ -14,13 +14,13 @@ bool Loader::loadAssets() {
     std::cout << "Loading assets data..." << std::endl;
     
     /* Load test tiles texture */
-    auto loadingResult = Loader::getLoader().loadTextureFromAssets("tiles.png", 1, 1, "some_tiles");
+    auto loadingResult = Loader::getLoader().loadTextureFromAssets("tiles.png", 64, 64, "some_tiles");
     if(!loadingResult) {
         std::cerr << "Error loading texture from assets" << std::endl;
         return false;
     }
 
-    std::cout << "Loader done!" << std::endl;
+    std::cout << Loader::getLoader() << std::endl;
     return true;
 }
 
@@ -32,8 +32,8 @@ bool Loader::loadWorld(World& world) {
         for(int x = -size; x < size+1; x++) {
             Entity *junk = new Entity();
             auto color_comp = new ColorComponent(junk);
-            color_comp->rect.top_left.x = static_cast<float>(x);
-            color_comp->rect.top_left.y = static_cast<float>(y);
+            color_comp->worldRect.top_left.x = static_cast<float>(x);
+            color_comp->worldRect.top_left.y = static_cast<float>(y);
             color_comp->r = 0.5F + (y % 2) / 2.0F;
             color_comp->g = 0.5F + (x % 2) / 2.0F;
             junk->addComponent(color_comp);
@@ -48,47 +48,50 @@ bool Loader::loadPlayer(World& world) {
     std::cout << "Loading player data..." << std::endl;
     Entity* player = &world.player;
 
-   /**
-     * Create players look.
-     * Load texture or replace with placeholde color.
-     */
+    /* Try adding texture to player */
     auto playersTextureID = Loader::getLoader().getTextureDataByName("some_tiles");
 
     if(playersTextureID) {
-        std::cout << "has image" << std::endl;
+        /* Texture */
+        std::cout << "Player has texture" << std::endl;
         auto texture = new TextureComponent(player, (*playersTextureID).id);
-        // std::cout << "texture: " << texture->image_id.id << ": " << Loader::get_loader().get_image(texture->image_id).texture_id << std::endl;
         player->addComponent(texture);
-        auto trsf_ctrl = new TransformComponent(player, texture->rect.top_left);
+
+        /* Option to move object. Has starting position */
+        auto trsf_ctrl = new TransformComponent(player, texture->worldRect.top_left);
         player->addComponent(trsf_ctrl);
-    } else {
-        std::cout << "no image" << std::endl;
+    } 
+    else {
+        /* Color */
+        std::cout << "Player has no texture, add placeholder color" << std::endl;
         auto color = new ColorComponent(player);
         color->r = 1.0F;
         color->g = 0.0F;
         color->b = 1.0F;
-        color->rect.top_left.x = 0.5F;
+        color->worldRect.top_left.x = 0.5F;
         player->addComponent(color);
 
-        auto trsf_ctrl = new TransformComponent(player, color->rect.top_left);
+        /* Option to move object. Has starting position */
+        auto trsf_ctrl = new TransformComponent(player, color->worldRect.top_left);
         player->addComponent(trsf_ctrl);
     }
 
-    // todo add some templating or whatever - it is not obvious
-    // that player sam some component to be controlled
+    /* WSAD to control player */
     auto wsad_ctrl = new WSADControllableComponent(player);
     player->addComponent(wsad_ctrl);
 
+    /* Yes, player is one of entities - 
+     * easier to sort in rendering and similar. */
     world.entities.push_back(player);
 
     return true;
 }
 
-bool Loader::hasTextureDataWithID(TextureId textureID) {
+bool Loader::hasTextureDataWithID(TextureID textureID) {
     return getTextureDataByID(textureID).has_value();
 }
 
-std::optional<TextureData> Loader::getTextureDataByID(TextureId textureID) {
+std::optional<TextureData> Loader::getTextureDataByID(TextureID textureID) {
     auto it = std::find_if(textureDatas.begin(), textureDatas.end(), [textureID](const TextureData& textureData) {
         return textureData.id == textureID;
     });
@@ -117,7 +120,7 @@ std::optional<TextureData> Loader::getTextureDataByName(const std::string& name)
     return std::nullopt;
 }
 
-std::optional<TextureId> Loader::storeInGPUMemory(std::vector<unsigned char>& pixels, int width, int height) {
+std::optional<TextureID> Loader::storeInGPUMemory(std::vector<unsigned char>& pixels, int width, int height) {
     GLuint tid;
     glGenTextures(1, &tid);
     glBindTexture(GL_TEXTURE_2D, tid);
@@ -132,7 +135,7 @@ std::optional<TextureId> Loader::storeInGPUMemory(std::vector<unsigned char>& pi
         return std::nullopt;
     }
  
-    TextureId textureID{tid};
+    TextureID textureID{tid};
     std::cout << "Texture stored in GPU successfully with id: " << textureID << std::endl;
     return textureID;
 }
@@ -145,13 +148,13 @@ bool Loader::loadTextureFromAssets(const std::string& relativePath, int div_w, i
 bool Loader::loadTextureFromAbsolutePath(const std::string& abs_path, int div_w, int div_h, const std::string& name) {
     /* Check if image with given path is already loaded. */
     const std::string absolute_path = IO::get_absolute_path(abs_path);
-    // for(const auto& textureDataPair : textureDatas) {
-    //     const auto& textureData = textureDataPair.second;
-    //     if(textureData.absolute_path == absolute_path) {
-    //         std::cout << "Image with path: " << absolute_path << " is already loaded." << std::endl;
-    //         return textureData.id; // or textureDataPair.first
-    //     }
-    // }
+    for(const auto& textureData : textureDatas) {
+        if(textureData.absolute_path == absolute_path) {
+            /* It is considered as error */
+            std::cerr << "Image with path: " << absolute_path << " is already loaded." << std::endl;
+            return false;
+        }
+    }
 
     /* Load and decode file to pixels data */
     std::vector<unsigned char> image;
@@ -183,7 +186,7 @@ bool Loader::loadTextureFromAbsolutePath(const std::string& abs_path, int div_w,
     /* Store in set */
     textureDatas.push_back(texture_data);
 
-    std::cout << "Texture loaded successfully: " << texture_data << std::endl;
+    std::cout << "Texture loaded successfully: " << texture_data.id << std::endl;
     return true;
 }
 

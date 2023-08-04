@@ -6,29 +6,29 @@
 class TextureData {
 public:
     TextureData() = default;
-    TextureData(const std::string& absolute_path, int width, int height, TextureId id, const std::string& name) : absolute_path(absolute_path), width(width), height(height), id(id), name(name) {}
+    TextureData(const std::string& absolute_path, int width, int height, TextureID id, const std::string& name) : absolute_path(absolute_path), width(width), height(height), id(id), name(name) {}
     std::string absolute_path{""};
     std::string name{""};
     int width{0};
     int height{0};
     int div_width{1};
     int div_height{1};
-    TextureId id{};
+    TextureID id{};
     
     size_t operator()(const TextureData& textureData) const {
-        return id.id;
+        return id.value;
     }
 
     bool operator==(const TextureData& other) const {
-        return id.id == other.id.id;
+        return id.value == other.id.value;
     }
 
     bool operator<(const TextureData& other) const {
-        return id.id < other.id.id;
+        return id.value < other.id.value;
     }
 
     friend std::ostream& operator<<(std::ostream& os, const TextureData& texture_data) {
-        os << "TextureData: " << texture_data.name << " (" << texture_data.absolute_path << ") " << texture_data.width << "x" << texture_data.height << " (" << texture_data.div_width << "x" << texture_data.div_height << ") " << texture_data.id;
+        os << "\'" << texture_data.name << "\'" << " (" << texture_data.absolute_path << ") " << texture_data.width << "x" << texture_data.height << " (" << texture_data.div_width << "x" << texture_data.div_height << ") GPU: " << texture_data.id;
         return os;
     }
 };

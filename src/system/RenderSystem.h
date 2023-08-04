@@ -17,6 +17,8 @@ public:
     void attachCamera(Camera *cam);
 
 private:
+    void renderTexturedBox(const TextureData& textureData, const Rect2F& worldRect, int tilesetIndex);
+    void renderFilledBox(Rect2F worldRect, float r, float g, float b);
     Camera *camera;
     int viewport_width{Settings::Window::WIDTH};
     int viewport_height{Settings::Window::HEIGHT};

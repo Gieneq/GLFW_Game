@@ -4,6 +4,9 @@
 #include "Maths.h"
 #include "TextureId.h"
 
+
+// class TransparentComponent : public Component
+
 class ColorComponent : public Component {
 public:
     ColorComponent(Entity* e) : Component(e) {}
@@ -11,7 +14,7 @@ public:
     float r{0.56f};
     float g{1.0f};
     float b{1.0f};
-    Rect2F rect{0.0F,0.0F,1.0F,1.0F};
+    Rect2F worldRect{0.0F,0.0F,1.0F,1.0F};
 
     ColorComponent* clone(Entity* new_parent) override {
         return new ColorComponent(new_parent);
@@ -20,13 +23,15 @@ public:
 
 class TextureComponent : public Component {
 public:
-    TextureComponent(Entity* e, TextureId id) : Component(e), texture_id{id} {}
+    TextureComponent(Entity* e, TextureID id) : Component(e), textureID{id} {}
+    TextureComponent(Entity* e, TextureID id, int tilesetIdx) : Component(e), textureID{id}, tilesetIndex{tilesetIdx} {}
     virtual ~TextureComponent() = default;
 
-    TextureId texture_id{};
-    Rect2F rect{0.0F,0.0F,1.0F,1.0F};
+    TextureID textureID{};
+    int tilesetIndex{0};
+    Rect2F worldRect{0.0F,0.0F,1.0F,1.0F};
 
     TextureComponent* clone(Entity* new_parent) override {
-        return new TextureComponent(new_parent, texture_id);
+        return new TextureComponent(new_parent, textureID);
     }
 };
