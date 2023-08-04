@@ -1,5 +1,5 @@
 #include "TransformSystem.h"
-#include "../component/TransformComponent.h"
+#include "TransformComponent.h"
 
 void TransformSystem::init() {
 

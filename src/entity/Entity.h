@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 #include <vector>
-#include "../component/Component.h"
+#include "Component.h"
 
 class Entity {
 public:

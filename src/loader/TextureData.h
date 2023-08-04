@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include "TextureId.h"
-#include <GLFW/glfw3.h>
+#include "GLCommon.h"
 
 class TextureData {
 public:

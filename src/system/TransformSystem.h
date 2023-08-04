@@ -3,8 +3,8 @@
 #include <vector>
 
 #include "SystemBase.h"
-#include "../core/Settings.h"
-#include "../entity/Entity.h"
+#include "Settings.h"
+#include "Entity.h"
 
 class TransformSystem : public SystemBase{
 public:

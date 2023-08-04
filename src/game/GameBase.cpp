@@ -5,10 +5,10 @@
 #include "Loader.h"
 #include "IO.h"
 #include "World.h"
-#include "../component/Component.h"
-#include "../component/FoodComponent.h"
-#include "../component/TransformComponent.h"
-
+#include "Component.h"
+#include "FoodComponent.h"
+#include "TransformComponent.h"
+#include "Entity.h"
 
 void GameBase::init() {
     Core::init();

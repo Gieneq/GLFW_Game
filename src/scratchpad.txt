@@ -1,0 +1,127 @@
+
+
+// int main(void)
+// {
+
+
+//     GLFWwindow* window;
+
+//     /* Initialize the library */
+//     if (!glfwInit())
+//         return -1;
+
+//     /* Create a windowed mode window and its OpenGL context */
+//     window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+//     if (!window)
+//     {
+//         glfwTerminate();
+//         return -1;
+//     }
+
+//     /* Make the window's context current */
+//     glfwMakeContextCurrent(window);
+
+
+//     // gladLoadGL(); //glfwGetProcAddress
+//     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+
+//     if(glad_glClear == NULL) {
+//         printf("glad_glClear == NULL \n");
+//         // return -1;
+//     }
+//     else {
+//         printf("OpenGL version supported by this platform (%s): \n", glGetString(GL_VERSION));
+//         /* Loop until the user closes the window */
+//         while (!glfwWindowShouldClose(window))
+//         {
+//             /* Render here */
+//             glClear(GL_COLOR_BUFFER_BIT);
+
+//             /* Swap front and back buffers */
+//             glfwSwapBuffers(window);
+
+//             /* Poll for and process events */
+//             glfwPollEvents();
+//         }
+//     }
+//     glfwTerminate();
+//     printf("Bye \n");
+//     return 0;
+// }
+
+
+
+
+
+
+
+//         int width, height;
+//         glfwGetFramebufferSize(w, &width, &height);
+
+//                 // Actual OpenGL calls
+//                 glClear(GL_COLOR_BUFFER_BIT);
+//                 glDisable(GL_DEPTH_TEST);
+//                 glMatrixMode(GL_PROJECTION);
+//                 glLoadIdentity();
+//                 glOrtho(0, width, height, 0, 0, 1);
+//                 glMatrixMode(GL_MODELVIEW);
+
+//                 // Draw our line
+//                 glBegin(GL_LINE_LOOP);
+// //                        int x1 = 100, y1 = 100;
+// //                        int x2 = 200, y2 = 200;
+// //
+//                         glColor3f(0, 0, 1);
+
+//                         // Framerate-based angel. As the frames are displayed, this integer will increment
+//                         // and continue until it hits 360, then it will wrap around and start from 0
+//                         static double iteration = 0;
+//                         // The x, y offset onto the screen -- this should later be centered
+//                         static const int offset = 150;
+//                         // The radius of both our circle and the circle it's spinning in.
+//                         static const float radius = 50;
+
+//                         // Calculate our x, y cooredinates
+//                         double x1 = offset + radius + 100 * cos(iteration);
+//                         double y1 = offset + radius + 100 * sin(iteration);
+//                         static double wobble = 0.0;
+//                         //double x2 = offset + 100 + radius * cos(iteration), y2 = offset + 100 * sin(iteration);
+//                         //
+//                         y1 += sin(wobble) * 100;
+//                         wobble += 0.01;
+
+//                         // A = (π * r²)
+//                         double a = M_PI * (100 * 2);
+//                         // C = (2 * π * r)
+//                         double c = 2 * M_PI * 100;
+
+//                         static double b = 128;
+//                         //b += 1.0;
+//                         for (double i = 0; i < 2 * M_PI; i = i + ((2 * M_PI) / b))
+//                         {
+// //                                glVertex2f(x1 + sin(i) * M_PI, y1 + cos(i) * M_PI);
+
+//                                 glVertex2f(x1 + radius * cos(i), y1 + radius * sin(i));
+// //                                glVertex2f(x1, y1);
+// //                                glVertex2f(x2, y2);
+//                         }
+
+//                         iteration += 0.01;
+
+//                 glEnd();
+
+
+        //         glfwSwapBuffers(w);
+        //         glfwPollEvents();
+        // }
+
+
+
+
+
+        
+    // nk_glfw3_font_stash_begin(&atlas);
+    // nk_glfw3_font_stash_end();
+
+    // glfwSetKeyCallback(window, key_callback);
+    // glfwSetCursorPosCallback(window, cursor_pos_callback);

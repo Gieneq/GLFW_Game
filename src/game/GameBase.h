@@ -1,13 +1,10 @@
 #pragma once
 #include <vector>
-
 #include "Camera.h"
-#include "../core/Core.h"
-#include "../entity/Entity.h"
-
-#include "../system/RenderSystem.h"
-#include "../system/UserInputSystem.h"
-#include "../system/TransformSystem.h"
+#include "Core.h"
+#include "RenderSystem.h"
+#include "UserInputSystem.h"
+#include "TransformSystem.h"
 
 
 class GameBase : public Core {

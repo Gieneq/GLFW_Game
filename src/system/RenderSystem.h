@@ -1,14 +1,11 @@
 #pragma once
 #include <iostream>
 #include <vector>
-
-
-
 #include "SystemBase.h"
-#include "../core/Settings.h"
-#include "../component/SpriteComponent.h"
-#include "../entity/Entity.h"
-#include "../game/Camera.h"
+#include "Settings.h"
+#include "SpriteComponent.h"
+#include "Entity.h"
+#include "Camera.h"
 #include "Loader.h"
 
 class RenderSystem : public SystemBase {

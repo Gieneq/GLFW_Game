@@ -1,12 +1,11 @@
 #pragma once
 #include <iostream>
 #include <vector>
-
 #include "SystemBase.h"
-#include "../core/Settings.h"
-#include "../core/Callbacks.h"
-#include "../component/ControllableComponent.h"
-#include "../entity/Entity.h"
+#include "Settings.h"
+#include "Callbacks.h"
+#include "ControllableComponent.h"
+#include "Entity.h"
 
 class UserInputSystem : public SystemBase, public KeyboardEvent {
 public:

@@ -1,4 +1,7 @@
 #include "Camera.h"
+#include "Maths.h"
+#include "Entity.h"
+#include "TransformComponent.h"
 
 
 void Camera::update(float dt) {

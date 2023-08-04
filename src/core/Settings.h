@@ -3,8 +3,7 @@
 #include "Maths.h"
 
 namespace Settings {
-    struct Window
-    {
+    struct Window {
         static constexpr char* TITLE = "Some title";
         static constexpr int WIDTH{800};
         static constexpr int HEIGHT{600};
@@ -33,13 +32,12 @@ namespace Settings {
     };
 
     struct Resources {
-        static constexpr char* ASSETS_PATH  = "res/assets/";
+        static constexpr char* ASSETS_PATH  = "../res/assets/";
     };
     
     struct General {
         static constexpr double FPS_MEASURING_INTERVAL{1.0};
-        struct Version
-        {
+        struct Version {
             static constexpr int MAJOR{1};
             static constexpr int MINOR{0};
             static constexpr int PATCH{0};
@@ -47,6 +45,5 @@ namespace Settings {
                 return std::to_string(MAJOR) + "." + std::to_string(MINOR) + "." + std::to_string(PATCH);
             }
         };
-        
     };
 }

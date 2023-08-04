@@ -3,10 +3,6 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-// #include <pugixml.hpp>
-
-
-// using namespace std;
 
 std::string IO::get_absolute_path(std::string relative_path) {
     char full_path[MAX_PATH];

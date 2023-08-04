@@ -1,11 +1,5 @@
 message(STATUS "Building src")
 
-# Copy content of res to build
-# file(COPY res DESTINATION ${CMAKE_BINARY_DIR})
-
-# Refresh asset
-file(REMOVE_RECURSE ${CMAKE_CURRENT_BINARY_DIR}/res/)
-file(COPY ../res DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 
 
 add_subdirectory(utils)
@@ -16,7 +10,6 @@ add_subdirectory(system)
 add_subdirectory(game)
 add_subdirectory(world)
 add_subdirectory(loader)
-
 
 list(APPEND DEP_LIBS
     lodepng
@@ -30,12 +23,6 @@ list(APPEND DEP_LIBS
     world
     loader
 )
-
-
-
-
-
-
 
 # set(GLAD_GL "${GLFW_SOURCE_DIR}/deps/glad/gl.h"
 #             "${GLFW_SOURCE_DIR}/deps/glad/glad.h"
@@ -55,6 +42,7 @@ list(APPEND DEP_LIBS
 #                 "${GLFW_SOURCE_DIR}/deps/tinycthread.c")
 
 
+# include_directories("${GLFW_SOURCE_DIR}/deps_generated")
 # add_executable( GWorld ${GETOPT} ${GLAD_GL} )
 add_executable(GWorld
     main.cpp

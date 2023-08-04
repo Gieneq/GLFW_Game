@@ -1,14 +1,7 @@
 #include "RenderSystem.h"
-
-// #include "glad/glad.h"
-#include "GLFW/glfw3.h"
-// #include "glad/glad.h"
-// #define GLFW_INCLUDE_NONE
-// #include "GLFW/glfw3.h"
-
+#include "GLCommon.h"
 #include "Window.h"
 #include "Loader.h"
-// #include "linmath.h"
 
 void RenderSystem::init() {
     set_viewport_size(Window::width(), Window::height());

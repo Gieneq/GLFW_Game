@@ -1,9 +1,8 @@
 #pragma once
-#include "../core/Settings.h"
-#include "Maths.h"
-#include "../entity/Entity.h"
-#include "../component/TransformComponent.h"
+#include "Settings.h"
 
+class Entity;
+class TransformComponent;
 class Camera {
 public:
     Vect2F position{0.0F, 0.0F};

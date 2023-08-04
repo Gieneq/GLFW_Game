@@ -3,6 +3,7 @@ message(STATUS " * Building game")
 list(APPEND LIB_DEPENDENCIES 
   utils
   core
+  system
 )
 
 message(STATUS "   -> ${LIB_DEPENDENCIES}")

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Errors.h"
-#include "Settings.h"
 class KeyboardEvent;
 namespace Window
 {

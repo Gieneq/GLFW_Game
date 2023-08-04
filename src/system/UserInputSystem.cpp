@@ -1,11 +1,5 @@
 #include "UserInputSystem.h"
-
-
-// #include "glad/glad.h"
-#include "GLFW/glfw3.h"
-// #include "glad/glad.h"
-// #define GLFW_INCLUDE_NONE
-// #include "GLFW/glfw3.h"
+#include "GLCommon.h"
 
 void UserInputSystem::init() {
 
@@ -58,9 +52,3 @@ bool UserInputSystem::on_key_release(int key) {
     }
     return false;
 }
-
-    // nk_glfw3_font_stash_begin(&atlas);
-    // nk_glfw3_font_stash_end();
-
-    // glfwSetKeyCallback(window, key_callback);
-    // glfwSetCursorPosCallback(window, cursor_pos_callback);

@@ -1,22 +1,14 @@
 #include "Window.h"
-
-
-// #include "glad/glad.h"
-#include "GLFW/glfw3.h"
-// #include "glad/glad.h"
-// #define GLFW_INCLUDE_NONE
-// #include "GLFW/glfw3.h"
-
 #include <vector>
-
+#include "GLCommon.h"
 #include "Callbacks.h"
+#include "Errors.h"
+#include "Settings.h"
 
 static GLFWwindow *window;
 static int window_width{Settings::Window::WIDTH};
 static int window_height{Settings::Window::HEIGHT};
 static std::vector<KeyboardEvent*> keyboard_callbacks;
-
-
 
 static void onErrorCallback(int error, const char *desc) {
         fputs(desc, stderr);
