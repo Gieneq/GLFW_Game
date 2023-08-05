@@ -6,6 +6,11 @@
 #include "TextureData.h"
 #include "TextureId.h"
 #include <optional>
+#include <map>
+#include <tuple>
+#include "pugixml.hpp"
+
+// #define BUILD_TESTWORLD 1
 
 class Loader {
 private:
@@ -35,10 +40,15 @@ public:
     std::optional<TextureData> getTextureDataByName(const std::string& name);
     
 protected:
-    bool Loader::loadTextureFromAbsolutePath(const std::string& abs_path, int div_w, int div_h, const std::string& name);
-    bool Loader::loadTextureFromAssets(const std::string& relativePath, int div_w, int div_h, const std::string& name);
+    bool loadTextureFromAbsolutePath(const std::string& abs_path, int div_w, int div_h, const std::string& name);
+    bool loadTextureFromAssets(const std::string& relativePath, int div_w, int div_h, const std::string& name);
+    bool loadMap(World& world, const std::string& mapName);
 
 private:
-    std::optional<TextureID> Loader::storeInGPUMemory(std::vector<unsigned char>& pixels, int width, int height);
+    std::optional<std::map<std::string, int>> getMapInfo(const pugi::xml_node& mapNode);
+    std::vector<std::tuple<int, std::optional<int>, std::string>> getTilesetsInfo(const pugi::xml_node& mapNode);
+    bool loadTilesetData(int firstGid, std::optional<int> lastGid, const std::string& tilesetRelativePath);
+    std::string getMapAbsolutePath(const std::string& mapName);
+    std::optional<TextureID> storeInGPUMemory(std::vector<unsigned char>& pixels, int width, int height);
     std::vector<TextureData> textureDatas{};
 };

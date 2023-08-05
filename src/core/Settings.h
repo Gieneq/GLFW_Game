@@ -33,6 +33,9 @@ namespace Settings {
 
     struct Resources {
         static constexpr char* ASSETS_PATH  = "../res/assets/";
+        static constexpr char* DATA_PATH  = "../res/data/";
+        static constexpr char* MAPS_DIR  = "maps/";
+        static constexpr char* TILESETS_DIR  = "tilesets/";
     };
     
     struct General {

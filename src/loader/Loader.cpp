@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include "Settings.h"
-#include "pugixml.hpp"
 #include "lodepng.h"
 #include "IO.h"
 #include "LocationComponent.h"
@@ -28,6 +27,8 @@ bool Loader::loadAssets() {
 bool Loader::loadWorld(World& world) {
     std::cout << "Loading world data..." << std::endl;
 
+#ifdef BUILD_TESTWORLD
+    /* Build test world */
     int size = 10;
     for(int y = -size; y < size+1; y++) {
         for(int x = -size; x < size+1; x++) {
@@ -48,6 +49,10 @@ bool Loader::loadWorld(World& world) {
             world.entities.push_back(someTile);
         }
     }
+#else
+    /* Load world from files */
+    loadMap(world, "testmap.tmx");
+#endif
 
     return true;
 }
@@ -202,7 +207,163 @@ bool Loader::loadTextureFromAbsolutePath(const std::string& abs_path, int div_w,
     return true;
 }
 
+bool Loader::loadMap(World& world, const std::string& mapName) {
+    /* Get absolute path to the map */
+    auto mapAbsolutePath = getMapAbsolutePath(mapName);
 
+    /* Load map file with pugixml */
+
+    pugi::xml_document doc;
+    pugi::xml_parse_result result = doc.load_file(mapAbsolutePath.c_str());
+    if(!result) {
+        std::cerr << "Error loading map file: " << result.description() << std::endl;
+        return false;
+    }
+
+    /* Get map node and validate */
+    auto mapNode = doc.child("map");
+    if(!mapNode) {
+        std::cerr << "Error loading map file: no map node in map file" << std::endl;
+        return false;
+    }
+
+    /* Extract map info */
+    auto mapInfoOption = getMapInfo(mapNode);
+    if(!mapInfoOption.has_value()) {
+        std::cerr << "Error loading map file: invalid map info" << std::endl;
+        return false;
+    }
+    auto mapInfo = mapInfoOption.value();
+
+    std::cout << "Map info: " << std::endl;
+    std::cout << " - mapWidth: " << mapInfo["mapWidth"] << std::endl;
+    std::cout << " - mapHeight: " << mapInfo["mapHeight"] << std::endl;
+    std::cout << " - tileWidth: " << mapInfo["tileWidth"] << std::endl;
+    std::cout << " - tileHeight: " << mapInfo["tileHeight"] << std::endl;
+
+    /**
+     * Extract tileset info - global tiles ids with their source file relative path.
+     */
+    auto tilesetsInfo = getTilesetsInfo(mapNode);
+    if(tilesetsInfo.empty()) {
+        std::cerr << "Error loading map file: invalid tilesets info" << std::endl;
+        return false;
+    }
+
+    std::cout << "Tilesets info: " << std::endl;
+    for(const auto& tilesetInfo : tilesetsInfo) {
+        std::cout << " - firstGid: " << std::get<0>(tilesetInfo);
+        std::cout << ", lastGid: " << std::get<1>(tilesetInfo).value_or(-1);
+        std::cout << ", source: " << std::get<2>(tilesetInfo) << std::endl;
+    }
+
+    /* Load each tileset data */
+    for(const auto& tilesetInfo : tilesetsInfo) {
+        auto firstGid = std::get<0>(tilesetInfo);
+        auto lastGid = std::get<1>(tilesetInfo);
+        auto tilesetRelativePath = std::get<2>(tilesetInfo);
+
+        auto tilesetData = loadTilesetData(firstGid, lastGid, tilesetRelativePath);
+    }
+
+
+    std::cout << "Map file loaded successfully" << std::endl;
+    return true;
+}
+
+std::optional<std::map<std::string, int>> Loader::getMapInfo(const pugi::xml_node& mapNode) {
+    /* Get all attributes heck if they exist */
+    auto mapWidthAttrib = mapNode.attribute("width");
+    auto mapHeightAttrib = mapNode.attribute("height");
+    auto tileWidthAttrib = mapNode.attribute("tilewidth");
+    auto tileHeightAttrib = mapNode.attribute("tileheight");
+
+    /* Check if map has required attibutes */
+    if(!mapWidthAttrib || !mapHeightAttrib || !tileWidthAttrib || !tileHeightAttrib) {
+        std::cerr << "Error loading map file: no map size or tile size" << std::endl;
+        return std::nullopt;
+    }
+
+    /* Get attibutes values */
+    int mapWidth = mapNode.attribute("width").as_int(-1);
+    int mapHeight = mapNode.attribute("height").as_int(-1);
+    int tileWidth = mapNode.attribute("tilewidth").as_int(-1);
+    int tileHeight = mapNode.attribute("tileheight").as_int(-1);
+
+    /* Validate retrived values */
+    if(mapWidth <= 0 || mapHeight <= 0 || tileWidth <= 0 || tileHeight <= 0) {
+        std::cerr << "Error loading map file: invalid map size or tile size" << std::endl;
+        return std::nullopt;
+    }
+
+    /* Build result */
+    std::map<std::string, int> mapInfo;
+    mapInfo["mapWidth"] = mapWidth;
+    mapInfo["mapHeight"] = mapHeight;
+    mapInfo["tileWidth"] = tileWidth;
+    mapInfo["tileHeight"] = tileHeight;
+
+    return mapInfo;
+}
+
+
+std::vector<std::tuple<int, std::optional<int>, std::string>> Loader::getTilesetsInfo(const pugi::xml_node& mapNode) {
+    std::vector<std::tuple<int, std::optional<int>, std::string>> tilesetsInfo;
+
+    /* Iterate over all tilesets */
+    for(auto tilesetNode : mapNode.children("tileset")) {
+        /* Get tileset attributes */
+        auto firstGidAttrib = tilesetNode.attribute("firstgid");
+        auto sourceAttrib = tilesetNode.attribute("source");
+
+        /* Check if tileset has required attibutes */
+        if(!firstGidAttrib || !sourceAttrib) {
+            std::cerr << "Error loading map file: no tileset firstgid or source" << std::endl;
+            return std::vector<std::tuple<int, std::optional<int>, std::string>>();
+        }
+
+        /* Get attibutes values */
+        int firstGid = tilesetNode.attribute("firstgid").as_int(-1);
+        std::string source = tilesetNode.attribute("source").as_string("");
+
+        /* Validate retrived values */
+        if(firstGid <= 0 || source.empty()) {
+            std::cerr << "Error loading map file: invalid tileset firstgid or source" << std::endl;
+            return std::vector<std::tuple<int, std::optional<int>, std::string>>();
+        }
+
+        /**
+         * Update last tileset data with this firstGid.
+         * Note: tilesets last Gid is next tilesets firstGid - 1.
+         */
+        if(!tilesetsInfo.empty()) {
+            auto& lastTilesetInfo = tilesetsInfo.back();
+            std::get<1>(lastTilesetInfo) = std::make_optional(firstGid - 1);
+        }
+
+        /* Build result */
+        tilesetsInfo.push_back(std::make_tuple(firstGid, std::nullopt, source));
+    }
+
+    return tilesetsInfo;
+}
+
+
+/**
+ * Load tileset data from file. Append to Loader's data. If return true - success.
+*/
+bool Loader::loadTilesetData(int firstGid, std::optional<int> lastGid, const std::string& tilesetRelativePath) {
+    return true;
+}
+
+std::string Loader::getMapAbsolutePath(const std::string& mapName) {
+    std::string mapDir = std::string(Settings::Resources::DATA_PATH)
+        + std::string(Settings::Resources::MAPS_DIR);
+    std::string absoluteMapPath = IO::get_absolute_path(mapDir + mapName);
+    // std::cout << "Map absolute path: " << absoluteMapPath << std::endl;
+
+    return absoluteMapPath;
+}
 
 
 
