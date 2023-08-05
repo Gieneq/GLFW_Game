@@ -1,32 +1,37 @@
 #pragma once
-#include <iostream>
 #include "Component.h"
-#include "TransformComponent.h"
-#include "Entity.h"
 #include <stdexcept>
+#include <unordered_map>
 
-class WSADControllableComponent : public Component {
+enum class MovementControlKey {
+    NONE,
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT
+};
+
+class Entity;
+class MovementComponent;
+class ControllableComponent : public Component {
 public:
-    WSADControllableComponent(Entity* e) : Component(e) {
-        transform_cmpnt = e->getComponent<TransformComponent>();
-        if(transform_cmpnt == nullptr) {
-            throw std::runtime_error("WSADControllableComponent requires TransformComponent!");
-        }
+    ControllableComponent(Entity* e, MovementComponent* move);
+    virtual ~ControllableComponent() = default;
+
+    std::unordered_map<int, bool> pressedKeysWSAD;
+    MovementControlKey lastPressedKey{MovementControlKey::NONE};
+
+    void onPressWSADKey(int key);
+    void onReleaseWSADKey(int key);
+
+    bool active{true};
+
+    MovementComponent * controlledMovement{nullptr};
+
+    ControllableComponent* clone(Entity* new_parent) override {
+        return new ControllableComponent(new_parent, controlledMovement);
     }
-    virtual ~WSADControllableComponent() = default;
 
-    void press_w();
-    void press_a();
-    void press_s();
-    void press_d();
-    void release_w();
-    void release_a();
-    void release_s();
-    void release_d();
-
-    TransformComponent * transform_cmpnt;
-
-    WSADControllableComponent* clone(Entity* new_parent) override {
-        return new WSADControllableComponent(new_parent);
-    }
+protected:
+    void updateMovement();
 };

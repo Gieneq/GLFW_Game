@@ -1,56 +1,83 @@
 #include "ControllableComponent.h"
+#include "MovementComponent.h"
+#include "Entity.h"
+#include "GLCommon.h" 
 
+ControllableComponent::ControllableComponent(Entity* e, MovementComponent* move) : Component(e), controlledMovement(move) {
+    std::unordered_map<int, bool> pressedKeysWSAD {
+        {GLFW_KEY_W, false},
+        {GLFW_KEY_S, false},
+        {GLFW_KEY_A, false},
+        {GLFW_KEY_D, false}
+    };
+}   
 
-void WSADControllableComponent::press_w() {
-    std::cout << "Pressed W" << std::endl;
-    if(transform_cmpnt) {
-        transform_cmpnt->direction_north();
-        transform_cmpnt->go();
+void ControllableComponent::onPressWSADKey(int key) {
+    if(!active) {
+        return;
     }
+
+    if(key == GLFW_KEY_W) {
+        lastPressedKey = MovementControlKey::UP;
+    }
+    else if(key == GLFW_KEY_S) {
+        lastPressedKey = MovementControlKey::DOWN;
+    }
+    else if(key == GLFW_KEY_A) {
+        lastPressedKey = MovementControlKey::LEFT;
+    }
+    else if(key == GLFW_KEY_D) {
+        lastPressedKey = MovementControlKey::RIGHT;
+    }
+    else {
+        std::cerr << "Unknown key pressed in ControllableComponent: " << key << std::endl;
+    }
+
+    pressedKeysWSAD[key] = true;
+    updateMovement();
 }
 
-void WSADControllableComponent::press_a() {
-    std::cout << "Pressed A" << std::endl;
-    if(transform_cmpnt) {
-        transform_cmpnt->direction_west();
-        transform_cmpnt->go();
+void ControllableComponent::onReleaseWSADKey(int key) {
+    if(!active) {
+        return;
     }
+
+    if(key == GLFW_KEY_W && lastPressedKey == MovementControlKey::UP) {
+        lastPressedKey = MovementControlKey::NONE;
+    }
+    else if(key == GLFW_KEY_S && lastPressedKey == MovementControlKey::DOWN) {
+        lastPressedKey = MovementControlKey::NONE;
+    }
+    else if(key == GLFW_KEY_A && lastPressedKey == MovementControlKey::LEFT) {
+        lastPressedKey = MovementControlKey::NONE;
+    }
+    else if(key == GLFW_KEY_D && lastPressedKey == MovementControlKey::RIGHT) {
+        lastPressedKey = MovementControlKey::NONE;
+    }
+
+    pressedKeysWSAD[key] = false;
+    updateMovement();
 }
 
-void WSADControllableComponent::press_s() {
-    std::cout << "Pressed S" << std::endl;
-    if(transform_cmpnt) {
-        transform_cmpnt->direction_south();
-        transform_cmpnt->go();
+void ControllableComponent::updateMovement() {
+    /* Update direction */
+    if(!controlledMovement) {
+        return;
     }
-}
 
-void WSADControllableComponent::press_d() {
-    std::cout << "Pressed D" << std::endl;
-    if(transform_cmpnt) {
-        transform_cmpnt->direction_east();
-        transform_cmpnt->go();
+    if(lastPressedKey == MovementControlKey::NONE) {
+        controlledMovement->setDirection(Direction::NONE);
+    } 
+    else if(lastPressedKey == MovementControlKey::UP) {
+        controlledMovement->setDirection(Direction::NORTH);
     }
-}
-
-
-void WSADControllableComponent::release_w() {
-    if(transform_cmpnt) {
-        transform_cmpnt->stop();
+    else if(lastPressedKey == MovementControlKey::DOWN) {
+        controlledMovement->setDirection(Direction::SOUTH);
     }
-}
-void WSADControllableComponent::release_a() {
-    if(transform_cmpnt) {
-        transform_cmpnt->stop();
+    else if(lastPressedKey == MovementControlKey::LEFT) {
+        controlledMovement->setDirection(Direction::WEST);
     }
-}
-void WSADControllableComponent::release_s() {
-    if(transform_cmpnt) {
-        transform_cmpnt->stop();
-    }
-}
-void WSADControllableComponent::release_d() {
-    if(transform_cmpnt) {
-        transform_cmpnt->stop();
+    else if(lastPressedKey == MovementControlKey::RIGHT) {
+        controlledMovement->setDirection(Direction::EAST);
     }
 }

@@ -3,8 +3,8 @@
 #include "Component.h"
 #include "Maths.h"
 
-//enum of 4 types of direction
 enum class Direction {
+    NONE,
     NORTH,
     SOUTH,
     WEST,

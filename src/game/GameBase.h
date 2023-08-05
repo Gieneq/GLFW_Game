@@ -21,6 +21,6 @@ protected:
     Camera camera;
     World world;
     RenderSystem render_system;
-    UserInputSystem user_input_system;
+    UserInputSystem userInputSystem;
     MovementSystem movementSystem;
 };

@@ -6,8 +6,9 @@
 #include "IO.h"
 #include "World.h"
 #include "Component.h"
-#include "FoodComponent.h"
+#include "ControllableComponent.h"
 #include "LocationComponent.h"
+
 #include "Entity.h"
 
 bool GameBase::init() {
@@ -21,8 +22,8 @@ bool GameBase::init() {
     render_system.init();
     render_system.attachCamera(&camera);
 
-    user_input_system.init();
-    Window::addKeyboardListener(&user_input_system);
+    userInputSystem.init();
+    Window::addKeyboardListener(&userInputSystem);
 
     movementSystem.init();
     
@@ -49,7 +50,7 @@ bool GameBase::init() {
     camera.focusOn(world.player.getComponent<LocationComponent>());
 
     /* Attach controller to just loaded player */
-    user_input_system.attach_controllabe(&world.player);
+    userInputSystem.attachControllabe(&world.player);
     
     return result;
 }

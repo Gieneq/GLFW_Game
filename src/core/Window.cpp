@@ -32,14 +32,14 @@ static void key_callback(GLFWwindow *w, int key, int scancode, int action, int m
 
     if (action == GLFW_PRESS) {
         for(auto keyboard_callback : keyboard_callbacks) {
-            keyboard_callback->on_key_press(key);
+            keyboard_callback->onKeyPressed(key);
             //todo eval bool
         }
     }
     
     if (action == GLFW_RELEASE) {
         for(auto keyboard_callback : keyboard_callbacks) {
-            keyboard_callback->on_key_release(key);
+            keyboard_callback->onKeyReleased(key);
             //todo eval bool
         }
     }

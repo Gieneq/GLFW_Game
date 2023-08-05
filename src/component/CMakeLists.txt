@@ -10,6 +10,7 @@ message(STATUS "   -> ${LIB_DEPENDENCIES}")
 add_library(component 
   GraphicsComponent.cpp
   MovementComponent.cpp
+  ControllableComponent.cpp
 )
 
 target_link_libraries(component PUBLIC ${LIB_DEPENDENCIES})

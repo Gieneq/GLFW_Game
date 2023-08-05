@@ -8,6 +8,7 @@
 #include "LocationComponent.h"
 #include "GraphicsComponent.h"
 #include "MovementComponent.h"
+#include "ControllableComponent.h"
 #include <algorithm>
 
 bool Loader::loadAssets() {
@@ -85,11 +86,11 @@ bool Loader::loadPlayer(World& world) {
     /* Movement option */
     auto movementCmp = new MovementComponent(player, locatiomCmp);
     player->addComponent(movementCmp);
-    movementCmp->setDirection(Direction::SOUTH);
+    movementCmp->setDirection(Direction::NONE);
 
     /* WSAD to control player */
-    // auto wsad_ctrl = new WSADControllableComponent(player);
-    // player->addComponent(wsad_ctrl);
+    auto controllableCmp = new ControllableComponent(player, movementCmp);
+    player->addComponent(controllableCmp);
 
     /* Yes, player is one of entities - 
      * easier to sort in rendering and similar. */
