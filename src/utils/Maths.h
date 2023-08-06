@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 
 struct Vect2F {
     Vect2F(float x, float y) : x{x}, y{y} {}
@@ -29,6 +30,11 @@ struct Rect2F {
 
     Vect2F top_left;
     Size2F size;
+
+    friend std::ostream& operator<<(std::ostream& os, const Rect2F& rect) {
+        os << "[" << rect.top_left.x << ", " << rect.top_left.y << ", " << rect.size.w << ", " << rect.size.h << "]";
+        return os;
+    }
 };
 
 template<typename T>

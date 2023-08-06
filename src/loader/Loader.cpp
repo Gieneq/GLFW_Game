@@ -476,9 +476,117 @@ std::optional<TilesetData> Loader::loadTilesetData(int firstGid, std::optional<i
     }
     tilesetData.textureID = tilesetIdOption.value();
 
+    /* Fill tileset data with tiles data */
+    auto tilesLoadingResult = loadTilesData(tilesetNode, tilesetData);
+    if(!tilesLoadingResult) {
+        std::cerr << "Error loading tileset file: loading tiles data failed" << std::endl;
+        return std::nullopt;
+    }
+
     return tilesetData;
 }
 
+bool Loader::loadTilesData(const pugi::xml_node& mapNode, TilesetData& tilesetData) {
+
+    /* Iterate over tiles nodes */
+    for(auto tileNode : mapNode.children("tile")) {
+        /* Get tile attributes */
+        auto tileIdAttrib = tileNode.attribute("id");
+
+        /* Check if tile has required attibutes */
+        if(!tileIdAttrib) {
+            std::cerr << "Error loading tileset file: no tile id" << std::endl;
+            return false;
+        }
+
+        /* Get attibutes values */
+        int tileId = tileNode.attribute("id").as_int(-1);
+
+        /* Validate retrived values */
+        if((tileId < 0) && !tilesetData.validateLID(tileId)) {
+            std::cerr << "Error loading tileset file: invalid tile id" << std::endl;
+            return false;
+        }
+        
+        TileData tileData(tileId);
+
+        /* Get tile animation node */
+        auto animationNode = tileNode.child("animation");
+        if(animationNode) {
+            /* Iterate over animation frames */
+            for(auto frameNode : animationNode.children("frame")) {
+                /* Get frame attributes */
+                auto tileIdAttrib = frameNode.attribute("tileid");
+                auto durationAttrib = frameNode.attribute("duration");
+
+                /* Check if frame has required attibutes */
+                if(!tileIdAttrib || !durationAttrib) {
+                    std::cerr << "Error loading tileset file: no frame tileid or duration" << std::endl;
+                    return false;
+                }
+
+                /* Get attibutes values */
+                int tileId = frameNode.attribute("tileid").as_int(-1);
+                int duration = frameNode.attribute("duration").as_int(-1);
+
+                /* Validate retrived values */
+                if(((tileId < 0) && !tilesetData.validateLID(tileId)) || duration < 0) {
+                    std::cerr << "Error loading tileset file: invalid frame tileid or duration" << std::endl;
+                    return false;
+                }
+
+                /* Store in TilesetData */
+                auto animationFrame = TileAnimationFrameData(tileId, duration);
+                tileData.animationFrames.push_back(animationFrame);
+            }
+        }
+
+        /* Get tile objectgroup node */
+        auto collisionsRectsNode = tileNode.child("objectgroup");
+        if(collisionsRectsNode) {
+            /* Iterate over collision rects */
+            for(auto collisionRectNode : collisionsRectsNode.children("object")) {
+                /* Get object attributes */
+                auto xAttrib = collisionRectNode.attribute("x");
+                auto yAttrib = collisionRectNode.attribute("y");
+                auto widthAttrib = collisionRectNode.attribute("width");
+                auto heightAttrib = collisionRectNode.attribute("height");
+
+                /* Check if object has required attibutes */
+                if(!xAttrib || !yAttrib || !widthAttrib || !heightAttrib) {
+                    std::cerr << "Error loading tileset file: no object x, y, width or height" << std::endl;
+                    return false;
+                }
+
+                /* Get attibutes values */
+                int x = collisionRectNode.attribute("x").as_int(-1);
+                int y = collisionRectNode.attribute("y").as_int(-1);
+                int width = collisionRectNode.attribute("width").as_int(-1);
+                int height = collisionRectNode.attribute("height").as_int(-1);
+
+                /* Validate retrived values */
+                if(x < 0 || y < 0 || width < 0 || height < 0) {
+                    std::cerr << "Error loading tileset file: invalid object x, y, width or height" << std::endl;
+                    return false;
+                }
+
+                /* Store in TilesetData */
+                auto collisionRect = Rect2F(
+                    static_cast<float>(x),
+                    static_cast<float>(y),
+                    static_cast<float>(width),
+                    static_cast<float>(height)
+                );
+                tileData.collisionRects.push_back(collisionRect);
+            }
+        }
+
+        /* Store tile data */
+        tilesetData.tilesData.push_back(tileData);
+    }
+
+    return true;
+}
 
 std::string Loader::getTilesetAbsolutePath(const std::string& mapPath, const std::string& tilesetRelativePath) {
     /* TilesetRelativePath is in relation to map containing this dir */

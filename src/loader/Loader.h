@@ -9,8 +9,61 @@
 #include <map>
 #include <tuple>
 #include "pugixml.hpp"
+#include "Maths.h"
 
 // #define BUILD_TESTWORLD 1
+
+class TileAnimationFrameData {
+public:
+    TileAnimationFrameData() = default;
+    TileAnimationFrameData(int tileLID, int duration) : tileLID(tileLID), duration(duration) {}
+    int tileLID{-1};
+    int duration{0};
+
+    friend std::ostream& operator<<(std::ostream& os, const TileAnimationFrameData& tileAnimationFrameData) {
+        os << tileAnimationFrameData.tileLID << ": " << tileAnimationFrameData.duration;
+        return os;
+    }
+};
+
+class TileData {
+public:
+    TileData() = default;
+    TileData(int tileLID) : tileLID(tileLID) {}
+    int tileLID{-1};
+
+    std::vector<TileAnimationFrameData> animationFrames;
+    std::vector<Rect2F> collisionRects;
+    
+    bool hasAnimation() const {
+        return !animationFrames.empty();
+    }
+
+    bool hasCollisionRects() const {
+        return !collisionRects.empty();
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const TileData& tileData) {
+        os << "   - TileData[" << tileData.tileLID << "]" << ", AnimationsCount: " << tileData.animationFrames.size() << ", collisionRectsCount: " << tileData.collisionRects.size() << std::endl;
+        
+        if(tileData.hasAnimation()) {
+            os << "     - AnimationFrames: ";
+            for(const auto& animationFrame : tileData.animationFrames) {
+                os << animationFrame << ", ";
+            }
+            os << std::endl;
+        }
+
+        if(tileData.hasCollisionRects()) {
+            os << "     - CollisionRects: ";
+            for(const auto& collisionRect : tileData.collisionRects) {
+                os << collisionRect << ", ";
+            }
+            os << std::endl;
+        }
+        return os;
+    }
+};
 
 class TilesetData {
 public:
@@ -27,7 +80,7 @@ public:
     int columns;
     int rows;
     TextureID textureID;
-    //todo vector if tilesdata
+    std::vector<TileData> tilesData;
 
     void setTextureID(TextureID textureID) {
         this->textureID = textureID;
@@ -61,6 +114,16 @@ public:
         return true; //todo consider checking if there is Tile Data
     }
 
+    bool validateLID(int lid) const {
+        if(lid < 0) {
+            return false;
+        }
+        if(lid >= columns * rows) {
+            return false;
+        }
+        return true;
+    }
+
     friend std::ostream& operator<<(std::ostream& os, const TilesetData& tilesetData) {
         os << "   - TilesetData [" << tilesetData.firstGID << ", " << tilesetData.lastGID.value_or(-1) << "] " << std::endl;
         os << "   - tilesetAbsolutePath: " << tilesetData.tilesetAbsolutePath << std::endl;
@@ -70,6 +133,13 @@ public:
         os << "   - columns: " << tilesetData.columns << std::endl;
         os << "   - rows: " << tilesetData.rows << std::endl;
         os << "   - textureID: " << tilesetData.textureID << std::endl;
+        os << "   - tilesDataCount: " << tilesetData.tilesData.size() << ", details:" << std::endl;
+        
+        for(const auto& tileData : tilesetData.tilesData) {
+            os << tileData;
+        }
+
+        
         return os;
     }
 };
@@ -140,6 +210,7 @@ private:
     std::optional<std::map<std::string, int>> getMapInfo(const pugi::xml_node& mapNode);
     std::vector<std::tuple<int, std::optional<int>, std::string>> getTilesetsInfo(const pugi::xml_node& mapNode);
     std::optional<TilesetData> loadTilesetData(int firstGid, std::optional<int> lastGid, const std::string& mapPath, const std::string& tilesetRelativePath);
+    bool loadTilesData(const pugi::xml_node& mapNode, TilesetData& tilesetData);
     std::string getMapAbsolutePath(const std::string& mapName);
     std::string getTilesetAbsolutePath(const std::string& mapPath, const std::string& tilesetRelativePath);
     std::string getTilesetImageAbsolutePath(const std::string& tilesetAbsolutePath, const std::string& imageName);
