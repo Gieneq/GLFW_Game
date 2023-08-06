@@ -51,7 +51,7 @@ bool Loader::loadWorld(World& world) {
     }
 #else
     /* Load world from files */
-    loadMap(world, "testmap.tmx");
+    auto mapDataOption = loadMapData(world, "testmap.tmx");
 #endif
 
     return true;
@@ -157,19 +157,30 @@ std::optional<TextureID> Loader::storeInGPUMemory(std::vector<unsigned char>& pi
     return textureID;
 }
 
-bool Loader::loadTextureFromAssets(const std::string& relativePath, int div_w, int div_h, const std::string& name) {
+std::optional<TextureID> Loader::loadTextureFromAssets(const std::string& relativePath, int div_w, int div_h, const std::string& name) {
     std::string absPath = IO::get_absolute_path(Settings::Resources::ASSETS_PATH + relativePath);
     return loadTextureFromAbsolutePath(absPath, div_w, div_h, name);
 }
 
-bool Loader::loadTextureFromAbsolutePath(const std::string& abs_path, int div_w, int div_h, const std::string& name) {
+std::optional<TextureID> Loader::loadTextureFromAbsolutePath(const std::string& abs_path, int div_w, int div_h, const std::string& name) {
     /* Check if image with given path is already loaded. */
     const std::string absolute_path = IO::get_absolute_path(abs_path);
     for(const auto& textureData : textureDatas) {
         if(textureData.absolute_path == absolute_path) {
             /* It is considered as error */
             std::cerr << "Image with path: " << absolute_path << " is already loaded." << std::endl;
-            return false;
+            return std::nullopt;
+        }
+    }
+
+    /* Check if image with given name is already loaded. */
+    if(!name.empty()) {
+        auto textureDataOption = getTextureDataByName(name);
+        /* Check if found any */
+        if(textureDataOption.has_value()) {
+            /* It is considered as error */
+            std::cerr << "Image with name: " << name << " is already loaded." << std::endl;
+            return std::nullopt;
         }
     }
 
@@ -181,22 +192,27 @@ bool Loader::loadTextureFromAbsolutePath(const std::string& abs_path, int div_w,
 
     if(hasError) {
         std::cerr << "Error during loading file " << absolute_path << " " << loadingDecodingError << ": " << lodepng_error_text(loadingDecodingError) << std::endl;
-        return false;
+        return std::nullopt;
     }
 
     /* Seem this texture was not loaded yet. Store it in GPU memory. */
     auto textureID = storeInGPUMemory(image, width, height);
     if(!textureID) {
         std::cerr << "Error storing image " << absolute_path << " in GPU memory" << std::endl;
-        return false;
+        return std::nullopt;
     }
 
     /* Data successfully stored */
     image.clear();
 
+    /* Check name */
+    std::string textureName = "Texture_" + std::to_string((*textureID).value);
+    if(!name.empty()) {
+        textureName = name;
+    }
+
     /* Build final texture data */
-    //const GLuint gl_id
-    TextureData texture_data(absolute_path, width, height, *textureID, name);
+    TextureData texture_data(absolute_path, width, height, *textureID, textureName);
     texture_data.div_width = div_w;
     texture_data.div_height = div_h;
 
@@ -204,42 +220,44 @@ bool Loader::loadTextureFromAbsolutePath(const std::string& abs_path, int div_w,
     textureDatas.push_back(texture_data);
 
     std::cout << "Texture loaded successfully: " << texture_data.id << std::endl;
-    return true;
+    return texture_data.id;
 }
 
-bool Loader::loadMap(World& world, const std::string& mapName) {
+std::optional<MapData> Loader::loadMapData(World& world, const std::string& mapName) {
     /* Get absolute path to the map */
-    auto mapAbsolutePath = getMapAbsolutePath(mapName);
+    const auto mapAbsolutePath = getMapAbsolutePath(mapName);
 
     /* Load map file with pugixml */
-
     pugi::xml_document doc;
     pugi::xml_parse_result result = doc.load_file(mapAbsolutePath.c_str());
     if(!result) {
         std::cerr << "Error loading map file: " << result.description() << std::endl;
-        return false;
+        return std::nullopt;
     }
 
     /* Get map node and validate */
     auto mapNode = doc.child("map");
     if(!mapNode) {
         std::cerr << "Error loading map file: no map node in map file" << std::endl;
-        return false;
+        return std::nullopt;
     }
 
     /* Extract map info */
     auto mapInfoOption = getMapInfo(mapNode);
     if(!mapInfoOption.has_value()) {
         std::cerr << "Error loading map file: invalid map info" << std::endl;
-        return false;
+        return std::nullopt;
     }
     auto mapInfo = mapInfoOption.value();
 
-    std::cout << "Map info: " << std::endl;
-    std::cout << " - mapWidth: " << mapInfo["mapWidth"] << std::endl;
-    std::cout << " - mapHeight: " << mapInfo["mapHeight"] << std::endl;
-    std::cout << " - tileWidth: " << mapInfo["tileWidth"] << std::endl;
-    std::cout << " - tileHeight: " << mapInfo["tileHeight"] << std::endl;
+    // std::cout << "Map info: " << std::endl;
+    // std::cout << " - mapWidth: " << mapInfo["mapWidth"] << std::endl;
+    // std::cout << " - mapHeight: " << mapInfo["mapHeight"] << std::endl;
+    // std::cout << " - tileWidth: " << mapInfo["tileWidth"] << std::endl;
+    // std::cout << " - tileHeight: " << mapInfo["tileHeight"] << std::endl;
+
+    /* Initialize MapData - need to fill TilesetsData next */
+    MapData mapData(mapAbsolutePath, mapInfo["mapWidth"], mapInfo["mapHeight"], mapInfo["tileWidth"], mapInfo["tileHeight"]);
 
     /**
      * Extract tileset info - global tiles ids with their source file relative path.
@@ -247,15 +265,15 @@ bool Loader::loadMap(World& world, const std::string& mapName) {
     auto tilesetsInfo = getTilesetsInfo(mapNode);
     if(tilesetsInfo.empty()) {
         std::cerr << "Error loading map file: invalid tilesets info" << std::endl;
-        return false;
+        return std::nullopt;
     }
 
-    std::cout << "Tilesets info: " << std::endl;
-    for(const auto& tilesetInfo : tilesetsInfo) {
-        std::cout << " - firstGid: " << std::get<0>(tilesetInfo);
-        std::cout << ", lastGid: " << std::get<1>(tilesetInfo).value_or(-1);
-        std::cout << ", source: " << std::get<2>(tilesetInfo) << std::endl;
-    }
+    // std::cout << "Tilesets info: " << std::endl;
+    // for(const auto& tilesetInfo : tilesetsInfo) {
+    //     std::cout << " - firstGid: " << std::get<0>(tilesetInfo);
+    //     std::cout << ", lastGid: " << std::get<1>(tilesetInfo).value_or(-1);
+    //     std::cout << ", source: " << std::get<2>(tilesetInfo) << std::endl;
+    // }
 
     /* Load each tileset data */
     for(const auto& tilesetInfo : tilesetsInfo) {
@@ -263,12 +281,19 @@ bool Loader::loadMap(World& world, const std::string& mapName) {
         auto lastGid = std::get<1>(tilesetInfo);
         auto tilesetRelativePath = std::get<2>(tilesetInfo);
 
-        auto tilesetData = loadTilesetData(firstGid, lastGid, tilesetRelativePath);
+        auto tilesetData = loadTilesetData(firstGid, lastGid, mapAbsolutePath, tilesetRelativePath);
+        if(!tilesetData.has_value()) {
+            std::cerr << "Error loading map file: invalid tileset data" << std::endl;
+            return std::nullopt;
+        }
+
+        /* Store tileset data */
+        mapData.tilesetsData.push_back(tilesetData.value());
     }
 
-
+    std::cout << mapData << std::endl;
     std::cout << "Map file loaded successfully" << std::endl;
-    return true;
+    return mapData;
 }
 
 std::optional<std::map<std::string, int>> Loader::getMapInfo(const pugi::xml_node& mapNode) {
@@ -352,8 +377,121 @@ std::vector<std::tuple<int, std::optional<int>, std::string>> Loader::getTileset
 /**
  * Load tileset data from file. Append to Loader's data. If return true - success.
 */
-bool Loader::loadTilesetData(int firstGid, std::optional<int> lastGid, const std::string& tilesetRelativePath) {
-    return true;
+std::optional<TilesetData> Loader::loadTilesetData(int firstGid, std::optional<int> lastGid, const std::string& mapPath, const std::string& tilesetRelativePath) {
+    const auto absuluteTilesetPath = getTilesetAbsolutePath(mapPath, tilesetRelativePath);
+    // std::cout << "Loading tileset data from: " << absuluteTilesetPath << std::endl;
+
+    /* Load tileset file with pugixml */
+    pugi::xml_document doc;
+    pugi::xml_parse_result result = doc.load_file(absuluteTilesetPath.c_str());
+    if(!result) {
+        std::cerr << "Error loading tileset file: " << result.description() << std::endl;
+        return std::nullopt;
+    }
+
+    /* Get tileset node and validate */
+    auto tilesetNode = doc.child("tileset");
+    if(!tilesetNode) {
+        std::cerr << "Error loading tileset file: no tileset node in tileset file" << std::endl;
+        return std::nullopt;
+    }
+
+    /* Get tileset attributes */
+    auto tilesetNameAttrib = tilesetNode.attribute("tilewidth");
+    auto tileWidthAttrib = tilesetNode.attribute("tilewidth");
+    auto tileHeightAttrib = tilesetNode.attribute("tileheight");
+    auto tileCountAttrib = tilesetNode.attribute("tilecount");
+    auto columnsAttrib = tilesetNode.attribute("columns");
+
+    /* Check if tileset has required attibutes */
+    if(!tilesetNameAttrib || !tileWidthAttrib || !tileHeightAttrib || !tileCountAttrib || !columnsAttrib) {
+        std::cerr << "Error loading tileset file: no tileset name, tile size, tile count or columns" << std::endl;
+        return std::nullopt;
+    }
+
+    /* Get attibutes values */
+    std::string tilesetName = tilesetNode.attribute("name").as_string("");
+    int tileWidth = tilesetNode.attribute("tilewidth").as_int(-1);
+    int tileHeight = tilesetNode.attribute("tileheight").as_int(-1);
+    int tileCount = tilesetNode.attribute("tilecount").as_int(-1);
+    int columns = tilesetNode.attribute("columns").as_int(-1);
+
+    /* Validate retrived values */
+    if(tilesetName.empty() || tileWidth <= 0 || tileHeight <= 0 || tileCount <= 0 || columns <= 0) {
+        std::cerr << "Error loading tileset file: invalid tileset name, tile size, tile count or columns" << std::endl;
+        return std::nullopt;
+    }
+
+    // std::cout << "Tileset info: " << std::endl;
+    // std::cout << " - tilesetName: " << tilesetName << std::endl;
+    // std::cout << " - tileWidth: " << tileWidth << std::endl;
+    // std::cout << " - tileHeight: " << tileHeight << std::endl;
+    // std::cout << " - tileCount: " << tileCount << std::endl;
+    // std::cout << " - columns: " << columns << std::endl;
+
+    /* Get tileset image node and validate */
+    auto imageNode = tilesetNode.child("image");
+   if(!imageNode) {
+        std::cerr << "Error loading tileset file: no image node in tileset file" << std::endl;
+        return std::nullopt;
+    }
+
+    /* Get image attributes */
+    auto imageSourceAttrib = imageNode.attribute("source");
+    auto imageWidthAttrib = imageNode.attribute("width");
+    auto imageHeightAttrib = imageNode.attribute("height");
+
+    /* Check if image has required attibutes */
+    if(!imageSourceAttrib || !imageWidthAttrib || !imageHeightAttrib) {
+        std::cerr << "Error loading tileset file: no image source, width or height" << std::endl;
+        return std::nullopt;
+    }
+
+    /* Get attibutes values */
+    std::string imageSource = imageNode.attribute("source").as_string("");
+    int imageWidth = imageNode.attribute("width").as_int(-1);
+    int imageHeight = imageNode.attribute("height").as_int(-1);
+
+    /* Validate retrived values */
+    if(imageSource.empty() || imageWidth <= 0 || imageHeight <= 0) {
+        std::cerr << "Error loading tileset file: invalid image source, width or height" << std::endl;
+        return std::nullopt;
+    }
+
+    std::cout << " - Image info: " << std::endl;
+    std::cout << "   * imageSource: " << imageSource << std::endl;
+    std::cout << "   * imageWidth: " << imageWidth << std::endl;
+
+    auto absoluteTilesetImagePath = getTilesetImageAbsolutePath(absuluteTilesetPath, imageSource);
+    std::cout << "Loading tileset image from: " << absoluteTilesetImagePath << std::endl;
+
+    /* Store in TilesetData */
+    TilesetData tilesetData(firstGid, lastGid, absuluteTilesetPath, absoluteTilesetImagePath, imageWidth, imageHeight, columns, tileCount / columns);
+
+    /* Load tileset image */
+    auto tilesetIdOption = loadTextureFromAbsolutePath(absoluteTilesetImagePath, tilesetData.columns, tilesetData.rows, tilesetName);
+    if(!tilesetIdOption.has_value()) {
+        std::cerr << "Error loading tileset file: invalid tileset image" << std::endl;
+        return std::nullopt;
+    }
+    tilesetData.textureID = tilesetIdOption.value();
+
+    return tilesetData;
+}
+
+
+std::string Loader::getTilesetAbsolutePath(const std::string& mapPath, const std::string& tilesetRelativePath) {
+    /* TilesetRelativePath is in relation to map containing this dir */
+    std::string mapDir = IO::get_containing_dir(mapPath);
+    std::string absoluteTilesetPath = IO::get_absolute_path(mapDir + "\\" + tilesetRelativePath);
+    return absoluteTilesetPath;
+}
+
+std::string Loader::getTilesetImageAbsolutePath(const std::string& tilesetAbsolutePath, const std::string& imageName) {
+    /* absoluteTilesetImagePath is in the same dir as  tilesetAbsolutePath */
+    std::string tilesetDir = IO::get_containing_dir(tilesetAbsolutePath);
+    std::string absoluteTilesetImagePath = IO::get_absolute_path(tilesetDir + "\\" + imageName);
+    return absoluteTilesetImagePath;
 }
 
 std::string Loader::getMapAbsolutePath(const std::string& mapName) {
