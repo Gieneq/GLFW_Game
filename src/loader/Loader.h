@@ -12,6 +12,8 @@
 #include "Maths.h"
 
 // #define BUILD_TESTWORLD 1
+#define USE_ONLY_0_GROUP 1
+#define USE_ONLY_0_LAYER 1
 
 class TileAnimationFrameData {
 public:
@@ -146,12 +148,13 @@ public:
 
 class MapData {
 public:
+    MapData() = default;
     MapData(const std::string& mapAbsolutePath, int width, int height, int tileWidth, int tileHeight) : mapAbsolutePath(mapAbsolutePath), width(width), height(height), tileWidth(tileWidth), tileHeight(tileHeight) {}
-    std::string mapAbsolutePath;
-    int width;
-    int height;
-    int tileWidth;
-    int tileHeight;
+    std::string mapAbsolutePath{};
+    int width{-1};
+    int height{-1};
+    int tileWidth{-1};
+    int tileHeight{-1};
     std::vector<TilesetData> tilesetsData;
 
     void addTilesetData(const TilesetData& tilesetData) {
@@ -205,6 +208,8 @@ protected:
     std::optional<TextureID> loadTextureFromAbsolutePath(const std::string& abs_path, int div_w, int div_h, const std::string& name);
     std::optional<TextureID> loadTextureFromAssets(const std::string& relativePath, int div_w, int div_h, const std::string& name);
     std::optional<MapData> loadMapData(World& world, const std::string& mapName);
+    bool appendWorldLayer(World& world, const MapData& mapData, const std::vector<int> layerDataIndices);
+    bool buildWorld(World& world, const std::string mapName, const MapData& mapData);
 
 private:
     std::optional<std::map<std::string, int>> getMapInfo(const pugi::xml_node& mapNode);
@@ -215,5 +220,7 @@ private:
     std::string getTilesetAbsolutePath(const std::string& mapPath, const std::string& tilesetRelativePath);
     std::string getTilesetImageAbsolutePath(const std::string& tilesetAbsolutePath, const std::string& imageName);
     std::optional<TextureID> storeInGPUMemory(std::vector<unsigned char>& pixels, int width, int height);
+    
     std::vector<TextureData> textureDatas{};
+    MapData mapData{};
 };

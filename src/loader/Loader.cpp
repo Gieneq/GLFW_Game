@@ -9,6 +9,7 @@
 #include "MovementComponent.h"
 #include "ControllableComponent.h"
 #include <algorithm>
+#include <sstream>
 
 bool Loader::loadAssets() {
     std::cout << "Loading assets data..." << std::endl;
@@ -50,8 +51,26 @@ bool Loader::loadWorld(World& world) {
         }
     }
 #else
-    /* Load world from files */
-    auto mapDataOption = loadMapData(world, "testmap.tmx");
+    /**
+     * Load map data from files.
+     * Tiles are not built yet.
+     * It is used to build tiles and populate world.
+     */
+    const std::string mapFileName = "testmap.tmx";
+    {
+        auto mapDataOption = loadMapData(world, mapFileName);
+        if(!mapDataOption.has_value()) {
+            std::cerr << "Error loading map data" << std::endl;
+            return false;
+        }
+
+        mapData = mapDataOption.value();
+        /* Destroy on out of scope */
+    }
+
+    /* Use mapData to build World */
+    auto worldBuildResult = buildWorld(world, mapFileName, mapData);
+
 #endif
 
     return true;
@@ -331,7 +350,6 @@ std::optional<std::map<std::string, int>> Loader::getMapInfo(const pugi::xml_nod
     return mapInfo;
 }
 
-
 std::vector<std::tuple<int, std::optional<int>, std::string>> Loader::getTilesetsInfo(const pugi::xml_node& mapNode) {
     std::vector<std::tuple<int, std::optional<int>, std::string>> tilesetsInfo;
 
@@ -372,7 +390,6 @@ std::vector<std::tuple<int, std::optional<int>, std::string>> Loader::getTileset
 
     return tilesetsInfo;
 }
-
 
 /**
  * Load tileset data from file. Append to Loader's data. If return true - success.
@@ -612,7 +629,164 @@ std::string Loader::getMapAbsolutePath(const std::string& mapName) {
 }
 
 
+bool Loader::buildWorld(World& world, const std::string mapName, const MapData& mapData) {
 
+    /* Get absolute path to the map */
+    const auto mapAbsolutePath = getMapAbsolutePath(mapName);
+
+    /* Load map file with pugixml */
+    pugi::xml_document doc;
+    pugi::xml_parse_result result = doc.load_file(mapAbsolutePath.c_str());
+    if(!result) {
+        std::cerr << "Error loading map file: " << result.description() << std::endl;
+        return false;
+    }
+
+    /* Get map node and validate */
+    auto mapNode = doc.child("map");
+    if(!mapNode) {
+        std::cerr << "Error loading map file: no map node in map file" << std::endl;
+        return false;
+    }
+
+
+    /* Iterate over all lavers called group in tmx file */
+    for(auto groupNode : mapNode.children("group")) {
+        
+        /* Get group attributes */
+        auto nameAttrib = groupNode.attribute("name");
+
+        /* Check if group has required attibutes */
+        if(!nameAttrib) {
+            std::cerr << "Error loading map file: no group name" << std::endl;
+            return false;
+        }
+
+        /* Get attibutes values */
+        std::string groupName = groupNode.attribute("name").as_string("");
+
+        /* Validate retrived values */
+        if(groupName.empty()) {
+            std::cerr << "Error loading map file: invalid group name" << std::endl;
+            return false;
+        }
+
+        std::cout << " + groupName: " << groupName << std::endl;
+
+        /* Iterate over all layers in group */
+        for(auto layerNode : groupNode.children("layer")) {
+
+            /* Get group attributes */
+            auto layerNameAttrib = layerNode.attribute("name");
+
+            /* Check if group has required attibutes */
+            if(!layerNameAttrib) {
+                std::cerr << "Error loading map file: no layer name" << std::endl;
+                return false;
+            }
+
+            /* Get attibutes values */
+            std::string layerName = layerNode.attribute("name").as_string("");
+
+            /* Validate retrived values */
+            if(layerName.empty()) {
+                std::cerr << "Error loading map file: invalid layer name" << std::endl;
+                return false;
+            }
+
+            std::cout << "   * " << layerName << std::endl;
+
+            /* Get layer data node */
+            auto layerDataNode = layerNode.child("data");
+            if(!layerDataNode) {
+                std::cerr << "Error loading map file: no layer data" << std::endl;
+                return false;
+            }
+
+            /* Get layer data */
+            std::string layerData = layerDataNode.text().as_string("");
+
+            /* Validate retrived values */
+            if(layerData.empty()) {
+                std::cerr << "Error loading map file: invalid layer data" << std::endl;
+                return false;
+            }
+
+            /* Build layer data */
+            std::vector<int> layerDataIndices;
+            std::stringstream ss(layerData);
+            std::string token;
+            while(std::getline(ss, token, ',')) {
+                layerDataIndices.push_back(std::stoi(token));
+            }
+
+            /* Validate retrived values */
+            if(layerDataIndices.empty()) {
+                std::cerr << "Error loading map file: invalid layer data" << std::endl;
+                return false;
+            }
+
+            std::cout << "     - layerDataIndices.size(): " << layerDataIndices.size() << std::endl;
+
+            /* Append layer */
+            auto appendingLayerResult = appendWorldLayer(world, mapData, layerDataIndices);
+            if(!appendingLayerResult) {
+                std::cerr << "Error loading map file: invalid layer data" << std::endl;
+                return false;
+            }
+#ifdef USE_ONLY_0_LAYER
+            break;
+#endif
+        }
+
+
+        /* Finally */
+        
+#ifdef USE_ONLY_0_GROUP
+        break;
+#endif
+    }
+
+    return true;
+}
+
+bool Loader::appendWorldLayer(World& world, const MapData& mapData, const std::vector<int> layerDataIndices) {
+    
+    int tileIndex{0};
+    float tileX{0};
+    float tileY{0};
+    for(const auto tileGID: layerDataIndices) {
+        /* Calculate world location */
+        tileX = tileIndex % mapData.width;
+        tileY = tileIndex / mapData.width;
+
+        /* Build tile */
+        Entity *someTile = new Entity();
+
+        auto locationCmp = new LocationComponent(someTile);
+        locationCmp->worldRect.top_left.x = tileX;//static_cast<float>(x);
+        locationCmp->worldRect.top_left.y = tileY;//static_cast<float>(y);
+        locationCmp->worldRect.size.w = 1;
+        locationCmp->worldRect.size.h = 1;
+        someTile->addComponent(locationCmp);
+
+        auto colorCmp = new ColorComponent(someTile, locationCmp);
+        colorCmp->r = 0.5F + ((tileIndex % mapData.width) % 2) / 2.0F;
+        colorCmp->g = 0.5F + ((tileIndex / mapData.width) % 2) / 2.0F;
+        someTile->addComponent(colorCmp);
+
+        /* Retrive TileData from GID */
+        // auto tileDataOption = mapData.getTileDataByGID(tileGID);
+
+        // TextureID textureID{0};
+        // auto textureCmp = new TextureComponent(someTile, locationCmp, textureID);
+        // textureCmp.
+
+        world.entities.push_back(someTile);
+        ++tileIndex;
+    }
+    return true;
+}
 
 
 
