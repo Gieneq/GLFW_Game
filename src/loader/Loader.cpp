@@ -285,9 +285,7 @@ std::optional<TextureID> Loader::loadTextureFromAbsolutePath(const std::string& 
     }
 
     /* Build final texture data */
-    TextureData texture_data(absolute_path, width, height, *textureID, textureName);
-    texture_data.div_width = div_w;
-    texture_data.div_height = div_h;
+    TextureData texture_data(absolute_path, width, height, div_w, div_h, *textureID, textureName);
 
     /* Store in set */
     textureDatas.push_back(texture_data);
@@ -537,10 +535,10 @@ std::optional<TilesetData> Loader::loadTilesetData(int firstGid, std::optional<i
     std::cout << "Loading tileset image from: " << absoluteTilesetImagePath << std::endl;
 
     /* Store in TilesetData */
-    TilesetData tilesetData(firstGid, lastGid, absuluteTilesetPath, absoluteTilesetImagePath, imageWidth, imageHeight, columns, tileCount / columns);
+    TilesetData tilesetData(firstGid, lastGid, absuluteTilesetPath, absoluteTilesetImagePath, imageWidth, imageHeight, columns, tileCount / columns, tileWidth, tileHeight);
 
     /* Load tileset image */
-    auto tilesetIdOption = loadTextureFromAbsolutePath(absoluteTilesetImagePath, tilesetData.columns, tilesetData.rows, tilesetName);
+    auto tilesetIdOption = loadTextureFromAbsolutePath(absoluteTilesetImagePath, tileWidth, tileHeight, tilesetName);
     if(!tilesetIdOption.has_value()) {
         std::cerr << "Error loading tileset file: invalid tileset image" << std::endl;
         return std::nullopt;
@@ -849,8 +847,8 @@ bool Loader::appendWorldLayer(World& world, const MapData& mapData, const std::v
         auto tilesetData = tilesetDataOption.value();
         
         /* Size fix for larger objects */
-        locationCmp->worldRect.size.w = static_cast<float>(tilesetData.getTileWidth()) / regularTileWidth;
-        locationCmp->worldRect.size.h = static_cast<float>(tilesetData.getTileHeight()) / regularTileHeight;
+        locationCmp->worldRect.size.w = static_cast<float>(tilesetData.tileWidth) / regularTileWidth;
+        locationCmp->worldRect.size.h = static_cast<float>(tilesetData.tileHeight) / regularTileHeight;
 
         /* Get TileData by GID */
         auto tileDataOption = tilesetData.getTileDataByGID(tileGID);

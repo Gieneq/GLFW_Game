@@ -70,8 +70,8 @@ public:
 class TilesetData {
 public:
     TilesetData(int firstGID, std::optional<int> lastGID, const std::string& tilesetAbsolutePath, 
-        const std::string& tilesetImageAbsolutePath, int imageWidth, int imageHeight, int columns, int rows) : firstGID(firstGID), lastGID(lastGID), tilesetAbsolutePath(tilesetAbsolutePath), 
-        tilesetImageAbsolutePath(tilesetImageAbsolutePath), imageWidth(imageWidth), imageHeight(imageHeight), columns(columns), rows(rows) {}
+        const std::string& tilesetImageAbsolutePath, int imageWidth, int imageHeight, int columns, int rows, int tileWidth, int tileHeight) : firstGID(firstGID), lastGID(lastGID), tilesetAbsolutePath(tilesetAbsolutePath), 
+        tilesetImageAbsolutePath(tilesetImageAbsolutePath), imageWidth(imageWidth), imageHeight(imageHeight), columns(columns), rows(rows), tileWidth(tileWidth), tileHeight(tileHeight) {}
     
     int firstGID;
     std::optional<int> lastGID;
@@ -81,19 +81,13 @@ public:
     int imageHeight;
     int columns;
     int rows;
+    int tileWidth;
+    int tileHeight;
     TextureID textureID;
     std::vector<TileData> tilesData;
 
     void setTextureID(TextureID textureID) {
         this->textureID = textureID;
-    }
-
-    int getTileWidth() const {
-        return imageWidth / columns;
-    }
-
-    int getTileHeight() const {
-        return imageHeight / rows;
     }
 
     std::optional<TileData> getTileDataByGID(int gid) const;

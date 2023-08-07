@@ -23,6 +23,17 @@ void RenderSystem::renderTexturedBox(const TextureData& textureData, const Rect2
     auto eyeRect = worldRect.get_translated(camera->position.get_negated()).get_scaled(camera->zoom);
     auto projRect = Rect2F{eyeRect.top_left.x, -eyeRect.top_left.y, eyeRect.size.w, eyeRect.size.h}.get_scaled(Size2F{1.0F/aspect_ratio, 1.0F});
 
+
+    /** 
+     * Filter notvisible objects.
+     * Check if left < -1 or right > 1 or top < -1 or bottom > 1
+     * */
+
+    if(projRect.right() < -1.0F || projRect.left() > 1.0F || projRect.bottom() < -1.0F || projRect.top() > 1.0F) {
+        //todo consider moving to world space
+        return;
+    }
+
     glColor3f(1.0F, 1.0F, 1.0F);
 
 
@@ -32,13 +43,16 @@ void RenderSystem::renderTexturedBox(const TextureData& textureData, const Rect2
     glBindTexture(GL_TEXTURE_2D, textureData.id.value);
     glEnable(GL_TEXTURE_2D);
         
-    int u_idx = tilesetIndex % textureData.div_width;
-    int v_idx = tilesetIndex / textureData.div_width;
-
-    float u1 = static_cast<float>(u_idx) / static_cast<float>(textureData.div_width);
-    float u2 = static_cast<float>(u_idx + 1) / static_cast<float>(textureData.div_width);
-    float v1 = static_cast<float>(v_idx) / static_cast<float>(textureData.div_height);
-    float v2 = static_cast<float>(v_idx + 1) / static_cast<float>(textureData.div_height);
+    int u_idx = tilesetIndex % textureData.tilesPerRow;
+    int v_idx = tilesetIndex / textureData.tilesPerRow;
+    // float u1 = static_cast<float>(u_idx) / static_cast<float>(textureData.tileWidth);
+    // float u2 = static_cast<float>(u_idx + 1) / static_cast<float>(textureData.tileWidth);
+    // float v1 = static_cast<float>(v_idx) / static_cast<float>(textureData.tileHeight);
+    // float v2 = static_cast<float>(v_idx + 1) / static_cast<float>(textureData.tileHeight);
+    float u1 = static_cast<float>((u_idx + 0) * textureData.tileWidth) / static_cast<float>(textureData.width);
+    float u2 = static_cast<float>((u_idx + 1) * textureData.tileWidth) / static_cast<float>(textureData.width);
+    float v1 = static_cast<float>((v_idx + 0) * textureData.tileHeight) / static_cast<float>(textureData.height);
+    float v2 = static_cast<float>((v_idx + 1) * textureData.tileHeight) / static_cast<float>(textureData.height);
 
     glBegin(GL_QUADS);
     glTexCoord2f(u1, v1);
@@ -55,6 +69,26 @@ void RenderSystem::renderTexturedBox(const TextureData& textureData, const Rect2
     glDisable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, 0);
     glDisable(GL_BLEND);
+
+
+
+    glColor3f(1.0F, 0.0F, 0.0F);
+    float vertices[] = {
+        projRect.left(), projRect.bottom(), // Bottom-left vertex
+        projRect.left(), projRect.top(), // Top-left vertex
+        projRect.right(), projRect.top(), // Top-right vertex
+        projRect.right(), projRect.bottom()  // Bottom-right vertex
+    };
+    glEnableClientState(GL_VERTEX_ARRAY);
+
+    // Define the vertex array data
+    glVertexPointer(2, GL_FLOAT, 0, vertices);
+
+    // Draw the rectangle using GL_LINE_LOOP to form the borders
+    glDrawArrays(GL_LINE_LOOP, 0, 4);
+
+    // Disable vertex arrays after drawing
+    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void RenderSystem::renderFilledBox(Rect2F worldRect, float r, float g, float b) {
