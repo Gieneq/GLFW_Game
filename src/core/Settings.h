@@ -5,8 +5,8 @@
 namespace Settings {
     struct Window {
         static constexpr char* TITLE = "Some title";
-        static constexpr int WIDTH{800/2};
-        static constexpr int HEIGHT{600/2};
+        static constexpr int WIDTH{800};
+        static constexpr int HEIGHT{600};
         static constexpr float ASPECT_RATIO{static_cast<float>(WIDTH) / static_cast<float>(HEIGHT)};
         static constexpr bool ENABLE_VSYNC{true};
 
@@ -28,7 +28,7 @@ namespace Settings {
     };
 
     struct Camera {
-        static constexpr float ZOOM = 0.5f;
+        static constexpr float ZOOM = 0.125f;
     };
 
     struct Resources {
