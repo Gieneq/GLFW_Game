@@ -13,7 +13,7 @@ public:
     float g{1.0f};
     float b{1.0f};
     LocationComponent* parentLocation{nullptr};
-    Rect2F relativeBoxRect{0.0F,0.0F,1.0F,1.0F};
+    Vect2F relativeBoxTranslation{0.0F, 0.0F};
     Rect2F getWorldRect();
 
     ColorComponent* clone(Entity* new_parent) override {
@@ -31,7 +31,7 @@ public:
     TextureID textureID{};
     int tilesetIndex{0};
     LocationComponent* parentLocation{nullptr};
-    Rect2F relativeBoxRect{0.0F,0.0F,1.0F,1.0F};
+    Vect2F relativeBoxTranslation{0.0F, 0.0F};
     Rect2F getWorldRect();
 
     TextureComponent* clone(Entity* new_parent) override {

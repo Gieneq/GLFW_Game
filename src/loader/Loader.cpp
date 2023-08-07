@@ -11,6 +11,59 @@
 #include <algorithm>
 #include <sstream>
 
+
+std::optional<TileData> TilesetData::getTileDataByGID(int gid) const {
+    /* Check if this tileset can have corresponding GID */
+    auto lidOption = decodeGID(gid);
+    if(!lidOption.has_value()) {
+        return std::nullopt;
+    }
+
+    auto lid = lidOption.value();
+
+    /* Has LID, find TileData in vector */
+    for(const auto& tileData : tilesData) {
+        if(tileData.tileLID == lid) {
+            return tileData;
+        }
+    }
+
+    /* No tile data found - generate with lid */
+    TileData tileData{lid};
+    //todo append
+    return tileData;
+}
+
+std::optional<int> TilesetData::decodeGID(int gid) const {
+    if(gid < firstGID) {
+        return std::nullopt;
+    }
+    if(lastGID.has_value() && gid > lastGID.value()) {
+        return std::nullopt;
+    }
+    return gid - firstGID;
+}
+
+bool TilesetData::validateLID(int lid) const {
+    if(lid < 0) {
+        return false;
+    }
+    if(lid >= columns * rows) {
+        return false;
+    }
+    return true;
+}
+
+std::optional<TilesetData> MapData::getTilesetDataCorrespondingToGID(int gid) const {
+    for(const auto& tilesetData : tilesetsData) {
+        auto tileDataOption = tilesetData.getTileDataByGID(gid);
+        if(tileDataOption.has_value()) {
+            return tilesetData;
+        }
+    }
+    return std::nullopt;
+}
+
 bool Loader::loadAssets() {
     std::cout << "Loading assets data..." << std::endl;
     
@@ -109,6 +162,7 @@ bool Loader::loadPlayer(World& world) {
 
     /* Movement option */
     auto movementCmp = new MovementComponent(player, locatiomCmp);
+    movementCmp->speed = 8.0F;
     player->addComponent(movementCmp);
     movementCmp->setDirection(Direction::NONE);
 
@@ -751,40 +805,72 @@ bool Loader::buildWorld(World& world, const std::string mapName, const MapData& 
 }
 
 bool Loader::appendWorldLayer(World& world, const MapData& mapData, const std::vector<int> layerDataIndices) {
-    
+    const float regularTileWidth = static_cast<float>(mapData.tileWidth);
+    const float regularTileHeight = static_cast<float>(mapData.tileHeight);
+
     int tileIndex{0};
     float tileX{0};
     float tileY{0};
+    // std::cout << "!!!!!!!!!!!!!!!!!! layerDataIndices.size(): " << layerDataIndices.size() << 
+    //     "Width: " << mapData.width << std::endl;
     for(const auto tileGID: layerDataIndices) {
+        /* Check empty spaces */
+        if(tileGID == 0) {
+            ++tileIndex;
+            continue;
+        }
+
         /* Calculate world location */
-        tileX = tileIndex % mapData.width;
-        tileY = tileIndex / mapData.width;
+        tileX = static_cast<float>(tileIndex % mapData.width);
+        tileY = static_cast<float>(tileIndex / mapData.width);
 
         /* Build tile */
         Entity *someTile = new Entity();
 
         auto locationCmp = new LocationComponent(someTile);
-        locationCmp->worldRect.top_left.x = tileX;//static_cast<float>(x);
-        locationCmp->worldRect.top_left.y = tileY;//static_cast<float>(y);
-        locationCmp->worldRect.size.w = 1;
-        locationCmp->worldRect.size.h = 1;
+        locationCmp->worldRect.top_left.x = tileX;
+        locationCmp->worldRect.top_left.y = tileY;
+        locationCmp->worldRect.size.w = 1.0F;
+        locationCmp->worldRect.size.h = 1.0F;
         someTile->addComponent(locationCmp);
 
-        auto colorCmp = new ColorComponent(someTile, locationCmp);
-        colorCmp->r = 0.5F + ((tileIndex % mapData.width) % 2) / 2.0F;
-        colorCmp->g = 0.5F + ((tileIndex / mapData.width) % 2) / 2.0F;
-        someTile->addComponent(colorCmp);
+        // auto colorCmp = new ColorComponent(someTile, locationCmp);
+        // colorCmp->r = 0.5F + ((tileIndex % mapData.width) % 2) / 2.0F;
+        // colorCmp->g = 0.5F + ((tileIndex / mapData.width) % 2) / 2.0F;
+        // someTile->addComponent(colorCmp);
 
-        /* Retrive TileData from GID */
-        // auto tileDataOption = mapData.getTileDataByGID(tileGID);
+        /* Retrive TilesetData corresponding to GID */
+        auto tilesetDataOption = mapData.getTilesetDataCorrespondingToGID(tileGID);
+        if(!tilesetDataOption.has_value()) {
+            std::cerr << "Error getting TilesetData: invalid tile GID " << tileGID << std::endl;
+            return false;
+        }
 
-        // TextureID textureID{0};
-        // auto textureCmp = new TextureComponent(someTile, locationCmp, textureID);
-        // textureCmp.
+        auto tilesetData = tilesetDataOption.value();
+        
+        /* Size fix for larger objects */
+        locationCmp->worldRect.size.w = static_cast<float>(tilesetData.getTileWidth()) / regularTileWidth;
+        locationCmp->worldRect.size.h = static_cast<float>(tilesetData.getTileHeight()) / regularTileHeight;
 
+        /* Get TileData by GID */
+        auto tileDataOption = tilesetData.getTileDataByGID(tileGID);
+        if(!tileDataOption.has_value()) {
+            std::cerr << "Error getting TileData: invalid tile GID " << tileGID << std::endl;
+            return false;
+        }
+        auto tileData = tileDataOption.value();
+
+        /* Get Texture data from Tileset and Tile Data */
+        TextureID textureID = tilesetData.textureID;
+        auto textureCmp = new TextureComponent(someTile, locationCmp, textureID, tileData.tileLID);
+        someTile->addComponent(textureCmp);
+
+        /* Append new tile to world */
         world.entities.push_back(someTile);
         ++tileIndex;
     }
+
+    std::cout << "Layer appended successfully. Total entities count: " << world.entities.size() << std::endl;
     return true;
 }
 

@@ -12,8 +12,8 @@
 #include "Maths.h"
 
 // #define BUILD_TESTWORLD 1
-#define USE_ONLY_0_GROUP 1
-#define USE_ONLY_0_LAYER 1
+// #define USE_ONLY_0_GROUP 1
+// #define USE_ONLY_0_LAYER 1
 
 class TileAnimationFrameData {
 public:
@@ -96,35 +96,11 @@ public:
         return imageHeight / rows;
     }
 
-    std::optional<int> getTileLID(int gid) const {
-        if(gid < firstGID) {
-            return std::nullopt;
-        }
-        if(lastGID.has_value() && gid > lastGID.value()) {
-            return std::nullopt;
-        }
-        return gid - firstGID;
-    }
+    std::optional<TileData> getTileDataByGID(int gid) const;
 
-    bool isGidInTileset(int gid) const {
-        if(gid < firstGID) {
-            return false;
-        }
-        if(lastGID.has_value() && gid > lastGID.value()) {
-            return false;
-        }
-        return true; //todo consider checking if there is Tile Data
-    }
+    std::optional<int> decodeGID(int gid) const;
 
-    bool validateLID(int lid) const {
-        if(lid < 0) {
-            return false;
-        }
-        if(lid >= columns * rows) {
-            return false;
-        }
-        return true;
-    }
+    bool validateLID(int lid) const;
 
     friend std::ostream& operator<<(std::ostream& os, const TilesetData& tilesetData) {
         os << "   - TilesetData [" << tilesetData.firstGID << ", " << tilesetData.lastGID.value_or(-1) << "] " << std::endl;
@@ -141,7 +117,6 @@ public:
             os << tileData;
         }
 
-        
         return os;
     }
 };
@@ -160,6 +135,8 @@ public:
     void addTilesetData(const TilesetData& tilesetData) {
         tilesetsData.push_back(tilesetData);
     }
+
+    std::optional<TilesetData> getTilesetDataCorrespondingToGID(int gid) const;
 
     friend std::ostream& operator<<(std::ostream& os, const MapData& mapData) {
         os << "MapData: " << std::endl;

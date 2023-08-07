@@ -3,9 +3,9 @@
 
 
 Rect2F ColorComponent::getWorldRect() {
-    return relativeBoxRect.get_translated(parentLocation->worldRect.top_left);
+    return parentLocation->worldRect.get_translated(relativeBoxTranslation);
 }
 
 Rect2F TextureComponent::getWorldRect() {
-    return relativeBoxRect.get_translated(parentLocation->worldRect.top_left);
+    return parentLocation->worldRect.get_translated(relativeBoxTranslation);
 }

@@ -28,7 +28,7 @@ namespace Settings {
     };
 
     struct Camera {
-        static constexpr float ZOOM = 0.25f;
+        static constexpr float ZOOM = 0.125f;
     };
 
     struct Resources {

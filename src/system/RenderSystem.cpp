@@ -25,6 +25,10 @@ void RenderSystem::renderTexturedBox(const TextureData& textureData, const Rect2
 
     glColor3f(1.0F, 1.0F, 1.0F);
 
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     glBindTexture(GL_TEXTURE_2D, textureData.id.value);
     glEnable(GL_TEXTURE_2D);
         
@@ -50,6 +54,7 @@ void RenderSystem::renderTexturedBox(const TextureData& textureData, const Rect2
 
     glDisable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, 0);
+    glDisable(GL_BLEND);
 }
 
 void RenderSystem::renderFilledBox(Rect2F worldRect, float r, float g, float b) {
