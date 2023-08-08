@@ -21,8 +21,9 @@ void RenderSystem::attachCamera(Camera *cam) {
 
 void RenderSystem::renderTexturedBox(const TextureData& textureData, const Rect2F& worldRect, int tilesetIndex) {
     auto eyeRect = worldRect.get_translated(camera->position.get_negated()).get_scaled(camera->zoom);
-    auto projRect = Rect2F{eyeRect.top_left.x, -eyeRect.top_left.y, eyeRect.size.w, eyeRect.size.h}.get_scaled(Size2F{1.0F/aspect_ratio, 1.0F});
-
+    auto projRect = Rect2F{eyeRect.top_left.x, -eyeRect.top_left.y - eyeRect.size.h, eyeRect.size.w, eyeRect.size.h}.get_scaled(Size2F{1.0F/aspect_ratio, 1.0F});
+    //reflect with y axis
+    // projRect.top_left.y = -projRect.top_left.y - projRect.size.h;
 
     /** 
      * Filter notvisible objects.
@@ -96,8 +97,7 @@ void RenderSystem::renderFilledBox(Rect2F worldRect, float r, float g, float b) 
     auto eyeRect = worldRect.get_translated(camera->position.get_negated()).get_scaled(camera->zoom);
     //here (0,0) x (1,1) in eye space if camera is pointing (0,0)
     //then get scaled with camera->zoom to (0,0) x (0.1, 0.1)
-    auto projRect = Rect2F{eyeRect.top_left.x, -eyeRect.top_left.y, eyeRect.size.w, eyeRect.size.h}
-        .get_scaled(Size2F{1.0F/aspect_ratio, 1.0F});
+    auto projRect = Rect2F{eyeRect.top_left.x, -eyeRect.top_left.y - eyeRect.size.h, eyeRect.size.w, eyeRect.size.h}.get_scaled(Size2F{1.0F/aspect_ratio, 1.0F});
     //herecanbe (0,0) x (0.05, 0.1) if aspect ratio is 2.0 - smaller width for long display
     glColor3f(r, g, b);
 

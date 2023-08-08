@@ -12,11 +12,11 @@ std::vector<Rect2F> CollisionComponent::getWorldSpaceCollisionRects() const {
 }
 
 void CollisionDetectorComponent::onCollision(std::vector<Rect2F> collidingRects) {
-    std::cout << "Collision of " << getWorldSpaceBoundingRect() << "detected with:" << std::endl;
-    for (auto& rect : collidingRects) {
-        std::cout << " --> " << rect << std::endl;
-    }
-    std::cout << std::endl;
+    // std::cout << "Collision of " << getWorldSpaceBoundingRect() << "detected with:" << std::endl;
+    // for (auto& rect : collidingRects) {
+    //     std::cout << " --> " << rect << std::endl;
+    // }
+    // std::cout << std::endl;
     // movementCmp->stop();
 }
 

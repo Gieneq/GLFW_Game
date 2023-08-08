@@ -167,7 +167,7 @@ bool Loader::loadPlayer(World& world) {
 
     /* Movement option */
     auto movementCmp = new MovementComponent(player, locatiomCmp);
-    movementCmp->speed = 8.0F;
+    movementCmp->speed = 1.0F;
     player->addComponent(movementCmp);
     movementCmp->setDirection(Direction::NONE);
 
@@ -208,7 +208,7 @@ bool Loader::hasTextureDataWithName(const std::string& name) {
 
 std::optional<TextureData> Loader::getTextureDataByName(const std::string& name) {
     auto it = std::find_if(textureDatas.begin(), textureDatas.end(), [name](const TextureData& textureData) {
-        std::cout << "comparing: " << textureData.name << " with " << name << std::endl;
+        // std::cout << "comparing: " << textureData.name << " with " << name << std::endl;
         return textureData.name == name;
     });
 
@@ -536,9 +536,9 @@ std::optional<TilesetData> Loader::loadTilesetData(int firstGid, std::optional<i
         return std::nullopt;
     }
 
-    std::cout << " - Image info: " << std::endl;
-    std::cout << "   * imageSource: " << imageSource << std::endl;
-    std::cout << "   * imageWidth: " << imageWidth << std::endl;
+    // std::cout << " - Image info: " << std::endl;
+    // std::cout << "   * imageSource: " << imageSource << std::endl;
+    // std::cout << "   * imageWidth: " << imageWidth << std::endl;
 
     auto absoluteTilesetImagePath = getTilesetImageAbsolutePath(absuluteTilesetPath, imageSource);
     std::cout << "Loading tileset image from: " << absoluteTilesetImagePath << std::endl;
@@ -649,11 +649,24 @@ bool Loader::loadTilesData(const pugi::xml_node& mapNode, TilesetData& tilesetDa
                 }
 
                 /* Store in TilesetData */
+                // float rectBaseY = (static_cast<float>(y) / static_cast<float>(tilesetData.tileHeight));
+                // float rectH = static_cast<float>(height) / static_cast<float>(tilesetData.tileHeight);
+                // auto collisionRect = Rect2F(
+                //     static_cast<float>(x) / static_cast<float>(tilesetData.tileWidth),
+                //     (rectH <= 1.0F) ? (0.0F - rectBaseY) : (1.0F - rectBaseY), // todo looks bad
+                //     static_cast<float>(width) / static_cast<float>(tilesetData.tileWidth),
+                //     rectH
+                // );
                 float rectBaseY = (static_cast<float>(y) / static_cast<float>(tilesetData.tileHeight));
                 float rectH = static_cast<float>(height) / static_cast<float>(tilesetData.tileHeight);
+                bool isHigher = (static_cast<float>(tilesetData.tileHeight) / static_cast<float>(mapData.tileHeight)) <= 1.0F;
+                // if(isHigher) {
+                //     std::cout << "isHigher" << std::endl;
+                // }
+
                 auto collisionRect = Rect2F(
                     static_cast<float>(x) / static_cast<float>(tilesetData.tileWidth),
-                    (rectH <= 1.0F) ? (0.0F - rectBaseY) : (1.0F - rectBaseY), // todo looks bad
+                    (isHigher) ? (0.0F + rectBaseY) : (2.0F + rectBaseY), // todo looks bad
                     static_cast<float>(width) / static_cast<float>(tilesetData.tileWidth),
                     rectH
                 );
@@ -890,7 +903,7 @@ bool Loader::appendWorldLayer(World& world, const MapData& mapData, const std::v
             //std::cout << "Tile " << tileData.tileLID << "has collision rects: " << tileData.collisionRects.size() << std::endl;
             auto collisionCmp = new CollisionComponent(someTile, locationCmp);
             for(const auto& collisionRect : tileData.collisionRects) {
-                std::cout << "Line 908: Collision rect: " << collisionRect << std::endl;
+                // std::cout << "Line 908: Collision rect: " << collisionRect << std::endl;
                 collisionCmp->appendCollidionRect(collisionRect);
             }
             someTile->addComponent(collisionCmp);

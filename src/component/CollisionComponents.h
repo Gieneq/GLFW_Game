@@ -34,7 +34,7 @@ public:
     void onCollision(std::vector<Rect2F> collidingRects);
 
     MovementComponent* movementCmp{nullptr};
-    Rect2F boundingRect{0, 0, 1, 0.6F};
+    Rect2F boundingRect{0, 0, 1, 0.12F};
     Rect2F getWorldSpaceBoundingRect() const;
 
     CollisionDetectorComponent* clone(Entity* new_parent) override {
