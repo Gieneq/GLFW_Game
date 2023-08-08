@@ -4,6 +4,7 @@
 #include "GLCommon.h"
 #include "Window.h"
 #include "Settings.h"
+#include "Timers.h"
 
 bool Core::init() {
     lastTime = glfwGetTime();
@@ -14,12 +15,14 @@ bool Core::init() {
 void Core::loop() {
     double current_time = glfwGetTime();
     double delta_time = current_time - lastTime;
+    int deltaTImeMs = static_cast<int>(delta_time * 1000.0);
     FPSAccumulatedTime += delta_time;
     logAccumulatedTime += delta_time;
     lastTime = current_time;
 
     input();
     update(static_cast<float>(delta_time));
+    TimersRegister::getTimersRegister().update(deltaTImeMs);
     
     Window::prepare();
     render();

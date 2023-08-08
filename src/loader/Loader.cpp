@@ -6,10 +6,12 @@
 #include "IO.h"
 #include "LocationComponent.h"
 #include "GraphicsComponent.h"
+#include "AnimationComponent.h"
 #include "MovementComponent.h"
 #include "ControllableComponent.h"
 #include <algorithm>
 #include <sstream>
+#include "Timers.h"
 
 
 std::optional<TileData> TilesetData::getTileDataByGID(int gid) const {
@@ -63,6 +65,8 @@ std::optional<TilesetData> MapData::getTilesetDataCorrespondingToGID(int gid) co
     }
     return std::nullopt;
 }
+
+/* Loader */
 
 bool Loader::loadAssets() {
     std::cout << "Loading assets data..." << std::endl;
@@ -605,8 +609,8 @@ bool Loader::loadTilesData(const pugi::xml_node& mapNode, TilesetData& tilesetDa
                 }
 
                 /* Store in TilesetData */
-                auto animationFrame = TileAnimationFrameData(tileId, duration);
-                tileData.animationFrames.push_back(animationFrame);
+                tileData.animationInterval = duration; // all frames has the same duration
+                tileData.animationFramesLIDs.push_back(tileId);
             }
         }
 
@@ -862,6 +866,17 @@ bool Loader::appendWorldLayer(World& world, const MapData& mapData, const std::v
         TextureID textureID = tilesetData.textureID;
         auto textureCmp = new TextureComponent(someTile, locationCmp, textureID, tileData.tileLID);
         someTile->addComponent(textureCmp);
+
+        /* Check if tile has animation */
+        if(tileData.hasAnimation()) {
+            std::cout << "Tile has animation: " << tileData.tileLID << ", " << tileData.animationInterval << std::endl;
+            auto animationCmp = new AnimationComponent(someTile, textureCmp, tileData.animationInterval);
+            for(const auto& animationFrameLID : tileData.animationFramesLIDs) {
+                animationCmp->appendIndex(animationFrameLID);
+            }
+            animationCmp->setActive(true);
+            someTile->addComponent(animationCmp);
+        }
 
         /* Append new tile to world */
         world.entities.push_back(someTile);

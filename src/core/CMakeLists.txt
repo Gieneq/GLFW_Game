@@ -8,6 +8,7 @@ list(APPEND LIB_DEPENDENCIES
 message(STATUS "   -> ${LIB_DEPENDENCIES}")
 
 add_library(core 
+  Timers.cpp
   Core.cpp
   Errors.cpp
   Settings.cpp

@@ -65,7 +65,17 @@ void GameBase::update(float dt) {
     for(auto entity: world.entities) {
         movementSystem.update(entity, dt);
     }
-    
+
+    /* Update append-removal idea:
+     * UPDATE AND RENDER HAVE 2 WORLD-VIEW ACTIVE BOXES
+     * update box is bigger than render box
+     * render box = viewport with slight offset
+     * there are additional vectors for pointers to entites in world.
+     * tsose "batches" are recycled every loop somehow
+     *   t would be best to have some apeends removal based on entering and leaving those boxes
+     *   - clearing all every loop is not the best option
+    */
+        
     camera.update(dt);
 }
 

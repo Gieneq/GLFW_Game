@@ -15,30 +15,18 @@
 // #define USE_ONLY_0_GROUP 1
 // #define USE_ONLY_0_LAYER 1
 
-class TileAnimationFrameData {
-public:
-    TileAnimationFrameData() = default;
-    TileAnimationFrameData(int tileLID, int duration) : tileLID(tileLID), duration(duration) {}
-    int tileLID{-1};
-    int duration{0};
-
-    friend std::ostream& operator<<(std::ostream& os, const TileAnimationFrameData& tileAnimationFrameData) {
-        os << tileAnimationFrameData.tileLID << ": " << tileAnimationFrameData.duration;
-        return os;
-    }
-};
-
 class TileData {
 public:
     TileData() = default;
     TileData(int tileLID) : tileLID(tileLID) {}
     int tileLID{-1};
 
-    std::vector<TileAnimationFrameData> animationFrames;
+    int animationInterval{1000};
+    std::vector<int> animationFramesLIDs;
     std::vector<Rect2F> collisionRects;
     
     bool hasAnimation() const {
-        return !animationFrames.empty();
+        return !animationFramesLIDs.empty();
     }
 
     bool hasCollisionRects() const {
@@ -46,12 +34,12 @@ public:
     }
 
     friend std::ostream& operator<<(std::ostream& os, const TileData& tileData) {
-        os << "   - TileData[" << tileData.tileLID << "]" << ", AnimationsCount: " << tileData.animationFrames.size() << ", collisionRectsCount: " << tileData.collisionRects.size() << std::endl;
+        os << "   - TileData[" << tileData.tileLID << "]" << ", AnimationsCount: " << tileData.animationFramesLIDs.size() << ", collisionRectsCount: " << tileData.collisionRects.size() << std::endl;
         
         if(tileData.hasAnimation()) {
             os << "     - AnimationFrames: ";
-            for(const auto& animationFrame : tileData.animationFrames) {
-                os << animationFrame << ", ";
+            for(const auto& animationFrameLID : tileData.animationFramesLIDs) {
+                os << animationFrameLID << ", ";
             }
             os << std::endl;
         }

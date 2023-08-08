@@ -3,12 +3,14 @@
 
 class TimerListener {
 public:
-    virtual void onTimerTick() = 0;
+    virtual void onTimerTick(const int recentTick) = 0;
 };
 
 class Timer {
 public:
+    Timer() = default;
     Timer(int intervalMs, int minTick, int maxTicks) : intervalMs(intervalMs), minTick(minTick), maxTicks(maxTicks) {}
+    
     void start() {
         running = true;
         recentTick = minTick;
@@ -18,41 +20,38 @@ public:
         running = false;
     }
 
-    void update(float dtMs) {
-        if(!running) {
-            return;
-        }
+    void update(int dtMs);
+    void onTick();
 
-        intervalMs += dtMs;
-        if(recentInterval >= intervalMs) {
-            recentInterval -= intervalMs;
-            onTick();
-        }
-    }
-
-    void onTick() {
-        /* Emit signal to all listeners */
-        for(auto listener : listeners) {
-            listener->onTimerTick();
-        }
-
-        /* Update */
-        ++recentTick;
-        if(recentTick >= maxTicks) {
-            recentTick = minTick;
-        }
-    }
-
-    void addListener(TimerListener* listener) {
-        listeners.push_back(listener);
-    }
+    void addListener(TimerListener* listener);
+    void removeListener(TimerListener* listener);
 
 private:
-    bool running{false};
-    int intervalMs{0};
+    friend class TimersRegister;
+    bool running{true};
+    int intervalMs{1000};
     int recentInterval{0};
     int recentTick{0};
     int minTick{0};
-    int maxTicks{2};
+    int maxTicks{1};
     std::vector<TimerListener*> listeners;
+};
+
+class TimersRegister {
+public:
+    TimersRegister() = default;
+    static TimersRegister& getTimersRegister() {
+        static TimersRegister timersRegister;
+        return timersRegister;
+    }
+
+    void addTimer(const Timer& timer) {
+        timers.push_back(timer);
+    }
+
+    void update(int dtMs);
+    Timer& getTimer(int interval, int minTick, int maxTicks);
+
+private:
+    std::vector<Timer> timers;
 };

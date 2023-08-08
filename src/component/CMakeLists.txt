@@ -3,6 +3,7 @@ message(STATUS " * Building component")
 list(APPEND LIB_DEPENDENCIES 
   utils
   loader
+  core
 )
 
 message(STATUS "   -> ${LIB_DEPENDENCIES}")
@@ -11,6 +12,7 @@ add_library(component
   GraphicsComponent.cpp
   MovementComponent.cpp
   ControllableComponent.cpp
+  AnimationComponent.cpp
 )
 
 target_link_libraries(component PUBLIC ${LIB_DEPENDENCIES})
