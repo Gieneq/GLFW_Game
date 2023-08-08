@@ -5,8 +5,14 @@
 
 class Entity {
 public:
+    Entity() = default;
     void addComponent(Component* component);
     // void removeComponent(Component* component);
+    int id{next_id++};
+
+    bool operator==(const Entity& other) const {
+        return id == other.id;
+    }
 
     template<typename T>
     bool hasComponent() const {
@@ -53,4 +59,5 @@ public:
 
 private:
     std::vector<Component*> components;
+    static int next_id;
 };

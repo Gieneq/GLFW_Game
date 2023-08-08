@@ -13,6 +13,7 @@ add_library(component
   MovementComponent.cpp
   ControllableComponent.cpp
   AnimationComponent.cpp
+  CollisionComponents.cpp
 )
 
 target_link_libraries(component PUBLIC ${LIB_DEPENDENCIES})

@@ -18,6 +18,7 @@ World start to look like game. There was added loading of map files with resourc
 - 23.03.2023: Colored tiles rendering
 - 25.03.2023: Textured tiles rendering
 - 07.08.2023: Map TMX & Tileset TSX files loading and rendering
+- 08.08.2023: Tiles animation with common timing listeners
 
 ## Dependencies:
 - https://github.com/glfw/glfw
@@ -42,3 +43,6 @@ Setup GLAD:
 ## How to setup environment
 
 Comming soon...
+
+## Ideas
+- Update, render batches

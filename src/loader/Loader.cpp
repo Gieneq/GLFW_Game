@@ -9,6 +9,7 @@
 #include "AnimationComponent.h"
 #include "MovementComponent.h"
 #include "ControllableComponent.h"
+#include "CollisionComponents.h"
 #include <algorithm>
 #include <sstream>
 #include "Timers.h"
@@ -78,7 +79,7 @@ bool Loader::loadAssets() {
         return false;
     }
 
-    std::cout << Loader::getLoader() << std::endl;
+    // std::cout << Loader::getLoader() << std::endl;
     return true;
 }
 
@@ -142,8 +143,8 @@ bool Loader::loadPlayer(World& world) {
     player->addComponent(locatiomCmp);
 
     /* Set starting position */
-    locatiomCmp->worldRect.top_left.x = 1.2F;
-    locatiomCmp->worldRect.top_left.y = 0.0F;
+    locatiomCmp->worldRect.top_left.x = 20.0F;
+    locatiomCmp->worldRect.top_left.y = 30.0F;
 
     /* Try adding texture to player */
     auto playersTextureID = Loader::getLoader().getTextureDataByName("some_tiles");
@@ -173,6 +174,10 @@ bool Loader::loadPlayer(World& world) {
     /* WSAD to control player */
     auto controllableCmp = new ControllableComponent(player, movementCmp);
     player->addComponent(controllableCmp);
+
+    /* Collision detector */
+    auto collisionDetectorCmp = new CollisionDetectorComponent(player, movementCmp);
+    player->addComponent(collisionDetectorCmp);
 
     /* Yes, player is one of entities - 
      * easier to sort in rendering and similar. */
@@ -644,11 +649,13 @@ bool Loader::loadTilesData(const pugi::xml_node& mapNode, TilesetData& tilesetDa
                 }
 
                 /* Store in TilesetData */
+                float rectBaseY = (static_cast<float>(y) / static_cast<float>(tilesetData.tileHeight));
+                float rectH = static_cast<float>(height) / static_cast<float>(tilesetData.tileHeight);
                 auto collisionRect = Rect2F(
-                    static_cast<float>(x),
-                    static_cast<float>(y),
-                    static_cast<float>(width),
-                    static_cast<float>(height)
+                    static_cast<float>(x) / static_cast<float>(tilesetData.tileWidth),
+                    (rectH <= 1.0F) ? (0.0F - rectBaseY) : (1.0F - rectBaseY), // todo looks bad
+                    static_cast<float>(width) / static_cast<float>(tilesetData.tileWidth),
+                    rectH
                 );
                 tileData.collisionRects.push_back(collisionRect);
             }
@@ -869,13 +876,24 @@ bool Loader::appendWorldLayer(World& world, const MapData& mapData, const std::v
 
         /* Check if tile has animation */
         if(tileData.hasAnimation()) {
-            std::cout << "Tile has animation: " << tileData.tileLID << ", " << tileData.animationInterval << std::endl;
+            // std::cout << "Tile has animation: " << tileData.tileLID << ", " << tileData.animationInterval << std::endl;
             auto animationCmp = new AnimationComponent(someTile, textureCmp, tileData.animationInterval);
             for(const auto& animationFrameLID : tileData.animationFramesLIDs) {
                 animationCmp->appendIndex(animationFrameLID);
             }
             animationCmp->setActive(true);
             someTile->addComponent(animationCmp);
+        }
+
+        /* Check if has collision rects */
+        if(tileData.hasCollisionRects()) {
+            //std::cout << "Tile " << tileData.tileLID << "has collision rects: " << tileData.collisionRects.size() << std::endl;
+            auto collisionCmp = new CollisionComponent(someTile, locationCmp);
+            for(const auto& collisionRect : tileData.collisionRects) {
+                std::cout << "Line 908: Collision rect: " << collisionRect << std::endl;
+                collisionCmp->appendCollidionRect(collisionRect);
+            }
+            someTile->addComponent(collisionCmp);
         }
 
         /* Append new tile to world */

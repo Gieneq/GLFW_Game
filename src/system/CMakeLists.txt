@@ -14,6 +14,7 @@ add_library(system
   RenderSystem.cpp
   MovementSystem.cpp
   UserInputSystem.cpp
+  CollisionsSystem.cpp
 )
 
 target_link_libraries(system PUBLIC ${LIB_DEPENDENCIES})

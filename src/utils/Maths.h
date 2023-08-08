@@ -31,6 +31,10 @@ struct Rect2F {
     Vect2F top_left;
     Size2F size;
 
+    bool checkIntersection(const Rect2F& other) const {
+        return !(left() > other.right() || right() < other.left() || top() > other.bottom() || bottom() < other.top());
+    }
+
     friend std::ostream& operator<<(std::ostream& os, const Rect2F& rect) {
         os << "[" << rect.top_left.x << ", " << rect.top_left.y << ", " << rect.size.w << ", " << rect.size.h << "]";
         return os;

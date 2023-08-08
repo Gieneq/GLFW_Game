@@ -26,6 +26,8 @@ bool GameBase::init() {
     Window::addKeyboardListener(&userInputSystem);
 
     movementSystem.init();
+
+    collisionsSystem.init();
     
     /* Loader loading */
     result = Loader::getLoader().loadAssets();
@@ -66,6 +68,8 @@ void GameBase::update(float dt) {
         movementSystem.update(entity, dt);
     }
 
+    collisionsSystem.update(world.entities, &world.player, dt);
+
     /* Update append-removal idea:
      * UPDATE AND RENDER HAVE 2 WORLD-VIEW ACTIVE BOXES
      * update box is bigger than render box
@@ -83,5 +87,9 @@ void GameBase::render() {
     //todo sorting based on z index and Y axis
     for(auto entity: world.entities) {
         render_system.render(entity);
+    }
+
+    for(auto collisionRect: collisionsSystem.getLastCheckResults()) {
+        render_system.renderFilledBox(collisionRect, 0.0, 1.0, 1.0);
     }
 }

@@ -6,7 +6,7 @@
 #include "Settings.h"
 #include "Entity.h"
 
-class MovementSystem : public SystemBase{
+class MovementSystem : public SystemBase {
 public:
     int system_id;
     void init();

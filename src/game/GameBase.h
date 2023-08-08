@@ -5,6 +5,7 @@
 #include "RenderSystem.h"
 #include "UserInputSystem.h"
 #include "MovementSystem.h"
+#include "CollisionsSystem.h"
 #include "World.h"
 #include "Entity.h"
 
@@ -23,4 +24,5 @@ protected:
     RenderSystem render_system;
     UserInputSystem userInputSystem;
     MovementSystem movementSystem;
+    CollisionsSystem collisionsSystem;
 };
