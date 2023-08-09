@@ -90,6 +90,6 @@ void GameBase::render() {
     }
 
     for(auto collisionRect: collisionsSystem.getLastCheckResults()) {
-        render_system.renderFilledBox(collisionRect, 0.0, 1.0, 1.0);
+        render_system.renderTranslucentFilledBox(collisionRect, 0.0F, 1.0F, 1.0F, 0.2F);
     }
 }

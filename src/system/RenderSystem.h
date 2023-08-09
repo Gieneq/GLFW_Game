@@ -17,6 +17,7 @@ public:
 
     void renderTexturedBox(const TextureData& textureData, const Rect2F& worldRect, int tilesetIndex);
     void renderFilledBox(Rect2F worldRect, float r, float g, float b);
+    void renderTranslucentFilledBox(Rect2F worldRect, float r, float g, float b, float fillingAlpha);
     
 private:
     Camera *camera;

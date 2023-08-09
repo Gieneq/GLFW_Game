@@ -31,8 +31,25 @@ struct Rect2F {
     Vect2F top_left;
     Size2F size;
 
+    void alignToLeftOf(const Rect2F& other) {
+        top_left.x = other.left() - size.w;
+    }
+
+    void alignToRightOf(const Rect2F& other) {
+        top_left.x = other.right();
+    }
+
+    void alignToTopOf(const Rect2F& other) {
+        top_left.y = other.top() - size.h;
+    }
+
+    void alignToBottomOf(const Rect2F& other) {
+        top_left.y = other.bottom();
+    }
+
     bool checkIntersection(const Rect2F& other) const {
-        return !(left() > other.right() || right() < other.left() || top() > other.bottom() || bottom() < other.top());
+        // return !(left() > other.right() || right() < other.left() || top() > other.bottom() || bottom() < other.top());
+        return !(left() >= other.right() || right() <= other.left() || top() >= other.bottom() || bottom() <= other.top());
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Rect2F& rect) {

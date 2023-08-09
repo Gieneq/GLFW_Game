@@ -4,6 +4,8 @@
 #include "Loader.h"
 #include "GraphicsComponent.h"
 
+#define DEBUG_TEXTURE_BORDERS
+
 void RenderSystem::init() {
     setViewportDimensions(Window::width(), Window::height());
 }
@@ -22,8 +24,6 @@ void RenderSystem::attachCamera(Camera *cam) {
 void RenderSystem::renderTexturedBox(const TextureData& textureData, const Rect2F& worldRect, int tilesetIndex) {
     auto eyeRect = worldRect.get_translated(camera->position.get_negated()).get_scaled(camera->zoom);
     auto projRect = Rect2F{eyeRect.top_left.x, -eyeRect.top_left.y - eyeRect.size.h, eyeRect.size.w, eyeRect.size.h}.get_scaled(Size2F{1.0F/aspect_ratio, 1.0F});
-    //reflect with y axis
-    // projRect.top_left.y = -projRect.top_left.y - projRect.size.h;
 
     /** 
      * Filter notvisible objects.
@@ -46,10 +46,7 @@ void RenderSystem::renderTexturedBox(const TextureData& textureData, const Rect2
         
     int u_idx = tilesetIndex % textureData.tilesPerRow;
     int v_idx = tilesetIndex / textureData.tilesPerRow;
-    // float u1 = static_cast<float>(u_idx) / static_cast<float>(textureData.tileWidth);
-    // float u2 = static_cast<float>(u_idx + 1) / static_cast<float>(textureData.tileWidth);
-    // float v1 = static_cast<float>(v_idx) / static_cast<float>(textureData.tileHeight);
-    // float v2 = static_cast<float>(v_idx + 1) / static_cast<float>(textureData.tileHeight);
+
     float u1 = static_cast<float>((u_idx + 0) * textureData.tileWidth) / static_cast<float>(textureData.width);
     float u2 = static_cast<float>((u_idx + 1) * textureData.tileWidth) / static_cast<float>(textureData.width);
     float v1 = static_cast<float>((v_idx + 0) * textureData.tileHeight) / static_cast<float>(textureData.height);
@@ -71,8 +68,7 @@ void RenderSystem::renderTexturedBox(const TextureData& textureData, const Rect2
     glBindTexture(GL_TEXTURE_2D, 0);
     glDisable(GL_BLEND);
 
-
-
+#ifdef DEBUG_TEXTURE_BORDERS
     glColor3f(1.0F, 0.0F, 0.0F);
     float vertices[] = {
         projRect.left(), projRect.bottom(), // Bottom-left vertex
@@ -90,15 +86,12 @@ void RenderSystem::renderTexturedBox(const TextureData& textureData, const Rect2
 
     // Disable vertex arrays after drawing
     glDisableClientState(GL_VERTEX_ARRAY);
+#endif
 }
 
 void RenderSystem::renderFilledBox(Rect2F worldRect, float r, float g, float b) {
-    //on input for example (0,0) x (1,1) in world space
     auto eyeRect = worldRect.get_translated(camera->position.get_negated()).get_scaled(camera->zoom);
-    //here (0,0) x (1,1) in eye space if camera is pointing (0,0)
-    //then get scaled with camera->zoom to (0,0) x (0.1, 0.1)
     auto projRect = Rect2F{eyeRect.top_left.x, -eyeRect.top_left.y - eyeRect.size.h, eyeRect.size.w, eyeRect.size.h}.get_scaled(Size2F{1.0F/aspect_ratio, 1.0F});
-    //herecanbe (0,0) x (0.05, 0.1) if aspect ratio is 2.0 - smaller width for long display
     glColor3f(r, g, b);
 
     glBegin(GL_QUADS);
@@ -109,6 +102,41 @@ void RenderSystem::renderFilledBox(Rect2F worldRect, float r, float g, float b) 
     glEnd();
 }
 
+void RenderSystem::renderTranslucentFilledBox(Rect2F worldRect, float r, float g, float b, float fillingAlpha) {
+    auto eyeRect = worldRect.get_translated(camera->position.get_negated()).get_scaled(camera->zoom);
+    auto projRect = Rect2F{eyeRect.top_left.x, -eyeRect.top_left.y - eyeRect.size.h, eyeRect.size.w, eyeRect.size.h}.get_scaled(Size2F{1.0F/aspect_ratio, 1.0F});
+
+    float vertices[] = {
+        projRect.left(), projRect.bottom(), // Bottom-left vertex
+        projRect.left(), projRect.top(), // Top-left vertex
+        projRect.right(), projRect.top(), // Top-right vertex
+        projRect.right(), projRect.bottom()  // Bottom-right vertex
+    };
+
+    /* Draw filling */
+    glColor4f(r, g, b, fillingAlpha);
+    glEnable(GL_BLEND);
+    glBegin(GL_QUADS);
+    glVertex2f(projRect.left(), projRect.bottom());
+    glVertex2f(projRect.left(), projRect.top());
+    glVertex2f(projRect.right(), projRect.top());
+    glVertex2f(projRect.right(), projRect.bottom());
+    glEnd();
+    glDisable(GL_BLEND);
+
+    /* Draw borders */
+    glColor3f(r, g, b);
+    glEnableClientState(GL_VERTEX_ARRAY);
+
+    // Define the vertex array data
+    glVertexPointer(2, GL_FLOAT, 0, vertices);
+
+    // Draw the rectangle using GL_LINE_LOOP to form the borders
+    glDrawArrays(GL_LINE_LOOP, 0, 4);
+
+    // Disable vertex arrays after drawing
+    glDisableClientState(GL_VERTEX_ARRAY);
+}
 
 void RenderSystem::render(Entity* entity) {
     /* Textured quad rendering */

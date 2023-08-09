@@ -167,7 +167,7 @@ bool Loader::loadPlayer(World& world) {
 
     /* Movement option */
     auto movementCmp = new MovementComponent(player, locatiomCmp);
-    movementCmp->speed = 1.0F;
+    movementCmp->speed = Settings::Player::INITIAL_SPEED;
     player->addComponent(movementCmp);
     movementCmp->setDirection(Direction::NONE);
 
@@ -330,12 +330,6 @@ std::optional<MapData> Loader::loadMapData(World& world, const std::string& mapN
     }
     auto mapInfo = mapInfoOption.value();
 
-    // std::cout << "Map info: " << std::endl;
-    // std::cout << " - mapWidth: " << mapInfo["mapWidth"] << std::endl;
-    // std::cout << " - mapHeight: " << mapInfo["mapHeight"] << std::endl;
-    // std::cout << " - tileWidth: " << mapInfo["tileWidth"] << std::endl;
-    // std::cout << " - tileHeight: " << mapInfo["tileHeight"] << std::endl;
-
     /* Initialize MapData - need to fill TilesetsData next */
     MapData mapData(mapAbsolutePath, mapInfo["mapWidth"], mapInfo["mapHeight"], mapInfo["tileWidth"], mapInfo["tileHeight"]);
 
@@ -348,20 +342,13 @@ std::optional<MapData> Loader::loadMapData(World& world, const std::string& mapN
         return std::nullopt;
     }
 
-    // std::cout << "Tilesets info: " << std::endl;
-    // for(const auto& tilesetInfo : tilesetsInfo) {
-    //     std::cout << " - firstGid: " << std::get<0>(tilesetInfo);
-    //     std::cout << ", lastGid: " << std::get<1>(tilesetInfo).value_or(-1);
-    //     std::cout << ", source: " << std::get<2>(tilesetInfo) << std::endl;
-    // }
-
     /* Load each tileset data */
     for(const auto& tilesetInfo : tilesetsInfo) {
         auto firstGid = std::get<0>(tilesetInfo);
         auto lastGid = std::get<1>(tilesetInfo);
         auto tilesetRelativePath = std::get<2>(tilesetInfo);
 
-        auto tilesetData = loadTilesetData(firstGid, lastGid, mapAbsolutePath, tilesetRelativePath);
+        auto tilesetData = loadTilesetData(firstGid, lastGid, mapAbsolutePath, tilesetRelativePath, mapData.tileWidth, mapData.tileHeight);
         if(!tilesetData.has_value()) {
             std::cerr << "Error loading map file: invalid tileset data" << std::endl;
             return std::nullopt;
@@ -455,7 +442,7 @@ std::vector<std::tuple<int, std::optional<int>, std::string>> Loader::getTileset
 /**
  * Load tileset data from file. Append to Loader's data. If return true - success.
 */
-std::optional<TilesetData> Loader::loadTilesetData(int firstGid, std::optional<int> lastGid, const std::string& mapPath, const std::string& tilesetRelativePath) {
+std::optional<TilesetData> Loader::loadTilesetData(int firstGid, std::optional<int> lastGid, const std::string& mapPath, const std::string& tilesetRelativePath, const int mapTileWidth, const int mapTileHeight) {
     const auto absuluteTilesetPath = getTilesetAbsolutePath(mapPath, tilesetRelativePath);
     // std::cout << "Loading tileset data from: " << absuluteTilesetPath << std::endl;
 
@@ -500,13 +487,6 @@ std::optional<TilesetData> Loader::loadTilesetData(int firstGid, std::optional<i
         return std::nullopt;
     }
 
-    // std::cout << "Tileset info: " << std::endl;
-    // std::cout << " - tilesetName: " << tilesetName << std::endl;
-    // std::cout << " - tileWidth: " << tileWidth << std::endl;
-    // std::cout << " - tileHeight: " << tileHeight << std::endl;
-    // std::cout << " - tileCount: " << tileCount << std::endl;
-    // std::cout << " - columns: " << columns << std::endl;
-
     /* Get tileset image node and validate */
     auto imageNode = tilesetNode.child("image");
    if(!imageNode) {
@@ -536,10 +516,6 @@ std::optional<TilesetData> Loader::loadTilesetData(int firstGid, std::optional<i
         return std::nullopt;
     }
 
-    // std::cout << " - Image info: " << std::endl;
-    // std::cout << "   * imageSource: " << imageSource << std::endl;
-    // std::cout << "   * imageWidth: " << imageWidth << std::endl;
-
     auto absoluteTilesetImagePath = getTilesetImageAbsolutePath(absuluteTilesetPath, imageSource);
     std::cout << "Loading tileset image from: " << absoluteTilesetImagePath << std::endl;
 
@@ -555,7 +531,7 @@ std::optional<TilesetData> Loader::loadTilesetData(int firstGid, std::optional<i
     tilesetData.textureID = tilesetIdOption.value();
 
     /* Fill tileset data with tiles data */
-    auto tilesLoadingResult = loadTilesData(tilesetNode, tilesetData);
+    auto tilesLoadingResult = loadTilesData(tilesetNode, tilesetData, mapTileWidth, mapTileHeight);
     if(!tilesLoadingResult) {
         std::cerr << "Error loading tileset file: loading tiles data failed" << std::endl;
         return std::nullopt;
@@ -564,7 +540,7 @@ std::optional<TilesetData> Loader::loadTilesetData(int firstGid, std::optional<i
     return tilesetData;
 }
 
-bool Loader::loadTilesData(const pugi::xml_node& mapNode, TilesetData& tilesetData) {
+bool Loader::loadTilesData(const pugi::xml_node& mapNode, TilesetData& tilesetData, const int mapTileWidth, const int mapTileHeight) {
 
     /* Iterate over tiles nodes */
     for(auto tileNode : mapNode.children("tile")) {
@@ -649,26 +625,19 @@ bool Loader::loadTilesData(const pugi::xml_node& mapNode, TilesetData& tilesetDa
                 }
 
                 /* Store in TilesetData */
-                // float rectBaseY = (static_cast<float>(y) / static_cast<float>(tilesetData.tileHeight));
-                // float rectH = static_cast<float>(height) / static_cast<float>(tilesetData.tileHeight);
-                // auto collisionRect = Rect2F(
-                //     static_cast<float>(x) / static_cast<float>(tilesetData.tileWidth),
-                //     (rectH <= 1.0F) ? (0.0F - rectBaseY) : (1.0F - rectBaseY), // todo looks bad
-                //     static_cast<float>(width) / static_cast<float>(tilesetData.tileWidth),
-                //     rectH
-                // );
-                float rectBaseY = (static_cast<float>(y) / static_cast<float>(tilesetData.tileHeight));
-                float rectH = static_cast<float>(height) / static_cast<float>(tilesetData.tileHeight);
-                bool isHigher = (static_cast<float>(tilesetData.tileHeight) / static_cast<float>(mapData.tileHeight)) <= 1.0F;
-                // if(isHigher) {
-                //     std::cout << "isHigher" << std::endl;
-                // }
+                float xScale = static_cast<float>(tilesetData.tileWidth) / static_cast<float>(mapTileWidth);
+                float yScale = static_cast<float>(tilesetData.tileHeight) / static_cast<float>(mapTileHeight);
+
+                float rectBaseX = static_cast<float>(x) / static_cast<float>(tilesetData.tileWidth);
+                float rectBaseY = static_cast<float>(y) / static_cast<float>(tilesetData.tileHeight);
+                float rectBaseW = static_cast<float>(width) / static_cast<float>(tilesetData.tileWidth);
+                float rectBaseH = static_cast<float>(height) / static_cast<float>(tilesetData.tileHeight);
 
                 auto collisionRect = Rect2F(
-                    static_cast<float>(x) / static_cast<float>(tilesetData.tileWidth),
-                    (isHigher) ? (0.0F + rectBaseY) : (2.0F + rectBaseY), // todo looks bad
-                    static_cast<float>(width) / static_cast<float>(tilesetData.tileWidth),
-                    rectH
+                    xScale * rectBaseX,
+                    yScale * rectBaseY,
+                    xScale * rectBaseW,
+                    yScale * rectBaseH
                 );
                 tileData.collisionRects.push_back(collisionRect);
             }
@@ -699,14 +668,11 @@ std::string Loader::getMapAbsolutePath(const std::string& mapName) {
     std::string mapDir = std::string(Settings::Resources::DATA_PATH)
         + std::string(Settings::Resources::MAPS_DIR);
     std::string absoluteMapPath = IO::get_absolute_path(mapDir + mapName);
-    // std::cout << "Map absolute path: " << absoluteMapPath << std::endl;
-
     return absoluteMapPath;
 }
 
 
 bool Loader::buildWorld(World& world, const std::string mapName, const MapData& mapData) {
-
     /* Get absolute path to the map */
     const auto mapAbsolutePath = getMapAbsolutePath(mapName);
 
@@ -724,7 +690,6 @@ bool Loader::buildWorld(World& world, const std::string mapName, const MapData& 
         std::cerr << "Error loading map file: no map node in map file" << std::endl;
         return false;
     }
-
 
     /* Iterate over all lavers called group in tmx file */
     for(auto groupNode : mapNode.children("group")) {
@@ -814,8 +779,6 @@ bool Loader::buildWorld(World& world, const std::string mapName, const MapData& 
             break;
 #endif
         }
-
-
         /* Finally */
         
 #ifdef USE_ONLY_0_GROUP
@@ -833,8 +796,6 @@ bool Loader::appendWorldLayer(World& world, const MapData& mapData, const std::v
     int tileIndex{0};
     float tileX{0};
     float tileY{0};
-    // std::cout << "!!!!!!!!!!!!!!!!!! layerDataIndices.size(): " << layerDataIndices.size() << 
-    //     "Width: " << mapData.width << std::endl;
     for(const auto tileGID: layerDataIndices) {
         /* Check empty spaces */
         if(tileGID == 0) {
@@ -855,11 +816,6 @@ bool Loader::appendWorldLayer(World& world, const MapData& mapData, const std::v
         locationCmp->worldRect.size.w = 1.0F;
         locationCmp->worldRect.size.h = 1.0F;
         someTile->addComponent(locationCmp);
-
-        // auto colorCmp = new ColorComponent(someTile, locationCmp);
-        // colorCmp->r = 0.5F + ((tileIndex % mapData.width) % 2) / 2.0F;
-        // colorCmp->g = 0.5F + ((tileIndex / mapData.width) % 2) / 2.0F;
-        // someTile->addComponent(colorCmp);
 
         /* Retrive TilesetData corresponding to GID */
         auto tilesetDataOption = mapData.getTilesetDataCorrespondingToGID(tileGID);
@@ -889,7 +845,6 @@ bool Loader::appendWorldLayer(World& world, const MapData& mapData, const std::v
 
         /* Check if tile has animation */
         if(tileData.hasAnimation()) {
-            // std::cout << "Tile has animation: " << tileData.tileLID << ", " << tileData.animationInterval << std::endl;
             auto animationCmp = new AnimationComponent(someTile, textureCmp, tileData.animationInterval);
             for(const auto& animationFrameLID : tileData.animationFramesLIDs) {
                 animationCmp->appendIndex(animationFrameLID);
@@ -900,10 +855,8 @@ bool Loader::appendWorldLayer(World& world, const MapData& mapData, const std::v
 
         /* Check if has collision rects */
         if(tileData.hasCollisionRects()) {
-            //std::cout << "Tile " << tileData.tileLID << "has collision rects: " << tileData.collisionRects.size() << std::endl;
             auto collisionCmp = new CollisionComponent(someTile, locationCmp);
             for(const auto& collisionRect : tileData.collisionRects) {
-                // std::cout << "Line 908: Collision rect: " << collisionRect << std::endl;
                 collisionCmp->appendCollidionRect(collisionRect);
             }
             someTile->addComponent(collisionCmp);

@@ -173,8 +173,8 @@ protected:
 private:
     std::optional<std::map<std::string, int>> getMapInfo(const pugi::xml_node& mapNode);
     std::vector<std::tuple<int, std::optional<int>, std::string>> getTilesetsInfo(const pugi::xml_node& mapNode);
-    std::optional<TilesetData> loadTilesetData(int firstGid, std::optional<int> lastGid, const std::string& mapPath, const std::string& tilesetRelativePath);
-    bool loadTilesData(const pugi::xml_node& mapNode, TilesetData& tilesetData);
+    std::optional<TilesetData> loadTilesetData(int firstGid, std::optional<int> lastGid, const std::string& mapPath, const std::string& tilesetRelativePath, const int mapTileWidth, const int mapTileHeight);
+    bool loadTilesData(const pugi::xml_node& mapNode, TilesetData& tilesetData, const int mapTileWidth, const int mapTileHeight);
     std::string getMapAbsolutePath(const std::string& mapName);
     std::string getTilesetAbsolutePath(const std::string& mapPath, const std::string& tilesetRelativePath);
     std::string getTilesetImageAbsolutePath(const std::string& tilesetAbsolutePath, const std::string& imageName);
