@@ -66,7 +66,7 @@ bool GameBase::onKeyReleased(int key) {
             std::cout << " _________________________________________________" << std::endl;
             std::cout << "| Player location: " << locationCmp->worldRect.top_left << std::endl;
             std::cout << "| Render batch size: " << render_system.getLastEntitesCount() << std::endl;
-            std::cout << "| World entities count: " << world.entities.size() << std::endl;
+            std::cout << "| World floor.back() entities count: " << world.floors.back().getTotalEntitiesCount() << std::endl;
             std::cout << std::endl;
         }
         return true;

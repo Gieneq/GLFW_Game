@@ -181,7 +181,11 @@ bool Loader::loadPlayer(World& world) {
 
     /* Yes, player is one of entities - 
      * easier to sort in rendering and similar. */
-    world.entities.push_back(player);
+    if(world.floors.empty()) {
+        return false;
+    }
+
+    world.floors.back().dynamicEntities.push_back(player);
 
     return true;
 }
@@ -778,11 +782,27 @@ bool Loader::buildWorld(World& world, const std::string mapName, const MapData& 
 
             /* Append layer */
             zIndex = groupIdx * maxLayersPerGroup + layerIdx;
-            auto appendingLayerResult = appendWorldLayer(world, mapData, layerDataIndices, zIndex);
-            if(!appendingLayerResult) {
+            auto appendingLayerResult = createEntitiesLayer(mapData, layerDataIndices, zIndex);
+            if(!appendingLayerResult.has_value()) {
                 std::cerr << "Error loading map file: invalid layer data" << std::endl;
                 return false;
             }
+
+            /* Append layer to last floor of the world based on layerIDX */
+            if(layerIdx < 2) {
+                /* 0_floor, 1_details */
+                for(auto entity : appendingLayerResult.value()) {
+                    world.floors.back().floorEntities.push_back(entity);
+                }
+            }
+
+            else if(layerIdx == 2) {
+                /* 2_objects */
+                for(auto entity : appendingLayerResult.value()) {
+                    world.floors.back().staticEntities.push_back(entity);
+                }
+            }
+
 #ifdef USE_ONLY_0_LAYER
             break;
 #endif
@@ -799,7 +819,9 @@ bool Loader::buildWorld(World& world, const std::string mapName, const MapData& 
     return true;
 }
 
-bool Loader::appendWorldLayer(World& world, const MapData& mapData, const std::vector<int> layerDataIndices, int zIndex) {
+std::optional<std::vector<Entity*>> Loader::createEntitiesLayer(const MapData& mapData, const std::vector<int> layerDataIndices, int zIndex) {
+    std::vector<Entity*> layerEntities;
+
     int tileIndex{0};
     float tileX{0};
     float tileY{0};
@@ -817,7 +839,7 @@ bool Loader::appendWorldLayer(World& world, const MapData& mapData, const std::v
         auto tilesetDataOption = mapData.getTilesetDataCorrespondingToGID(tileGID);
         if(!tilesetDataOption.has_value()) {
             std::cerr << "Error getting TilesetData: invalid tile GID " << tileGID << std::endl;
-            return false;
+            return std::nullopt;
         }
 
         /* Got tileset data - proceed */
@@ -839,7 +861,7 @@ bool Loader::appendWorldLayer(World& world, const MapData& mapData, const std::v
         auto tileDataOption = tilesetData.getTileDataByGID(tileGID);
         if(!tileDataOption.has_value()) {
             std::cerr << "Error getting TileData: invalid tile GID " << tileGID << std::endl;
-            return false;
+            return std::nullopt;
         }
         auto tileData = tileDataOption.value();
 
@@ -868,12 +890,13 @@ bool Loader::appendWorldLayer(World& world, const MapData& mapData, const std::v
         }
 
         /* Append new tile to world */
-        world.entities.push_back(someTile);
+        // world.entities.push_back(someTile);
+        layerEntities.push_back(someTile);
         ++tileIndex;
     }
 
-    std::cout << "Layer appended successfully. Total entities count: " << world.entities.size() << std::endl;
-    return true;
+    // std::cout << "Layer appended successfully. Total entities count: " << world.entities.size() << std::endl;
+    return layerEntities;
 }
 
 
