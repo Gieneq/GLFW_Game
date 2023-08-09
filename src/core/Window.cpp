@@ -17,7 +17,7 @@ static double usagePercentage;
  * TODO - some fort of prioritazing, sorting, disabling 
  * and receive response (bool return)
 */
-static std::vector<KeyboardEvent*> keyboard_callbacks;
+static std::vector<KeyboardEventListener*> keyboard_callbacks;
 
 static void onErrorCallback(int error, const char *desc) {
         fputs(desc, stderr);
@@ -45,7 +45,7 @@ static void key_callback(GLFWwindow *w, int key, int scancode, int action, int m
     }
 }
 
-void Window::addKeyboardListener(KeyboardEvent* ke) {
+void Window::addKeyboardListener(KeyboardEventListener* ke) {
     keyboard_callbacks.push_back(ke);
 }
 

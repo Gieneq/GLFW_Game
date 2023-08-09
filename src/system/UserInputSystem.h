@@ -7,7 +7,7 @@
 
 class ControllableComponent;
 class Entity;
-class UserInputSystem : public SystemBase, public KeyboardEvent {
+class UserInputSystem : public SystemBase, public KeyboardEventListener {
 public:
     int system_id;
     void init();

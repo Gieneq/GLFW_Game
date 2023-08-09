@@ -11,8 +11,13 @@
 #include "pugixml.hpp"
 #include "Maths.h"
 
+/**
+ * Group is for example base floor tiles,
+ * Layer is stack of groups.
+*/
+
 // #define BUILD_TESTWORLD 1
-// #define USE_ONLY_0_GROUP 1
+#define USE_ONLY_0_GROUP 1
 // #define USE_ONLY_0_LAYER 1
 
 class TileData {
@@ -71,6 +76,8 @@ public:
     int rows;
     int tileWidth;
     int tileHeight;
+    int tileWidthMultiplier{1};
+    int tileHeightMultiplier{1};
     TextureID textureID;
     std::vector<TileData> tilesData;
 
@@ -174,7 +181,7 @@ private:
     std::optional<std::map<std::string, int>> getMapInfo(const pugi::xml_node& mapNode);
     std::vector<std::tuple<int, std::optional<int>, std::string>> getTilesetsInfo(const pugi::xml_node& mapNode);
     std::optional<TilesetData> loadTilesetData(int firstGid, std::optional<int> lastGid, const std::string& mapPath, const std::string& tilesetRelativePath, const int mapTileWidth, const int mapTileHeight);
-    bool loadTilesData(const pugi::xml_node& mapNode, TilesetData& tilesetData, const int mapTileWidth, const int mapTileHeight);
+    bool loadTilesData(const pugi::xml_node& mapNode, TilesetData& tilesetData);
     std::string getMapAbsolutePath(const std::string& mapName);
     std::string getTilesetAbsolutePath(const std::string& mapPath, const std::string& tilesetRelativePath);
     std::string getTilesetImageAbsolutePath(const std::string& tilesetAbsolutePath, const std::string& imageName);

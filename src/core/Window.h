@@ -1,6 +1,6 @@
 #pragma once
 
-class KeyboardEvent;
+class KeyboardEventListener;
 
 namespace Window
 {
@@ -14,5 +14,5 @@ namespace Window
     int height();
     double getUsagePercentage();
 
-    void addKeyboardListener(KeyboardEvent* ke);
+    void addKeyboardListener(KeyboardEventListener* ke);
 } // namespace Window

@@ -7,6 +7,11 @@ struct Vect2F {
     Vect2F get_negated() const;
     float x{0.0F};
     float y{0.0F};
+
+    friend std::ostream& operator<<(std::ostream& os, const Vect2F& vect) {
+        os << "[" << vect.x << ", " << vect.y << "]";
+        return os;
+    }
 };
 
 struct Size2F {

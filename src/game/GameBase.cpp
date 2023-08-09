@@ -24,6 +24,7 @@ bool GameBase::init() {
 
     userInputSystem.init();
     Window::addKeyboardListener(&userInputSystem);
+    Window::addKeyboardListener(this);
 
     movementSystem.init();
 
@@ -57,6 +58,19 @@ bool GameBase::init() {
     return result;
 }
 
+bool GameBase::onKeyReleased(int key) {
+    if(key == GLFW_KEY_I) {
+        /* Print some informations */
+        auto locationCmp = world.player.getComponent<LocationComponent>();
+        if(locationCmp) {
+            std::cout << "Player location: " << locationCmp->worldRect.top_left << std::endl;
+        }
+        return true;
+    }
+
+    return false;
+}
+
 
 bool GameBase::input() {
     // user_input_system.process_keyboard();
@@ -68,7 +82,6 @@ void GameBase::update(float dt) {
         movementSystem.update(entity, dt);
     }
 
-    collisionsSystem.update(world.entities, &world.player, dt);
 
     /* Update append-removal idea:
      * UPDATE AND RENDER HAVE 2 WORLD-VIEW ACTIVE BOXES
@@ -80,7 +93,10 @@ void GameBase::update(float dt) {
      *   - clearing all every loop is not the best option
     */
         
+    collisionsSystem.update(world.entities, &world.player, dt);
+    
     camera.update(dt);
+    
 }
 
 void GameBase::render() {

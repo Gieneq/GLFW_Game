@@ -8,8 +8,9 @@
 #include "CollisionsSystem.h"
 #include "World.h"
 #include "Entity.h"
+#include "Callbacks.h"
 
-class GameBase : public Core {
+class GameBase : public Core, public KeyboardEventListener {
 public:
     virtual ~GameBase() = default;
 
@@ -17,6 +18,10 @@ public:
     virtual bool input() override;
     virtual void update(float dt) override;
     virtual void render() override;
+    virtual bool onKeyPressed(int key) { 
+        return false;
+    }
+    virtual bool onKeyReleased(int key);
 
 protected:
     Camera camera;

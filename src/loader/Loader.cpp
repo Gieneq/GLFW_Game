@@ -143,8 +143,8 @@ bool Loader::loadPlayer(World& world) {
     player->addComponent(locatiomCmp);
 
     /* Set starting position */
-    locatiomCmp->worldRect.top_left.x = 20.0F;
-    locatiomCmp->worldRect.top_left.y = 30.0F;
+    locatiomCmp->worldRect.top_left.x = 29.3353F;
+    locatiomCmp->worldRect.top_left.y = 29.7162F;
 
     /* Try adding texture to player */
     auto playersTextureID = Loader::getLoader().getTextureDataByName("some_tiles");
@@ -521,6 +521,8 @@ std::optional<TilesetData> Loader::loadTilesetData(int firstGid, std::optional<i
 
     /* Store in TilesetData */
     TilesetData tilesetData(firstGid, lastGid, absuluteTilesetPath, absoluteTilesetImagePath, imageWidth, imageHeight, columns, tileCount / columns, tileWidth, tileHeight);
+    tilesetData.tileWidthMultiplier = static_cast<int>(static_cast<float>(tilesetData.tileWidth) / static_cast<float>(mapTileWidth));
+    tilesetData.tileHeightMultiplier = static_cast<int>(static_cast<float>(tilesetData.tileHeight) / static_cast<float>(mapTileHeight));
 
     /* Load tileset image */
     auto tilesetIdOption = loadTextureFromAbsolutePath(absoluteTilesetImagePath, tileWidth, tileHeight, tilesetName);
@@ -531,7 +533,7 @@ std::optional<TilesetData> Loader::loadTilesetData(int firstGid, std::optional<i
     tilesetData.textureID = tilesetIdOption.value();
 
     /* Fill tileset data with tiles data */
-    auto tilesLoadingResult = loadTilesData(tilesetNode, tilesetData, mapTileWidth, mapTileHeight);
+    auto tilesLoadingResult = loadTilesData(tilesetNode, tilesetData);
     if(!tilesLoadingResult) {
         std::cerr << "Error loading tileset file: loading tiles data failed" << std::endl;
         return std::nullopt;
@@ -540,7 +542,7 @@ std::optional<TilesetData> Loader::loadTilesetData(int firstGid, std::optional<i
     return tilesetData;
 }
 
-bool Loader::loadTilesData(const pugi::xml_node& mapNode, TilesetData& tilesetData, const int mapTileWidth, const int mapTileHeight) {
+bool Loader::loadTilesData(const pugi::xml_node& mapNode, TilesetData& tilesetData) {
 
     /* Iterate over tiles nodes */
     for(auto tileNode : mapNode.children("tile")) {
@@ -625,8 +627,8 @@ bool Loader::loadTilesData(const pugi::xml_node& mapNode, TilesetData& tilesetDa
                 }
 
                 /* Store in TilesetData */
-                float xScale = static_cast<float>(tilesetData.tileWidth) / static_cast<float>(mapTileWidth);
-                float yScale = static_cast<float>(tilesetData.tileHeight) / static_cast<float>(mapTileHeight);
+                float xScale = static_cast<float>(tilesetData.tileWidthMultiplier);
+                float yScale = static_cast<float>(tilesetData.tileHeightMultiplier);
 
                 float rectBaseX = static_cast<float>(x) / static_cast<float>(tilesetData.tileWidth);
                 float rectBaseY = static_cast<float>(y) / static_cast<float>(tilesetData.tileHeight);
@@ -790,9 +792,6 @@ bool Loader::buildWorld(World& world, const std::string mapName, const MapData& 
 }
 
 bool Loader::appendWorldLayer(World& world, const MapData& mapData, const std::vector<int> layerDataIndices) {
-    const float regularTileWidth = static_cast<float>(mapData.tileWidth);
-    const float regularTileHeight = static_cast<float>(mapData.tileHeight);
-
     int tileIndex{0};
     float tileX{0};
     float tileY{0};
@@ -803,19 +802,8 @@ bool Loader::appendWorldLayer(World& world, const MapData& mapData, const std::v
             continue;
         }
 
-        /* Calculate world location */
-        tileX = static_cast<float>(tileIndex % mapData.width);
-        tileY = static_cast<float>(tileIndex / mapData.width);
-
         /* Build tile */
         Entity *someTile = new Entity();
-
-        auto locationCmp = new LocationComponent(someTile);
-        locationCmp->worldRect.top_left.x = tileX;
-        locationCmp->worldRect.top_left.y = tileY;
-        locationCmp->worldRect.size.w = 1.0F;
-        locationCmp->worldRect.size.h = 1.0F;
-        someTile->addComponent(locationCmp);
 
         /* Retrive TilesetData corresponding to GID */
         auto tilesetDataOption = mapData.getTilesetDataCorrespondingToGID(tileGID);
@@ -824,11 +812,19 @@ bool Loader::appendWorldLayer(World& world, const MapData& mapData, const std::v
             return false;
         }
 
+        /* Got tileset data - proceed */
         auto tilesetData = tilesetDataOption.value();
         
-        /* Size fix for larger objects */
-        locationCmp->worldRect.size.w = static_cast<float>(tilesetData.tileWidth) / regularTileWidth;
-        locationCmp->worldRect.size.h = static_cast<float>(tilesetData.tileHeight) / regularTileHeight;
+        /* Calculate world location */
+        tileX = static_cast<float>(tileIndex % mapData.width);
+        tileY = static_cast<float>(tileIndex / mapData.width);
+
+        auto locationCmp = new LocationComponent(someTile);
+        locationCmp->worldRect.top_left.x = tileX;
+        locationCmp->worldRect.top_left.y = tileY - (tilesetData.tileHeightMultiplier > 1 ? 1 : 0);
+        locationCmp->worldRect.size.w = 1.0F * tilesetData.tileWidthMultiplier;
+        locationCmp->worldRect.size.h = 1.0F * tilesetData.tileHeightMultiplier;
+        someTile->addComponent(locationCmp);
 
         /* Get TileData by GID */
         auto tileDataOption = tilesetData.getTileDataByGID(tileGID);

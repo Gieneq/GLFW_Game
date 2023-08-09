@@ -1,8 +1,8 @@
 #pragma once
 
-class KeyboardEvent {
+class KeyboardEventListener {
 public:
-    virtual ~KeyboardEvent() = default;
+    virtual ~KeyboardEventListener() = default;
     
     virtual bool onKeyPressed(int key) = 0;
     virtual bool onKeyReleased(int key) = 0;
