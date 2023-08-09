@@ -143,8 +143,8 @@ bool Loader::loadPlayer(World& world) {
     player->addComponent(locatiomCmp);
 
     /* Set starting position */
-    locatiomCmp->worldRect.top_left.x = 29.3353F;
-    locatiomCmp->worldRect.top_left.y = 29.7162F;
+    locatiomCmp->worldRect.top_left.x = 13.5485F;
+    locatiomCmp->worldRect.top_left.y = 18.5593F;
 
     /* Try adding texture to player */
     auto playersTextureID = Loader::getLoader().getTextureDataByName("some_tiles");
@@ -693,6 +693,11 @@ bool Loader::buildWorld(World& world, const std::string mapName, const MapData& 
         return false;
     }
 
+    const int maxLayersPerGroup = 16;
+    int groupIdx = 0;
+    int layerIdx = 0;
+    int zIndex = 0;
+
     /* Iterate over all lavers called group in tmx file */
     for(auto groupNode : mapNode.children("group")) {
         
@@ -772,7 +777,8 @@ bool Loader::buildWorld(World& world, const std::string mapName, const MapData& 
             std::cout << "     - layerDataIndices.size(): " << layerDataIndices.size() << std::endl;
 
             /* Append layer */
-            auto appendingLayerResult = appendWorldLayer(world, mapData, layerDataIndices);
+            zIndex = groupIdx * maxLayersPerGroup + layerIdx;
+            auto appendingLayerResult = appendWorldLayer(world, mapData, layerDataIndices, zIndex);
             if(!appendingLayerResult) {
                 std::cerr << "Error loading map file: invalid layer data" << std::endl;
                 return false;
@@ -780,18 +786,20 @@ bool Loader::buildWorld(World& world, const std::string mapName, const MapData& 
 #ifdef USE_ONLY_0_LAYER
             break;
 #endif
+            ++layerIdx;
         }
         /* Finally */
         
 #ifdef USE_ONLY_0_GROUP
         break;
 #endif
+    ++groupIdx;
     }
 
     return true;
 }
 
-bool Loader::appendWorldLayer(World& world, const MapData& mapData, const std::vector<int> layerDataIndices) {
+bool Loader::appendWorldLayer(World& world, const MapData& mapData, const std::vector<int> layerDataIndices, int zIndex) {
     int tileIndex{0};
     float tileX{0};
     float tileY{0};
@@ -824,6 +832,7 @@ bool Loader::appendWorldLayer(World& world, const MapData& mapData, const std::v
         locationCmp->worldRect.top_left.y = tileY - (tilesetData.tileHeightMultiplier > 1 ? 1 : 0);
         locationCmp->worldRect.size.w = 1.0F * tilesetData.tileWidthMultiplier;
         locationCmp->worldRect.size.h = 1.0F * tilesetData.tileHeightMultiplier;
+        locationCmp->zIndex = zIndex; //hope it will work
         someTile->addComponent(locationCmp);
 
         /* Get TileData by GID */

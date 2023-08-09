@@ -63,7 +63,11 @@ bool GameBase::onKeyReleased(int key) {
         /* Print some informations */
         auto locationCmp = world.player.getComponent<LocationComponent>();
         if(locationCmp) {
-            std::cout << "Player location: " << locationCmp->worldRect.top_left << std::endl;
+            std::cout << " _________________________________________________" << std::endl;
+            std::cout << "| Player location: " << locationCmp->worldRect.top_left << std::endl;
+            std::cout << "| Render batch size: " << render_system.getLastEntitesCount() << std::endl;
+            std::cout << "| World entities count: " << world.entities.size() << std::endl;
+            std::cout << std::endl;
         }
         return true;
     }
@@ -100,10 +104,12 @@ void GameBase::update(float dt) {
 }
 
 void GameBase::render() {
+    render_system.prepare();
     //todo sorting based on z index and Y axis
     for(auto entity: world.entities) {
-        render_system.render(entity);
+        render_system.processEntity(entity);
     }
+    render_system.render();
 
     for(auto collisionRect: collisionsSystem.getLastCheckResults()) {
         render_system.renderTranslucentFilledBox(collisionRect, 0.0F, 1.0F, 1.0F, 0.2F);

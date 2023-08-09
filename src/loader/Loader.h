@@ -12,8 +12,8 @@
 #include "Maths.h"
 
 /**
- * Group is for example base floor tiles,
- * Layer is stack of groups.
+ * Group is 
+ * Layer is 
 */
 
 // #define BUILD_TESTWORLD 1
@@ -174,7 +174,7 @@ protected:
     std::optional<TextureID> loadTextureFromAbsolutePath(const std::string& abs_path, int div_w, int div_h, const std::string& name);
     std::optional<TextureID> loadTextureFromAssets(const std::string& relativePath, int div_w, int div_h, const std::string& name);
     std::optional<MapData> loadMapData(World& world, const std::string& mapName);
-    bool appendWorldLayer(World& world, const MapData& mapData, const std::vector<int> layerDataIndices);
+    bool appendWorldLayer(World& world, const MapData& mapData, const std::vector<int> layerDataIndices, int zIndex);
     bool buildWorld(World& world, const std::string mapName, const MapData& mapData);
 
 private:

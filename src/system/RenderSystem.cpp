@@ -3,6 +3,9 @@
 #include "Window.h"
 #include "Loader.h"
 #include "GraphicsComponent.h"
+#include "LocationComponent.h"
+#include "Entity.h"
+#include <algorithm>
 
 #define DEBUG_TEXTURE_BORDERS
 
@@ -138,7 +141,42 @@ void RenderSystem::renderTranslucentFilledBox(Rect2F worldRect, float r, float g
     glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void RenderSystem::render(Entity* entity) {
+void RenderSystem::prepare() {
+    enititesBatch.clear();
+
+    /* Cleare render box in world space from camera position */
+    renderBoxWorldSpace.size.w = 20; //static_cast<float>(viewport_width) * camera->zoom;
+    renderBoxWorldSpace.size.h = 10;
+    renderBoxWorldSpace.top_left.x = camera->position.x - renderBoxWorldSpace.size.w / 2.0F;
+    renderBoxWorldSpace.top_left.y = camera->position.y - renderBoxWorldSpace.size.h / 2.0F;
+}
+
+void RenderSystem::processEntity(const Entity* entity) {
+    auto locationCmp = entity->getComponent<LocationComponent>();
+    if(locationCmp) {
+        if(renderBoxWorldSpace.checkIntersection(locationCmp->worldRect)) {
+            auto entityData = EntityRenderData{
+                entity, 
+                locationCmp->zIndex
+            };
+            enititesBatch.push_back(entityData);
+        }
+    }
+}
+
+void RenderSystem::render() {
+    lastEntitesCount = static_cast<int>(enititesBatch.size());
+
+    /* Sort entities by Y axis */
+    std::sort(enititesBatch.begin(), enititesBatch.end());
+
+    /* Render entities */
+    for(auto entityData : enititesBatch) {
+        renderEntity(entityData.entity);
+    }
+}
+
+void RenderSystem::renderEntity(const Entity* entity) {
     /* Textured quad rendering */
     auto texture_component = entity->getComponent<TextureComponent>();
     if(texture_component) {
