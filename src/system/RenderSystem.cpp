@@ -157,18 +157,21 @@ void RenderSystem::processEntity(const Entity* entity) {
         if(renderBoxWorldSpace.checkIntersection(locationCmp->worldRect)) {
             auto entityData = EntityRenderData{
                 entity, 
-                locationCmp->zIndex
+                /* Sort value */
+                locationCmp->worldRect.top_left.y + locationCmp->worldRect.size.h
             };
             enititesBatch.push_back(entityData);
         }
     }
 }
 
-void RenderSystem::render() {
+void RenderSystem::render(bool sorted) {
     lastEntitesCount = static_cast<int>(enititesBatch.size());
 
     /* Sort entities by Y axis */
-    std::sort(enititesBatch.begin(), enititesBatch.end());
+    if(sorted) {
+        std::sort(enititesBatch.begin(), enititesBatch.end());
+    }
 
     /* Render entities */
     for(auto entityData : enititesBatch) {

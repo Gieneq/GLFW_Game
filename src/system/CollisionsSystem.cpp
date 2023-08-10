@@ -1,12 +1,13 @@
 #include "CollisionsSystem.h"
 #include "CollisionComponents.h"
+#include "Entity.h"
 
 void CollisionsSystem::init() {
 
 }
 
 
-void CollisionsSystem::update(const std::vector<Entity*>& entities, Entity *entity, float dt) {
+void CollisionsSystem::update(const std::vector<CollisionComponent*>& collisionCmps, Entity *entity, float dt) {
     collidingRects.clear();
     //todo sweep somehow most colllision checks
     auto collisonDetectorCmp = entity->getComponent<CollisionDetectorComponent>();
@@ -15,16 +16,14 @@ void CollisionsSystem::update(const std::vector<Entity*>& entities, Entity *enti
         const auto boundingRectWorldSpace = collisonDetectorCmp->getWorldSpaceBoundingRect();
 
         /* Test collision with all entities except considered entity with collision detector */
-        for (auto otherEntity : entities) {
-            if(otherEntity->id != entity->id) {
-                auto otherCollisionCmp = otherEntity->getComponent<CollisionComponent>();
-                if(otherCollisionCmp) {
-                    /* Other entity has collision compoinent */
-                    auto otherCollisionRects = otherCollisionCmp->getWorldSpaceCollisionRects();
-                    for (auto& otherCollisionRect : otherCollisionRects) {
-                        if(boundingRectWorldSpace.checkIntersection(otherCollisionRect)) {
-                            collidingRects.push_back(otherCollisionRect);
-                        }
+        for (auto collCmp : collisionCmps) {
+            auto otherEntityOption = collCmp->getParent();
+            if(otherEntityOption.has_value() && (otherEntityOption.value()->id != entity->id)) {
+                /* Other entity has collision compoinent */
+                auto otherCollisionRects = collCmp->getWorldSpaceCollisionRects();
+                for (auto& otherCollisionRect : otherCollisionRects) {
+                    if(boundingRectWorldSpace.checkIntersection(otherCollisionRect)) {
+                        collidingRects.push_back(otherCollisionRect);
                     }
                 }
             }

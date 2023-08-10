@@ -9,6 +9,7 @@ message(STATUS "   -> ${LIB_DEPENDENCIES}")
 
 add_library(entity 
   Entity.cpp
+  Player.cpp
 )
 
 target_link_libraries(entity PUBLIC ${LIB_DEPENDENCIES})

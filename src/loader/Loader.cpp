@@ -136,15 +136,17 @@ bool Loader::loadWorld(World& world) {
 
 bool Loader::loadPlayer(World& world) {
     std::cout << "Loading player data..." << std::endl;
-    Entity* player = &world.player;
+    Player* player = &world.player;
 
     /* Add player location component */
     auto locatiomCmp = new LocationComponent(player);
     player->addComponent(locatiomCmp);
+    player->locationComponent = locatiomCmp;
 
     /* Set starting position */
     locatiomCmp->worldRect.top_left.x = 13.5485F;
     locatiomCmp->worldRect.top_left.y = 18.5593F;
+    locatiomCmp->containingFloor = &world.floors[0];
 
     /* Try adding texture to player */
     auto playersTextureID = Loader::getLoader().getTextureDataByName("some_tiles");
@@ -154,6 +156,7 @@ bool Loader::loadPlayer(World& world) {
         std::cout << "Player has texture" << std::endl;
         auto texture = new TextureComponent(player, locatiomCmp, (*playersTextureID).id);
         player->addComponent(texture);
+        player->textureComponent = texture;
     } 
     else {
         /* Color */
@@ -163,21 +166,27 @@ bool Loader::loadPlayer(World& world) {
         color->g = 0.0F;
         color->b = 1.0F;
         player->addComponent(color);
+        player->colorComponent = color;
     }
 
     /* Movement option */
     auto movementCmp = new MovementComponent(player, locatiomCmp);
     movementCmp->speed = Settings::Player::INITIAL_SPEED;
     player->addComponent(movementCmp);
+    player->movementComponent = movementCmp;
     movementCmp->setDirection(Direction::NONE);
 
     /* WSAD to control player */
     auto controllableCmp = new ControllableComponent(player, movementCmp);
     player->addComponent(controllableCmp);
+    player->controllableComponent = controllableCmp;
 
     /* Collision detector */
     auto collisionDetectorCmp = new CollisionDetectorComponent(player, movementCmp);
+    collisionDetectorCmp->boundingRect.size.h = 0.85F;
+    collisionDetectorCmp->boundingRect.top_left.y = 0.15F;
     player->addComponent(collisionDetectorCmp);
+    player->collisionDetectorComponent = collisionDetectorCmp;
 
     /* Yes, player is one of entities - 
      * easier to sort in rendering and similar. */
@@ -185,7 +194,13 @@ bool Loader::loadPlayer(World& world) {
         return false;
     }
 
-    world.floors.back().dynamicEntities.push_back(player);
+    if(player->locationComponent->containingFloor == nullptr) {
+        std::cerr << "Player has no containing floor" << std::endl;
+        return false;
+    }
+
+    /* Add player to its floor */
+    player->locationComponent->containingFloor->addDynamicEntity(player);
 
     return true;
 }
@@ -700,7 +715,6 @@ bool Loader::buildWorld(World& world, const std::string mapName, const MapData& 
     const int maxLayersPerGroup = 16;
     int groupIdx = 0;
     int layerIdx = 0;
-    int zIndex = 0;
 
     /* Iterate over all lavers called group in tmx file */
     for(auto groupNode : mapNode.children("group")) {
@@ -724,6 +738,11 @@ bool Loader::buildWorld(World& world, const std::string mapName, const MapData& 
         }
 
         std::cout << " + groupName: " << groupName << std::endl;
+
+        /* Create Floor inside world */
+        world.floors.push_back(Floor());
+        Floor* recentTopFloor = &world.floors.back();
+        recentTopFloor->elevation = groupIdx;
 
         /* Iterate over all layers in group */
         for(auto layerNode : groupNode.children("layer")) {
@@ -781,8 +800,7 @@ bool Loader::buildWorld(World& world, const std::string mapName, const MapData& 
             std::cout << "     - layerDataIndices.size(): " << layerDataIndices.size() << std::endl;
 
             /* Append layer */
-            zIndex = groupIdx * maxLayersPerGroup + layerIdx;
-            auto appendingLayerResult = createEntitiesLayer(mapData, layerDataIndices, zIndex);
+            auto appendingLayerResult = createEntitiesLayer(mapData, layerDataIndices, recentTopFloor);
             if(!appendingLayerResult.has_value()) {
                 std::cerr << "Error loading map file: invalid layer data" << std::endl;
                 return false;
@@ -792,14 +810,14 @@ bool Loader::buildWorld(World& world, const std::string mapName, const MapData& 
             if(layerIdx < 2) {
                 /* 0_floor, 1_details */
                 for(auto entity : appendingLayerResult.value()) {
-                    world.floors.back().floorEntities.push_back(entity);
+                    recentTopFloor->addFloorEntity(entity);
                 }
             }
 
             else if(layerIdx == 2) {
                 /* 2_objects */
                 for(auto entity : appendingLayerResult.value()) {
-                    world.floors.back().staticEntities.push_back(entity);
+                    recentTopFloor->addStaticEntity(entity);
                 }
             }
 
@@ -819,7 +837,7 @@ bool Loader::buildWorld(World& world, const std::string mapName, const MapData& 
     return true;
 }
 
-std::optional<std::vector<Entity*>> Loader::createEntitiesLayer(const MapData& mapData, const std::vector<int> layerDataIndices, int zIndex) {
+std::optional<std::vector<Entity*>> Loader::createEntitiesLayer(const MapData& mapData, const std::vector<int> layerDataIndices, Floor* containingFloor) {
     std::vector<Entity*> layerEntities;
 
     int tileIndex{0};
@@ -854,7 +872,7 @@ std::optional<std::vector<Entity*>> Loader::createEntitiesLayer(const MapData& m
         locationCmp->worldRect.top_left.y = tileY - (tilesetData.tileHeightMultiplier > 1 ? 1 : 0);
         locationCmp->worldRect.size.w = 1.0F * tilesetData.tileWidthMultiplier;
         locationCmp->worldRect.size.h = 1.0F * tilesetData.tileHeightMultiplier;
-        locationCmp->zIndex = zIndex; //hope it will work
+        locationCmp->containingFloor = containingFloor;
         someTile->addComponent(locationCmp);
 
         /* Get TileData by GID */

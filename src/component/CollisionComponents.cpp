@@ -28,18 +28,24 @@ void CollisionDetectorComponent::onCollision(std::vector<Rect2F> collidingRects)
         if(movementCmp->direction.x > 0) {
             movementCmp->direction.x = 0;
             movementCmp->parentLocation->worldRect.alignToLeftOf(rect);
+            //todo offset to fit bounding box
         } else if(movementCmp->direction.x < 0) {
             movementCmp->direction.x = 0;
             movementCmp->parentLocation->worldRect.alignToRightOf(rect);
+            //todo offset to fit bounding box
         }
 
         /* Align vertically */
         if(movementCmp->direction.y > 0) {
             movementCmp->direction.y = 0;
             movementCmp->parentLocation->worldRect.alignToTopOf(rect);
+            float diffY = movementCmp->parentLocation->worldRect.size.h - boundingRect.bottom();
+            movementCmp->parentLocation->worldRect.top_left.y += diffY;
         } else if(movementCmp->direction.y < 0) {
-            movementCmp->direction.y = 0; //todo - hacky, this works other way, try make the same
+            movementCmp->direction.y = 0; 
             movementCmp->parentLocation->worldRect.alignToBottomOf(rect);
+            float diffY = boundingRect.top_left.y;
+            movementCmp->parentLocation->worldRect.top_left.y -= diffY;
         }
     }
 }

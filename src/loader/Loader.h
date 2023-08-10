@@ -12,8 +12,8 @@
 #include "Maths.h"
 
 /**
- * Group is 
- * Layer is 
+ * Group is Floor class - heigt of terrain
+ * Layer is loading part of Group/Floor
 */
 
 // #define BUILD_TESTWORLD 1
@@ -174,7 +174,7 @@ protected:
     std::optional<TextureID> loadTextureFromAbsolutePath(const std::string& abs_path, int div_w, int div_h, const std::string& name);
     std::optional<TextureID> loadTextureFromAssets(const std::string& relativePath, int div_w, int div_h, const std::string& name);
     std::optional<MapData> loadMapData(World& world, const std::string& mapName);
-    std::optional<std::vector<Entity*>> Loader::createEntitiesLayer(const MapData& mapData, const std::vector<int> layerDataIndices, int zIndex);
+    std::optional<std::vector<Entity*>> Loader::createEntitiesLayer(const MapData& mapData, const std::vector<int> layerDataIndices, Floor* containingFloor);
     bool buildWorld(World& world, const std::string mapName, const MapData& mapData);
 
 private:

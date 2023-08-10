@@ -10,6 +10,7 @@
 #include "LocationComponent.h"
 
 #include "Entity.h"
+#include "Player.h"
 
 bool GameBase::init() {
     bool result = Core::init();
@@ -61,14 +62,22 @@ bool GameBase::init() {
 bool GameBase::onKeyReleased(int key) {
     if(key == GLFW_KEY_I) {
         /* Print some informations */
-        auto locationCmp = world.player.getComponent<LocationComponent>();
-        if(locationCmp) {
-            std::cout << " _________________________________________________" << std::endl;
-            std::cout << "| Player location: " << locationCmp->worldRect.top_left << std::endl;
-            std::cout << "| Render batch size: " << render_system.getLastEntitesCount() << std::endl;
-            std::cout << "| World floor.back() entities count: " << world.floors.back().getTotalEntitiesCount() << std::endl;
-            std::cout << std::endl;
-        }
+        auto player = &world.player;
+        auto containingFloor = player->getFloor().value();
+
+        std::cout << " __________________________________________________________" << std::endl;
+        std::cout << "| Player location: " << player->locationComponent->worldRect.top_left << "H: " << player->locationComponent->getWorldZ() << "/" << containingFloor->getZ() << std::endl;
+        std::cout << "| Render batch size: " << render_system.getLastEntitesCount() << std::endl;
+        std::cout << "| Floor [" << containingFloor->elevation << "/" << world.floors.size() << "] info:" << std::endl;
+        std::cout << "|  - entities floor:   " << containingFloor->getFloorEntities().size() << std::endl;
+        std::cout << "|  - entities clutter: " << containingFloor->getClutterEntities().size() << std::endl;
+        std::cout << "|  - entities static:  " << containingFloor->getStaticEntities().size() << std::endl;
+        std::cout << "|  - entities dynamic: " << containingFloor->getDynamicEntities().size() << std::endl;
+        std::cout << "|  - entities bigger:  " << containingFloor->getBiggerEntities().size() << std::endl;
+        std::cout << "|  - components location: " << containingFloor->getLocationComponents().size() << std::endl;
+        std::cout << "|  - components movement: " << containingFloor->getMovementComponents().size() << std::endl;
+        std::cout << "|  - components collision: " << containingFloor->getCollisionComponents().size() << std::endl;
+        std::cout << std::endl;
         return true;
     }
 
@@ -82,8 +91,19 @@ bool GameBase::input() {
 }
 
 void GameBase::update(float dt) {
-    for(auto entity: world.entities) {
-        movementSystem.update(entity, dt);
+    auto containingFloorOption = world.player.getFloor();
+    if(!containingFloorOption.has_value()) {
+        std::cerr << "Player is not on floor!" << std::endl;
+        return;
+    }
+    auto containingFloor = containingFloorOption.value();
+
+    /**
+     * Update movement is for dynamicEntities only.
+     * Player is also dynamicEntity.
+     */
+    for(auto dynamicEntity : containingFloor->getDynamicEntities()) {
+        movementSystem.update(dynamicEntity, dt);
     }
 
 
@@ -97,20 +117,46 @@ void GameBase::update(float dt) {
      *   - clearing all every loop is not the best option
     */
         
-    collisionsSystem.update(world.entities, &world.player, dt);
+    collisionsSystem.update(containingFloor->getCollisionComponents(), &world.player, dt);
     
     camera.update(dt);
     
 }
 
 void GameBase::render() {
+    auto containingFloorOption = world.player.getFloor();
+    if(!containingFloorOption.has_value()) {
+        std::cerr << "Player is not on floor!" << std::endl;
+        return;
+    }
+    auto containingFloor = containingFloorOption.value();
+    
+
+    /* Render from bottom of containingFloor */
+
+    /* Floor flat tiles */
     render_system.prepare();
-    //todo sorting based on z index and Y axis
-    for(auto entity: world.entities) {
+    for(auto entity: containingFloor->getFloorEntities()) {
         render_system.processEntity(entity);
     }
     render_system.render();
 
+    /* Clutter flat tiles */
+    render_system.prepare();
+    for(auto entity: containingFloor->getClutterEntities()) {
+        render_system.processEntity(entity);
+    }
+    render_system.render();
+    
+    /* Other big tiles */
+    render_system.prepare();
+    for(auto entity: containingFloor->getBiggerEntities()) {
+        render_system.processEntity(entity);
+    }
+    render_system.render(true);
+
+    /* Debug shapes */
+    render_system.prepare();
     for(auto collisionRect: collisionsSystem.getLastCheckResults()) {
         render_system.renderTranslucentFilledBox(collisionRect, 0.0F, 1.0F, 1.0F, 0.2F);
     }

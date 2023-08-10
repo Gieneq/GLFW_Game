@@ -29,7 +29,7 @@ public:
     void init();
     void prepare();
     void processEntity(const Entity* entity);
-    void render();
+    void render(bool sorted = false);
     void setViewportDimensions(int width, int height);
     void attachCamera(Camera *cam);
 
