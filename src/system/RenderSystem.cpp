@@ -145,8 +145,8 @@ void RenderSystem::prepare() {
     enititesBatch.clear();
 
     /* Cleare render box in world space from camera position */
-    renderBoxWorldSpace.size.w = 20; //static_cast<float>(viewport_width) * camera->zoom;
-    renderBoxWorldSpace.size.h = 10;
+    renderBoxWorldSpace.size.w = 2.0F / (1.0F * camera->zoom.w * (1.0F / aspect_ratio));
+    renderBoxWorldSpace.size.h = 2.0F / (1.0F * camera->zoom.h);
     renderBoxWorldSpace.top_left.x = camera->position.x - renderBoxWorldSpace.size.w / 2.0F;
     renderBoxWorldSpace.top_left.y = camera->position.y - renderBoxWorldSpace.size.h / 2.0F;
 }

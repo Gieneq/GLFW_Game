@@ -41,6 +41,8 @@ public:
         return lastEntitesCount;
     }
 
+    Rect2F renderBoxWorldSpace;
+    
 private:
     void renderEntity(const Entity* entity);
 
@@ -51,6 +53,5 @@ private:
 
     int lastEntitesCount{0};
     std::vector<EntityRenderData> enititesBatch;
-    Rect2F renderBoxWorldSpace;
 };
 

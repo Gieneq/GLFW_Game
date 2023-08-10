@@ -77,6 +77,9 @@ bool GameBase::onKeyReleased(int key) {
         std::cout << "|  - components location: " << containingFloor->getLocationComponents().size() << std::endl;
         std::cout << "|  - components movement: " << containingFloor->getMovementComponents().size() << std::endl;
         std::cout << "|  - components collision: " << containingFloor->getCollisionComponents().size() << std::endl;
+        std::cout << "| WorldClipRect: " << render_system.renderBoxWorldSpace << std::endl;
+
+        
         std::cout << std::endl;
         return true;
     }
