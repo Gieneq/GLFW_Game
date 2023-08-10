@@ -4,6 +4,7 @@
 #include "Loader.h"
 #include "GraphicsComponent.h"
 #include "LocationComponent.h"
+#include "CollisionComponents.h"
 #include "Entity.h"
 #include <algorithm>
 
@@ -71,25 +72,25 @@ void RenderSystem::renderTexturedBox(const TextureData& textureData, const Rect2
     glBindTexture(GL_TEXTURE_2D, 0);
     glDisable(GL_BLEND);
 
-#ifdef DEBUG_TEXTURE_BORDERS
-    glColor3f(1.0F, 0.0F, 0.0F);
-    float vertices[] = {
-        projRect.left(), projRect.bottom(), // Bottom-left vertex
-        projRect.left(), projRect.top(), // Top-left vertex
-        projRect.right(), projRect.top(), // Top-right vertex
-        projRect.right(), projRect.bottom()  // Bottom-right vertex
-    };
-    glEnableClientState(GL_VERTEX_ARRAY);
+    if(rendeDebugView) {
+        glColor3f(1.0F, 0.0F, 0.0F);
+        float vertices[] = {
+            projRect.left(), projRect.bottom(), // Bottom-left vertex
+            projRect.left(), projRect.top(), // Top-left vertex
+            projRect.right(), projRect.top(), // Top-right vertex
+            projRect.right(), projRect.bottom()  // Bottom-right vertex
+        };
+        glEnableClientState(GL_VERTEX_ARRAY);
 
-    // Define the vertex array data
-    glVertexPointer(2, GL_FLOAT, 0, vertices);
+        // Define the vertex array data
+        glVertexPointer(2, GL_FLOAT, 0, vertices);
 
-    // Draw the rectangle using GL_LINE_LOOP to form the borders
-    glDrawArrays(GL_LINE_LOOP, 0, 4);
+        // Draw the rectangle using GL_LINE_LOOP to form the borders
+        glDrawArrays(GL_LINE_LOOP, 0, 4);
 
-    // Disable vertex arrays after drawing
-    glDisableClientState(GL_VERTEX_ARRAY);
-#endif
+        // Disable vertex arrays after drawing
+        glDisableClientState(GL_VERTEX_ARRAY);
+    }
 }
 
 void RenderSystem::renderFilledBox(Rect2F worldRect, float r, float g, float b) {
@@ -176,6 +177,18 @@ void RenderSystem::render(bool sorted) {
     /* Render entities */
     for(auto entityData : enititesBatch) {
         renderEntity(entityData.entity);
+    }
+}
+
+void RenderSystem::renderCollisionBoxes(const std::vector<CollisionComponent*>& collisionComponents) {
+    /* Render entities */
+    for(auto collisionComponent : collisionComponents) {
+        auto rects = collisionComponent->getWorldSpaceCollisionRects();
+        for(auto worldRect : rects) {
+            if(renderBoxWorldSpace.checkIntersection(worldRect)) {
+                renderTranslucentFilledBox(worldRect, 0.9F, 0.0F, 1.0F, 0.5F);
+            }
+        }
     }
 }
 

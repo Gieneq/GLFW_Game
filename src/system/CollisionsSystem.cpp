@@ -33,7 +33,7 @@ void CollisionsSystem::update(const std::vector<CollisionComponent*>& collisionC
             collisonDetectorCmp->onCollision(collidingRects);
             
             //to debug render
-            collidingRects.push_back(boundingRectWorldSpace);
+            collidingRects.push_back(collisonDetectorCmp->getWorldSpaceBoundingRect());
         }
     }
     

@@ -7,6 +7,7 @@
 #include "World.h"
 #include "Component.h"
 #include "ControllableComponent.h"
+#include "CollisionComponents.h"
 #include "LocationComponent.h"
 
 #include "Entity.h"
@@ -81,6 +82,13 @@ bool GameBase::onKeyReleased(int key) {
 
         
         std::cout << std::endl;
+        return true;
+    }
+    
+    if(key == GLFW_KEY_O) {
+        /* Toggle debug view */
+        debugView = !debugView;
+        render_system.rendeDebugView = debugView;
         return true;
     }
 
@@ -159,8 +167,13 @@ void GameBase::render() {
     render_system.render(true);
 
     /* Debug shapes */
-    render_system.prepare();
-    for(auto collisionRect: collisionsSystem.getLastCheckResults()) {
-        render_system.renderTranslucentFilledBox(collisionRect, 0.0F, 1.0F, 1.0F, 0.2F);
+    if(debugView) {
+        render_system.prepare();
+        render_system.renderCollisionBoxes(containingFloor->getCollisionComponents());
+        render_system.renderTranslucentFilledBox(world.player.collisionDetectorComponent->getWorldSpaceBoundingRect(), 0.1F, 0.2F, 1.0F, 0.5F);
+
+        for(auto collisionRect: collisionsSystem.getLastCheckResults()) {
+            render_system.renderTranslucentFilledBox(collisionRect, 0.0F, 1.0F, 1.0F, 0.2F);
+        }
     }
 }

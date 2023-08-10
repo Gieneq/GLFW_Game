@@ -9,6 +9,7 @@
 class Entity;
 class ColorComponent;
 class TextureComponent;
+class CollisionComponent;
 
 struct EntityRenderData {
     const Entity* entity;
@@ -37,11 +38,14 @@ public:
     void renderFilledBox(Rect2F worldRect, float r, float g, float b);
     void renderTranslucentFilledBox(Rect2F worldRect, float r, float g, float b, float fillingAlpha);
     
+    void renderCollisionBoxes(const std::vector<CollisionComponent*>& collisionComponents);
+
     int getLastEntitesCount() const {
         return lastEntitesCount;
     }
 
     Rect2F renderBoxWorldSpace;
+    bool rendeDebugView{false};
     
 private:
     void renderEntity(const Entity* entity);

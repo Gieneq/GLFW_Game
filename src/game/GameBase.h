@@ -30,4 +30,5 @@ protected:
     UserInputSystem userInputSystem;
     MovementSystem movementSystem;
     CollisionsSystem collisionsSystem;
+    bool debugView{false};
 };

@@ -19,6 +19,7 @@ World start to look like game. There was added loading of map files with resourc
 - 25.03.2023: Textured tiles rendering
 - 07.08.2023: Map TMX & Tileset TSX files loading and rendering
 - 08.08.2023: Tiles animation with common timing listeners
+- 10.08.2023: Collision detection
 
 ## Dependencies:
 - https://github.com/glfw/glfw
@@ -45,4 +46,4 @@ Setup GLAD:
 Comming soon...
 
 ## Ideas
-- Update, render batches
+- [x] Update, render batches
