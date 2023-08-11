@@ -2,10 +2,9 @@
 #include <iostream>
 #include "CollisionComponents.h"
 #include "MovementComponent.h"
-#include "LocationComponent.h"
 #include <algorithm>
 
-void Floor::addEntitysComponentsToRegisters(Entity* e) {
+void Elevation::addEntitisComponentsToRegisters(Entity* e) {
     CollisionComponent* cc = e->getComponent<CollisionComponent>();
     if(cc) {
         collisionComponentsRegister.push_back(cc);
@@ -14,36 +13,32 @@ void Floor::addEntitysComponentsToRegisters(Entity* e) {
     if(mc) {
         movementComponentsRegister.push_back(mc);
     }
-    LocationComponent* lc = e->getComponent<LocationComponent>();
-    if(lc) {
-        locationComponentsRegister.push_back(lc);
-    }
 }
 
-void Floor::addFloorEntity(Entity* e) {
+void Elevation::addFloorEntity(Entity* e) {
     floorEntities.push_back(e);
     addEntitysComponentsToRegisters(e);
 }
 
-void Floor::addClutterEntity(Entity* e) {
+void Elevation::addClutterEntity(Entity* e) {
     clutterEntities.push_back(e);
     addEntitysComponentsToRegisters(e);
 }
 
-void Floor::addStaticEntity(Entity* e) {
+void Elevation::addStaticEntity(Entity* e) {
     staticEntities.push_back(e);
-    biggerEntities.push_back(e);
+    biggerEntitiesRegister.push_back(e);
     addEntitysComponentsToRegisters(e);
 }
 
-void Floor::addDynamicEntity(Entity* e) {
+void Elevation::addDynamicEntity(Entity* e) {
     dynamicEntities.push_back(e);
-    biggerEntities.push_back(e);
+    biggerEntitiesRegister.push_back(e);
     addEntitysComponentsToRegisters(e);
 }
 
 
-bool Floor::removeEntity(Entity* e) {
+bool Elevation::removeEntity(Entity* e) {
     /* Find entity in any container */
     auto floorEntityIt = std::find(floorEntities.begin(), floorEntities.end(), e);
     auto clutterEntityIt = std::find(clutterEntities.begin(), clutterEntities.end(), e);
@@ -52,13 +47,15 @@ bool Floor::removeEntity(Entity* e) {
     auto biggerEntityIt = std::find(biggerEntities.begin(), biggerEntities.end(), e);
 
     /* If entity not found in any container, return false */
-    if(floorEntityIt == floorEntities.end() && clutterEntityIt == clutterEntities.end() 
-        && staticEntityIt == staticEntities.end() && dynamicEntityIt == dynamicEntities.end()
+    if(floorEntityIt == floorEntities.end() 
+        && clutterEntityIt == clutterEntities.end() 
+        && staticEntityIt == staticEntities.end() 
+        && dynamicEntityIt == dynamicEntities.end()
         && biggerEntityIt == biggerEntities.end()) {
         return false;
     }
 
-    /* Remove entity from any container */
+    /* Remove entity from container */
     if(floorEntityIt != floorEntities.end()) {
         floorEntities.erase(floorEntityIt);
     }
@@ -76,12 +73,13 @@ bool Floor::removeEntity(Entity* e) {
     }
 
     /* Remove entity's components from registers.
-     * Find them by checking their parent entity's pointer */
+     * Find them by checking their parent entity's pointer 
+    */
     
     /* CollisionComponent */
     auto collisionCmpFindResult = std::find_if(collisionComponentsRegister.begin(), collisionComponentsRegister.end(), 
         [e](CollisionComponent* cc) {
-            return cc->parent == e;
+            return cc->getParentEntity() == e;
         });
     
     if(collisionCmpFindResult != collisionComponentsRegister.end()) {
@@ -91,23 +89,16 @@ bool Floor::removeEntity(Entity* e) {
     /* MovementComponent */
     auto movementCmpFindResult = std::find_if(movementComponentsRegister.begin(), movementComponentsRegister.end(), 
         [e](MovementComponent* mc) {
-            return mc->parent == e;
+            return mc->getParentEntity() == e;
         });
 
     if(movementCmpFindResult != movementComponentsRegister.end()) {
         movementComponentsRegister.erase(movementCmpFindResult);
     }
 
-    /* LocationComponent */
-    auto locationCmpFindResult = std::find_if(locationComponentsRegister.begin(), locationComponentsRegister.end(), 
-        [e](LocationComponent* lc) {
-            return lc->parent == e;
-        });
-
-    if(locationCmpFindResult != locationComponentsRegister.end()) {
-        locationComponentsRegister.erase(locationCmpFindResult);
-    }
-
+    /*
+     *Seems entity and all its component are removed
+    */
     return true;
 }
 
@@ -115,29 +106,125 @@ bool Floor::removeEntity(Entity* e) {
 
 /* World */
 
-int World::getFloorsCount() const {
-    return static_cast<int>(floors.size());
+int World::getElevationsCount() const {
+    return static_cast<int>(elevations.size());
 }
 
-void World::appendFloor(int elevation) {
-    floors.push_back(Floor(elevation, this));
+Elevation* World::appendElevation() {
+    int nextElevation = getElevationsCount();
+    elevations.push_back(Elevation(nextElevation, this));
+    return &elevations.back();
 }
 
-std::optional<Floor*> World::getFloor(int elevation) {
-    if(elevation < 0 || elevation >= static_cast<int>(floors.size())) {
-        return std::nullopt;
-    }
-    return &floors[elevation];
-}
-
-std::optional<Floor*> World::getTopFloor() {
-    if(floors.empty()) {
+std::optional<Elevation*> World::getElevation(int elevation) {
+    if(elevations < 0 || elevations >= static_cast<int>(floors.size())) {
         return std::nullopt;
     }
 
-    return &floors.back();
+    return &elevations[elevation];
 }
 
-bool World::moveEntityToFloor(Entity* e, int newElevation) {
+std::optional<Elevation*> World::getTopElevation() {
+    if(elevations.empty()) {
+        return std::nullopt;
+    }
+
+    return &elevations.back();
+}
+
+bool World::moveEntityToElevation(Entity* e, int newElevation) {
     return false; //todo
+}
+
+/* 
+ * Creation
+*/
+
+std::optional<Entity *> World::createFloorEntity(int elevation) {
+    auto containingElevationOption = getElevation(elevation);
+    if(!containingElevationOption) {
+        return std::nullopt;
+    }
+
+    return createFloorEntity(*containingElevationOption);
+}
+
+std::optional<Entity *> createFloorEntity(Elevation* elevation) {
+    Entity* e = new Entity(elevation);
+    elevation->addFloorEntity(e);
+    allEntities.push_back(e);
+    return e;
+}
+
+std::optional<Entity *> World::createClutterEntity(int elevation) {
+    auto containingElevationOption = getElevation(elevation);
+    if(!containingElevationOption) {
+        return std::nullopt;
+    }
+
+    return createClutterEntity(*containingElevationOption);
+}
+
+std::optional<Entity *> createClutterEntity(Elevation* elevation) {
+    Entity* e = new Entity(elevation);
+    elevation->addClutterEntity(e);
+    allEntities.push_back(e);
+    return e;
+}
+
+std::optional<Entity *> World::createStaticEntity(int elevation) {
+    auto containingElevationOption = getElevation(elevation);
+    if(!containingElevationOption) {
+        return std::nullopt;
+    }
+
+    return createStaticEntity(*containingElevationOption);
+}
+
+std::optional<Entity *> createStaticEntity(Elevation* elevation) {
+    Entity* e = new Entity(elevation);
+    elevation->addStaticEntity(e);
+    allEntities.push_back(e);
+    return e;
+}
+
+std::optional<Entity *> World::createDynamicEntity(int elevation) {
+    auto containingElevationOption = getElevation(elevation);
+    if(!containingElevationOption) {
+        return std::nullopt;
+    }
+
+    return createDynamicEntity(*containingElevationOption);
+}
+
+std::optional<Entity *> createDynamicEntity(Elevation* elevation) {
+    Entity* e = new Entity(elevation);
+    elevation->addDynamicEntity(e);
+    allEntities.push_back(e);
+    return e;
+}
+
+/* 
+ * Destruction
+*/
+
+bool World::deleteEntity(Entity* e) {
+    /* Find entity in any container */
+    auto entityIt = std::find(allEntities.begin(), allEntities.end(), e);
+
+    /* If entity not found in any container, return false */
+    if(entityIt == allEntities.end()) {
+        return false;
+    }
+
+    /* Remove entity from container */
+    allEntities.erase(entityIt);
+
+    /* Remove entity from its elevation */
+    e->getContainingElevation()->removeEntity(e);
+
+    /* Delete entity */
+    delete e;
+
+    return true;
 }

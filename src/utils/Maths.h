@@ -2,9 +2,10 @@
 #include <iostream>
 
 struct Vect2F {
+    Vect2F() = default;
     Vect2F(float x, float y) : x{x}, y{y} {}
-    Vect2F() : x{0.0F}, y{0.0F} {}
     Vect2F get_negated() const;
+    Vect2F getTranslated(const Vect2F& translation) const;
     float x{0.0F};
     float y{0.0F};
 
@@ -14,11 +15,43 @@ struct Vect2F {
     }
 };
 
+struct Vect3F {
+    Vect3F() = default;
+    Vect3F(float x, float y, float z) : x{x}, y{y}, z{z} {}
+    Vect3F(const Vect2F& xy, float z) : x{xy.x}, y{xy.y}, z{z} {}
+    float x{0.0F};
+    float y{0.0F};
+    float z{0.0F};
+
+    friend std::ostream& operator<<(std::ostream& os, const Vect3F& vect) {
+        os << "[" << vect.x << ", " << vect.y << ", " << vect.z << "]";
+        return os;
+    }
+};
+
 struct Size2F {
+    Size2F() = default;
     Size2F(float w, float h) : w{w}, h{h} {}
-    Size2F() : w{0.0F}, h{0.0F} {}
     float w{0.0F};
     float h{0.0F};
+
+    friend std::ostream& operator<<(std::ostream& os, const Size2F& size) {
+        os << "[" << size.w << ", " << size.h << "]";
+        return os;
+    }
+};
+
+struct Size3F {
+    Size3F() = default;
+    Size3F(float w, float h, float l) : w{w}, h{h}, l{l} {}
+    float w{0.0F};
+    float h{0.0F};
+    float l{0.0F};
+
+    friend std::ostream& operator<<(std::ostream& os, const Size3F& size) {
+        os << "[" << size.w << ", " << size.h << ", " << size.l << "]";
+        return os;
+    }
 };
 
 struct Rect2F {

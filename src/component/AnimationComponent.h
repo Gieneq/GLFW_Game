@@ -20,12 +20,6 @@ public:
 
     TextureComponent * textureCmp{nullptr};
 
-    AnimationComponent* clone(Entity* new_parent) override {
-        auto animCmp = new AnimationComponent(new_parent, textureCmp, interval);
-        animCmp->indices = indices;
-        return animCmp;
-    }
-
 private:    
     bool active{false};
     int interval{1000};

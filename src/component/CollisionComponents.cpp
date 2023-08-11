@@ -1,9 +1,8 @@
 #include "CollisionComponents.h"
-#include "LocationComponent.h"
 #include "MovementComponent.h"
 #include <iostream>
 
-std::vector<Rect2F> CollisionComponent::getWorldSpaceCollisionRects() const {
+std::vector<Rect2F> CollisionComponent::getElevationSpaceCollisionRects() const {
     std::vector<Rect2F> worldSpaceCollisionRects;
     for (auto& rect : collisionRects) {
         worldSpaceCollisionRects.push_back(rect.get_translated(parentLocation->worldRect.top_left));
@@ -11,7 +10,7 @@ std::vector<Rect2F> CollisionComponent::getWorldSpaceCollisionRects() const {
     return worldSpaceCollisionRects;
 }
 
-void CollisionDetectorComponent::onCollision(std::vector<Rect2F> collidingRects) {
+void CollisionDetectorComponent::onCollision(std::vector<Rect2F> collidingRectsElevationSpace) {
     // std::cout << "[!] Collision of " << getWorldSpaceBoundingRect() << "detected with:";
     // for (auto& rect : collidingRects) {
     //     std::cout << rect << ", " << std::endl;
@@ -50,6 +49,6 @@ void CollisionDetectorComponent::onCollision(std::vector<Rect2F> collidingRects)
     }
 }
 
-Rect2F CollisionDetectorComponent::getWorldSpaceBoundingRect() const {
+Rect2F CollisionDetectorComponent::getElevationSpaceBoundingRect() const {
     return boundingRect.get_translated(movementCmp->parentLocation->worldRect.top_left);
 }

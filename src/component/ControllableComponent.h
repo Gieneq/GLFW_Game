@@ -12,7 +12,6 @@ enum class MovementControlKey {
 };
 
 class Entity;
-class MovementComponent;
 class ControllableComponent : public Component {
 public:
     ControllableComponent(Entity* e, MovementComponent* move);
@@ -32,10 +31,6 @@ public:
     bool active{true};
 
     MovementComponent * controlledMovement{nullptr};
-
-    ControllableComponent* clone(Entity* new_parent) override {
-        return new ControllableComponent(new_parent, controlledMovement);
-    }
 
 protected:
     void updateMovement();

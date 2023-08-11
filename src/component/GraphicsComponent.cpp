@@ -1,11 +1,20 @@
 #include "GraphicsComponent.h"
-#include "LocationComponent.h"
+#include "Entity.h"
 
 
-Rect2F ColorComponent::getWorldRect() {
-    return parentLocation->worldRect.get_translated(relativeBoxTranslation);
+Vect2F ColorComponent::getPositionElevationSpace() const {
+    return parent->getPositionElevationSpace().getTranslated(relativeBoxTranslation);
 }
 
-Rect2F TextureComponent::getWorldRect() {
-    return parentLocation->worldRect.get_translated(relativeBoxTranslation);
+
+Vect3F ColorComponent::getPositionWorldSpace() const {
+    return Vect3F{getPositionElevationSpace(), parent->getWorldSpaceZ()};
+}
+
+Vect2F TextureComponent::getPositionElevationSpace() const {
+    return parent->getPositionElevationSpace().getTranslated(relativeBoxTranslation);
+}
+
+Vect3F TextureComponent::getPositionWorldSpace() const {
+    return Vect3F{getPositionElevationSpace(), parent->getWorldSpaceZ()};
 }

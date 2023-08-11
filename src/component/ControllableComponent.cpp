@@ -1,6 +1,5 @@
 #include "ControllableComponent.h"
 #include "MovementComponent.h"
-#include "LocationComponent.h"
 #include "World.h"
 #include "Entity.h"
 #include "GLCommon.h" 

@@ -4,38 +4,40 @@
 #include "Maths.h"
 #include "TextureId.h"
 
-class LocationComponent;
 class ColorComponent : public Component {
 public:
-    ColorComponent(Entity* e, LocationComponent* loc) : Component(e), parentLocation(loc) {}
+    ColorComponent(Entity* e, float relX, float relY, float boxWidth, float boxHeight) : Component(e), size{boxWidth, boxHeight} {}
     virtual ~ColorComponent() = default;
+    Vect2F getPositionElevationSpace() const;
+    Vect3F getPositionWorldSpace() const;
+    Size2F getSize() const { return size; }
     float r{0.56f};
     float g{1.0f};
     float b{1.0f};
-    LocationComponent* parentLocation{nullptr};
-    Vect2F relativeBoxTranslation{0.0F, 0.0F};
-    Rect2F getWorldRect();
+    float a{1.0f};
 
-    ColorComponent* clone(Entity* new_parent) override {
-        //todo fix
-        return new ColorComponent(new_parent, parentLocation);
-    }
+private:
+    Vect2F relativeBoxTranslation{0.0F, 0.0F};
+    Size2F size{0.0F, 0.0F};
 };
 
 class TextureComponent : public Component {
 public:
-    TextureComponent(Entity* e, LocationComponent* loc, TextureID id) : Component(e), parentLocation(loc), textureID{id} {}
-    TextureComponent(Entity* e, LocationComponent* loc, TextureID id, int tilesetIdx) : Component(e), parentLocation(loc), textureID{id}, tilesetIndex{tilesetIdx} {}
+    TextureComponent(Entity* e, float relX, float relY, float boxWidth, float boxHeight, TextureID id) : Component(e), textureID{id} {}
+    TextureComponent(Entity* e, float relX, float relY, float boxWidth, float boxHeight, TextureID id, int tilesetIdx) : Component(e), textureID{id}, tilesetIndex{tilesetIdx} {}
     virtual ~TextureComponent() = default;
 
+    Vect2F getPositionElevationSpace() const;
+    Vect3F getPositionWorldSpace() const;
+    Size2F getSize() const { return size; }
+
+    TextureID getTextureID() const { return textureID; }
+    int getTilesetIndex() const { return tilesetIndex; }
+    void setTilesetIndex(int idx) { tilesetIndex = idx; }
+
+private:
+    Vect2F relativeBoxTranslation{0.0F, 0.0F};
+    Size2F size{0.0F, 0.0F};
     TextureID textureID{};
     int tilesetIndex{0};
-    LocationComponent* parentLocation{nullptr};
-    Vect2F relativeBoxTranslation{0.0F, 0.0F};
-    Rect2F getWorldRect();
-
-    TextureComponent* clone(Entity* new_parent) override {
-        //todo fix
-        return new TextureComponent(new_parent, parentLocation, textureID);
-    }
 };

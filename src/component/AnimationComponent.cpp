@@ -8,7 +8,7 @@ AnimationComponent::AnimationComponent(Entity* e, TextureComponent* textureCmp, 
 void AnimationComponent::onTimerTick(const int recentTick) {
     if(textureCmp) {
         // std::cout << "AnimationComponent::onTimerTick " << recentTick << "for" << textureCmp->textureID.value << std::endl;
-        textureCmp->tilesetIndex = indices[recentTick];
+        textureCmp->setTilesetIndex(indices[recentTick]);
     }
 }
 

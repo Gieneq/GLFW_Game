@@ -1,5 +1,5 @@
 #include "MovementComponent.h"
-#include "LocationComponent.h"
+#include "Entity.h"
 
 void MovementComponent::setDirection(Direction dir) {
     if(dir == Direction::NORTH) {
@@ -28,8 +28,8 @@ void MovementComponent::setDirection(Direction dir) {
 
 void MovementComponent::update(float dt) {
     auto translation = getTranslation(dt);
-    parentLocation->worldRect.top_left.x += translation.x;
-    parentLocation->worldRect.top_left.y += translation.y;
+    parent->getPositionElevationSpace().x += translation.x;
+    parent->getPositionElevationSpace().y += translation.y;
 }
 
 Vect2F MovementComponent::getTranslation(float dt) const {

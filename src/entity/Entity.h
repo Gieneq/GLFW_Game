@@ -1,18 +1,55 @@
 #pragma once
 #include <iostream>
+#include <optional>
 #include <vector>
 #include "Component.h"
+#include "Maths.h"
 
+class Elevation;
+class ColorComponent;
+class TextureComponent;
+class MovementComponent;
+class CollisionComponent;
+class CollisionDetectorComponent;
+class ControllableComponent;
+class AnimationComponent;
 class Entity {
 public:
     Entity() = default;
-    void addComponent(Component* component);
-    // void removeComponent(Component* component);
-    int id{next_id++};
+    Entity(Elevation* elevation) : containingElevation{elevation} {}
+    Entity(float elevationSpaceX, float elevationSpaceY, Elevation* elevation) : positionElevationSpace{elevationSpaceX, elevationSpaceY}, containingElevation{elevation} {}
+    Entity(float elevationSpaceX, float elevationSpaceY, float elevationSpaceZ, float width, float height, float length, Elevation* elevation) :
+        positionElevationSpace{elevationSpaceX, elevationSpaceY}, heightElevationSpace{elevationSpaceZ}, size{width, height}, length{length}, 
+        containingElevation{elevation}, active{true} {}
+    
+    // todo make Entity responsible for deleting components
+    ~Entity() {
+        for (auto component : components) {
+            delete component;
+        }
+    }
 
     bool operator==(const Entity& other) const {
-        return id == other.id;
+        return getId() == other.getId();
     }
+
+    bool operator!=(const Entity& other) const {
+        return getId() != other.getId();
+    }
+
+    bool operator>(const Entity& other) const {
+        return getId() > other.getId();
+    }
+
+    bool operator<(const Entity& other) const {
+        return getId() < other.getId();
+    }
+
+    inline long long getId() const {
+        return id;
+    }
+
+    /* Components related methods */
 
     template<typename T>
     bool hasComponent() const {
@@ -48,16 +85,107 @@ public:
         return result;
     }
 
-    Entity* clone() {
-        Entity* entity = new Entity();
-        for (auto component : components) {
-            auto new_component = component->clone(entity);
-            entity->addComponent(new_component);
-        }
-        return entity;
+    /* Components building methods */
+    MovementComponent* addMovementComponent(float speed = 1.0F);
+    ColorComponent* addColorComponent(float relX, float relY, float boxWidth, float boxHeight);
+    TextureComponent* addTextureComponent(float relX, float relY, float boxWidth, float boxHeight, TextureID id);
+    CollisionComponent* addCollisionComponent();
+    std::optional<CollisionDetectorComponent*> addCollisionDetectorComponent(const Rect2F& boundingRect);
+    std::optional<ControllableComponent*> addControllableComponent();
+    std::optional<AnimationComponent*> addAnimationComponent(int interval);
+    
+    
+    /* Position related methods */
+    float getWorldSpaceZ() const;
+
+    Vect3F getPositionWorldSpace() const;
+
+    Vect2F& getPositionElevationSpace() {
+        return positionElevationSpace;
+    }
+
+    inline Size2F getSize() const {
+        return size;
+    }
+
+    inline float getLength() const {
+        return length;
+    }
+    
+    inline const Elevation* getContainingElevation() {
+        return containingElevation;
+    }
+
+    inline float getLeftElevationSpace() const {
+        return positionElevationSpace.x;
+    }
+
+    inline float getRightElevationSpace() const {
+        return positionElevationSpace.x + size.w;
+    }
+
+    inline float getTopElevationSpace() const {
+        return positionElevationSpace.y;
+    }
+
+    inline float getBottomElevationSpace() const {
+        return positionElevationSpace.y + size.h;
+    }
+
+    inline float getDownElevationSpace() const {
+        return heightElevationSpace;
+    }
+
+    inline float getUpElevationSpace() const {
+        return heightElevationSpace + length;
+    }
+
+    inline void setXElevationSpace(float x) {
+        positionElevationSpace.x = x;
+    }
+
+    inline void setYElevationSpace(float y) {
+        positionElevationSpace.y = y;
+    }
+
+    inline void setZElevationSpace(float z) {
+        heightElevationSpace = z;
     }
 
 private:
+    /**
+     * ID is ised to distinguish entities.
+    */
+    long long id{nextId++};
     std::vector<Component*> components;
-    static int next_id;
+
+    /**
+     * Active entities can be updated and rendered.
+    */
+    bool active{false};
+
+    Elevation* containingElevation{nullptr};
+
+    /**
+     * Size 1x1 is base tilesize.
+     * Length 1 is space between layers.
+    */
+    Size2F size{1.0F, 1.0F};
+    float length{0.0F};
+
+    /**
+     * Position of top_left corner in relation to containing Elevation.
+     * Height can be used to place object on top of another.
+    */
+    Vect2F positionElevationSpace{0.0F, 0.0F};
+    float heightElevationSpace{0.0F};
+
+    /* Quick access to popular components */
+    ColorComponent* colorComponent{nullptr};
+    TextureComponent* textureComponent{nullptr};
+
+    /* General step in adding components */
+    void addComponent(Component* component);
+    
+    static long long nextId;
 };

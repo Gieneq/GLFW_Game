@@ -2,46 +2,45 @@
 #include <vector>
 #include "Entity.h"
 #include "Player.h"
+#include <optional>
 
 class LocationComponent;
 class MovementComponent;
 class CollisionComponent;
 class World;
-class Floor {
+class Elevation {
 public:
-    Floor() = default;
-    Floor(int elevation, World* containingWorld) : elevation(elevation), containingWorld(containingWorld) {}
+    Elevation() = default;
+    Elevation(int elevation, World* containingWorld) : elevation(elevation), containingWorld(containingWorld) {}
 
-    int elevation{0};
     
-    World* getContainingWorld() const {
+    inline World* getContainingWorld() const {
         return containingWorld;
     }
 
-    float getZ() const {
+    inline float getWorldSpaceZ() const {
         return static_cast<float>(elevation);
     }
 
-    int getTotalEntitiesCount() const {
+    inline int getTotalEntitiesCount() const {
         return static_cast<int>(floorEntities.size() + clutterEntities.size() 
             + staticEntities.size() + dynamicEntities.size());
     }
 
-    const std::vector<CollisionComponent*>& getCollisionComponents() const {
+    inline const std::vector<CollisionComponent*>& getCollisionComponents() const {
         return collisionComponentsRegister;
     }
 
-    const std::vector<MovementComponent*>& getMovementComponents() const {
+    inline const std::vector<MovementComponent*>& getMovementComponents() const {
         return movementComponentsRegister;
     }
 
-    const std::vector<LocationComponent*>& getLocationComponents() const {
-        return locationComponentsRegister;
-    }
-
     void addFloorEntity(Entity* e);
+    
     void addClutterEntity(Entity* e);
+
     void addStaticEntity(Entity* e);
+
     void addDynamicEntity(Entity* e);
 
     const std::vector<Entity*>& getFloorEntities() const {
@@ -61,35 +60,60 @@ public:
     }
 
     const std::vector<Entity*>& getBiggerEntities() const {
-        return biggerEntities;
+        return biggerEntitiesRegister;
     }
 
+    /* Only removes data from registers. Dispose of Entity is made separately */
     bool removeEntity(Entity* e);
 
+    /* World manages elevation indices */
+    friend class World;
+
+
 private:
-    void addEntitysComponentsToRegisters(Entity* e);
+    int elevation{0};
+    void addEntitisComponentsToRegisters(Entity* e);
 
     World* containingWorld{nullptr};
+    
+    // todo - I see use of Enum and templating here
     std::vector<Entity*> floorEntities;
     std::vector<Entity*> clutterEntities;
     std::vector<Entity*> staticEntities;
     std::vector<Entity*> dynamicEntities;
-    std::vector<Entity*> biggerEntities;
+
+    std::vector<Entity*> biggerEntitiesRegister;
     std::vector<CollisionComponent*> collisionComponentsRegister;
     std::vector<MovementComponent*> movementComponentsRegister;
-    std::vector<LocationComponent*> locationComponentsRegister;
 };
+
 
 class World {
 public:
-    void appendFloor(int elevation);
-    std::optional<Floor*> getFloor(int elevation);
-    std::optional<Floor*> getTopFloor();
-    int getFloorsCount() const;
-    bool moveEntityToFloor(Entity* e, int newElevation);
+    // todo dispose entities indestructor
+    Elevation* appendElevation();
+    std::optional<Elevation*> getElevation(int elevation);
+    std::optional<Elevation*> getTopElevation();
+    int getElevationsCount() const;
+
+    bool moveEntityToElevation(Entity* e, int newElevation);
+
+    // todo - I see use of Enum and templating here
+    std::optional<Entity *> createFloorEntity(int elevation);
+    std::optional<Entity *> createFloorEntity(Elevation* elevation);
+    std::optional<Entity *> createClutterEntity(int elevation);
+    std::optional<Entity *> createClutterEntity(Elevation* elevation);
+    std::optional<Entity *> createStaticEntity(int elevation);
+    std::optional<Entity *> createStaticEntity(Elevation* elevation);
+    std::optional<Entity *> createDynamicEntity(int elevation);
+    std::optional<Entity *> createDynamicEntity(Elevation* elevation);
+
+
+    bool deleteEntity(Entity* e);
     
     Player player;
 
 private:
-    std::vector<Floor> floors;
+    std::vector<Elevation> elevations;
+    std::vector<Entity *> allEntities;
 };

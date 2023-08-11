@@ -5,6 +5,11 @@ Vect2F Vect2F::get_negated() const {
     return Vect2F{-x, -y};
 }
 
+
+Vect2F Vect2F::getTranslated(const Vect2F& translation) const {
+    return Vect2F{x + translation.x, y + translation.y};
+}
+
 float Rect2F::left() const {
     return top_left.x;
 }
