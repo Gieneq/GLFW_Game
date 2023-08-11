@@ -13,6 +13,5 @@ public:
         return parent;
     }
     
-protected:
     Entity* parent{nullptr};
 };

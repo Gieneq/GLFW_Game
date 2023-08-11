@@ -1,5 +1,7 @@
 #include "ControllableComponent.h"
 #include "MovementComponent.h"
+#include "LocationComponent.h"
+#include "World.h"
 #include "Entity.h"
 #include "GLCommon.h" 
 
@@ -80,4 +82,19 @@ void ControllableComponent::updateMovement() {
     else if(lastPressedKey == MovementControlKey::RIGHT) {
         controlledMovement->setDirection(Direction::EAST);
     }
+}
+
+void ControllableComponent::onPressSpaceKey() {
+}
+
+void ControllableComponent::onReleaseSpaceKey() {
+
+}
+
+void ControllableComponent::onPressLShiftKey() {
+
+}
+
+void ControllableComponent::onReleaseLShiftKey() {
+
 }

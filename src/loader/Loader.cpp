@@ -138,6 +138,15 @@ bool Loader::loadPlayer(World& world) {
     std::cout << "Loading player data..." << std::endl;
     Player* player = &world.player;
 
+    /* There is needed at least one Floor */
+    auto someFloorOption = world.getFloor(0);
+    if(!someFloorOption.has_value()) {
+        std::cerr << "Error loading player: no floor 0 in world" << std::endl;
+        return false;
+    }
+    auto someFloor = someFloorOption.value();
+
+
     /* Add player location component */
     auto locatiomCmp = new LocationComponent(player);
     player->addComponent(locatiomCmp);
@@ -146,7 +155,7 @@ bool Loader::loadPlayer(World& world) {
     /* Set starting position */
     locatiomCmp->worldRect.top_left.x = 13.5485F;
     locatiomCmp->worldRect.top_left.y = 18.5593F;
-    locatiomCmp->containingFloor = &world.floors[0];
+    locatiomCmp->containingFloor = someFloor;
 
     /* Try adding texture to player */
     auto playersTextureID = Loader::getLoader().getTextureDataByName("some_tiles");
@@ -187,12 +196,6 @@ bool Loader::loadPlayer(World& world) {
     collisionDetectorCmp->boundingRect.top_left.y = 0.15F;
     player->addComponent(collisionDetectorCmp);
     player->collisionDetectorComponent = collisionDetectorCmp;
-
-    /* Yes, player is one of entities - 
-     * easier to sort in rendering and similar. */
-    if(world.floors.empty()) {
-        return false;
-    }
 
     if(player->locationComponent->containingFloor == nullptr) {
         std::cerr << "Player has no containing floor" << std::endl;
@@ -740,9 +743,8 @@ bool Loader::buildWorld(World& world, const std::string mapName, const MapData& 
         std::cout << " + groupName: " << groupName << std::endl;
 
         /* Create Floor inside world */
-        world.floors.push_back(Floor());
-        Floor* recentTopFloor = &world.floors.back();
-        recentTopFloor->elevation = groupIdx;
+        world.appendFloor(groupIdx);
+        Floor* recentTopFloor = world.getTopFloor().value();
 
         /* Iterate over all layers in group */
         for(auto layerNode : groupNode.children("layer")) {
@@ -908,7 +910,6 @@ std::optional<std::vector<Entity*>> Loader::createEntitiesLayer(const MapData& m
         }
 
         /* Append new tile to world */
-        // world.entities.push_back(someTile);
         layerEntities.push_back(someTile);
         ++tileIndex;
     }

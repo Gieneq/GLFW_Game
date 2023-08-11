@@ -23,6 +23,11 @@ public:
 
     void onPressWSADKey(int key);
     void onReleaseWSADKey(int key);
+    
+    void onPressSpaceKey();
+    void onReleaseSpaceKey();
+    void onPressLShiftKey();
+    void onReleaseLShiftKey();
 
     bool active{true};
 

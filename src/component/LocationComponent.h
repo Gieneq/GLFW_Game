@@ -1,8 +1,8 @@
 #pragma once
 #include "Component.h"
 #include "Maths.h"
-#include "World.h"
 
+class Floor;
 class LocationComponent : public Component {
 public:
     LocationComponent(Entity* e) : Component(e) {}
@@ -11,9 +11,8 @@ public:
     float relativeZ{0.0F}; // relative to floor
     float zLength{1.0F};
     Floor *containingFloor{nullptr};
-    float getWorldZ() const {
-        return containingFloor->elevation + relativeZ;
-    }
+
+    float getWorldZ() const;
 
     float getWorldBottomZ() const {
         return getWorldZ();
@@ -22,6 +21,10 @@ public:
     float getWorldTopZ() const {
         return getWorldZ() + zLength;
     }
+
+    int getRecentElevation();
+
+    bool changeElevation(int newElevation);
 
     LocationComponent* clone(Entity* new_parent) override {
         return new LocationComponent(new_parent);

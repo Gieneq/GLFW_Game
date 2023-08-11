@@ -69,7 +69,7 @@ bool GameBase::onKeyReleased(int key) {
         std::cout << " __________________________________________________________" << std::endl;
         std::cout << "| Player location: " << player->locationComponent->worldRect.top_left << "H: " << player->locationComponent->getWorldZ() << "/" << containingFloor->getZ() << std::endl;
         std::cout << "| Render batch size: " << render_system.getLastEntitesCount() << std::endl;
-        std::cout << "| Floor [" << containingFloor->elevation << "/" << world.floors.size() << "] info:" << std::endl;
+        std::cout << "| Floor [" << containingFloor->elevation << "/" << world.getFloorsCount() << "] info:" << std::endl;
         std::cout << "|  - entities floor:   " << containingFloor->getFloorEntities().size() << std::endl;
         std::cout << "|  - entities clutter: " << containingFloor->getClutterEntities().size() << std::endl;
         std::cout << "|  - entities static:  " << containingFloor->getStaticEntities().size() << std::endl;

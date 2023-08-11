@@ -6,12 +6,17 @@
 class LocationComponent;
 class MovementComponent;
 class CollisionComponent;
+class World;
 class Floor {
 public:
     Floor() = default;
-    Floor(int elevation) : elevation(elevation) {}
+    Floor(int elevation, World* containingWorld) : elevation(elevation), containingWorld(containingWorld) {}
 
     int elevation{0};
+    
+    World* getContainingWorld() const {
+        return containingWorld;
+    }
 
     float getZ() const {
         return static_cast<float>(elevation);
@@ -59,9 +64,12 @@ public:
         return biggerEntities;
     }
 
+    bool removeEntity(Entity* e);
+
 private:
     void addEntitysComponentsToRegisters(Entity* e);
 
+    World* containingWorld{nullptr};
     std::vector<Entity*> floorEntities;
     std::vector<Entity*> clutterEntities;
     std::vector<Entity*> staticEntities;
@@ -74,6 +82,14 @@ private:
 
 class World {
 public:
-    std::vector<Floor> floors;
+    void appendFloor(int elevation);
+    std::optional<Floor*> getFloor(int elevation);
+    std::optional<Floor*> getTopFloor();
+    int getFloorsCount() const;
+    bool moveEntityToFloor(Entity* e, int newElevation);
+    
     Player player;
+
+private:
+    std::vector<Floor> floors;
 };

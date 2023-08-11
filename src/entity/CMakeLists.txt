@@ -3,6 +3,7 @@ message(STATUS " * Building entity")
 list(APPEND LIB_DEPENDENCIES 
   utils
   component
+  world
 )
 
 message(STATUS "   -> ${LIB_DEPENDENCIES}")

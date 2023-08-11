@@ -4,6 +4,7 @@ list(APPEND LIB_DEPENDENCIES
   utils
   loader
   core
+  world
 )
 
 message(STATUS "   -> ${LIB_DEPENDENCIES}")
@@ -14,6 +15,7 @@ add_library(component
   ControllableComponent.cpp
   AnimationComponent.cpp
   CollisionComponents.cpp
+  LocationComponent.cpp
 )
 
 target_link_libraries(component PUBLIC ${LIB_DEPENDENCIES})
