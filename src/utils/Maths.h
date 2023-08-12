@@ -23,6 +23,8 @@ struct Vect3F {
     float y{0.0F};
     float z{0.0F};
 
+    Vect2F getXY() const;
+
     friend std::ostream& operator<<(std::ostream& os, const Vect3F& vect) {
         os << "[" << vect.x << ", " << vect.y << ", " << vect.z << "]";
         return os;
@@ -56,6 +58,7 @@ struct Size3F {
 
 struct Rect2F {
     Rect2F() : top_left{}, size{} {}
+    Rect2F(Vect2F tl, Size2F s) : top_left{tl}, size{s} {}
     Rect2F(float x, float y, float w, float h) : top_left{x,y}, size{w,h} {}
 
     float left() const;
@@ -92,6 +95,66 @@ struct Rect2F {
 
     friend std::ostream& operator<<(std::ostream& os, const Rect2F& rect) {
         os << "[" << rect.top_left.x << ", " << rect.top_left.y << ", " << rect.size.w << ", " << rect.size.h << "]";
+        return os;
+    }
+};
+
+class Rect3F {
+public:
+    Rect3F() : top_left{}, size{} {}
+    Rect3F(float x, float y, float z, float w, float h, float l) : top_left{x,y,z}, size{w,h,l} {}
+
+    float left() const;
+    float right() const;
+    float top() const;
+    float bottom() const;
+    float front() const;
+    float back() const;
+    Rect3F get_translated(Vect3F translation) const;
+    Rect3F get_scaled(Size3F scale) const;
+    static Rect3F from_sides(float left, float right, float top, float bottom, float front, float back);
+
+    Vect3F top_left;
+    Size3F size;
+
+    inline float& x() { return top_left.x; }
+    inline float& y() { return top_left.y; }
+    inline float& z() { return top_left.z; }
+
+    inline Rect2F getFlatten() const {
+        return Rect2F{top_left.x, top_left.y, size.w, size.h};
+    }
+
+    void alignToLeftOf(const Rect3F& other) {
+        top_left.x = other.left() - size.w;
+    }
+
+    void alignToRightOf(const Rect3F& other) {
+        top_left.x = other.right();
+    }
+
+    void alignToTopOf(const Rect3F& other) {
+        top_left.y = other.top() - size.h;
+    }
+
+    void alignToBottomOf(const Rect3F& other) {
+        top_left.y = other.bottom();
+    }
+
+    void alignToFrontOf(const Rect3F& other) {
+        top_left.z = other.front() - size.l;
+    }
+
+    void alignToBackOf(const Rect3F& other) {
+        top_left.z = other.back();
+    }
+
+    bool checkIntersection(const Rect3F& other) const {
+        return !(left() >= other.right() || right() <= other.left() || top() >= other.bottom() || bottom() <= other.top() || front() >= other.back() || back() <= other.front());
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const Rect3F& rect) {
+        os << "[" << rect.top_left.x << ", " << rect.top_left.y << ", " << rect.top_left.z << ", " << rect.size.w << ", " << rect.size.h << ", " << rect.size.l << "]";
         return os;
     }
 };

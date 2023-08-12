@@ -18,6 +18,10 @@ public:
         return containingWorld;
     }
 
+    inline int getIndex() const {
+        return elevation;
+    }
+
     inline float getWorldSpaceZ() const {
         return static_cast<float>(elevation);
     }

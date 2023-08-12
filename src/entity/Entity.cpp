@@ -6,7 +6,7 @@
 #include "AnimationComponent.h"
 #include "ControllableComponent.h"
 
-int Entity::nextId = 0;
+long long Entity::nextID = 0;
 
 float Entity::getWorldSpaceZ() const {
     return containingElevation->getWorldSpaceZ();
@@ -101,4 +101,44 @@ std::optional<AnimationComponent*> Entity::addAnimationComponent(int interval) {
     auto animationComponent = new AnimationComponent(this, textureCmp, interval);
     addComponent(animationComponent);
     return animationComponent;
+}
+
+std::optional<ColorComponent*> Entity::getColorComponent() const {
+    if(!colorComponent) {
+        return std::nullopt;
+    }
+    return colorComponent;
+}
+
+std::optional<TextureComponent*> Entity::getTextureComponent() const {
+    if(!textureComponent) {
+        return std::nullopt;
+    }
+    return textureComponent;
+}
+
+Rect2F Entity::getRectElevationSpace() const {
+    return Rect2F{
+        positionElevationSpace.x,
+        positionElevationSpace.y,
+        size.w,
+        size.h
+    };
+}
+Rect3F Entity::getBoxElevationSpace() const {
+    auto box = Rect3F{
+        positionElevationSpace.x,
+        positionElevationSpace.y,
+        heightElevationSpace,
+        size.w,
+        size.h,
+        length
+    };
+    return box;
+}
+
+Rect3F Entity::getBoxWorldSpace() const{
+    auto box = getBoxElevationSpace();
+    box.z() += getWorldSpaceZ();
+    return box;
 }

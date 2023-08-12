@@ -17,24 +17,24 @@ void Elevation::addEntitisComponentsToRegisters(Entity* e) {
 
 void Elevation::addFloorEntity(Entity* e) {
     floorEntities.push_back(e);
-    addEntitysComponentsToRegisters(e);
+    addEntitisComponentsToRegisters(e);
 }
 
 void Elevation::addClutterEntity(Entity* e) {
     clutterEntities.push_back(e);
-    addEntitysComponentsToRegisters(e);
+    addEntitisComponentsToRegisters(e);
 }
 
 void Elevation::addStaticEntity(Entity* e) {
     staticEntities.push_back(e);
     biggerEntitiesRegister.push_back(e);
-    addEntitysComponentsToRegisters(e);
+    addEntitisComponentsToRegisters(e);
 }
 
 void Elevation::addDynamicEntity(Entity* e) {
     dynamicEntities.push_back(e);
     biggerEntitiesRegister.push_back(e);
-    addEntitysComponentsToRegisters(e);
+    addEntitisComponentsToRegisters(e);
 }
 
 
@@ -44,14 +44,14 @@ bool Elevation::removeEntity(Entity* e) {
     auto clutterEntityIt = std::find(clutterEntities.begin(), clutterEntities.end(), e);
     auto staticEntityIt = std::find(staticEntities.begin(), staticEntities.end(), e);
     auto dynamicEntityIt = std::find(dynamicEntities.begin(), dynamicEntities.end(), e);
-    auto biggerEntityIt = std::find(biggerEntities.begin(), biggerEntities.end(), e);
+    auto biggerEntityIt = std::find(biggerEntitiesRegister.begin(), biggerEntitiesRegister.end(), e);
 
     /* If entity not found in any container, return false */
     if(floorEntityIt == floorEntities.end() 
         && clutterEntityIt == clutterEntities.end() 
         && staticEntityIt == staticEntities.end() 
         && dynamicEntityIt == dynamicEntities.end()
-        && biggerEntityIt == biggerEntities.end()) {
+        && biggerEntityIt == biggerEntitiesRegister.end()) {
         return false;
     }
 
@@ -68,8 +68,8 @@ bool Elevation::removeEntity(Entity* e) {
     if(dynamicEntityIt != dynamicEntities.end()) {
         dynamicEntities.erase(dynamicEntityIt);
     }
-    if(biggerEntityIt != biggerEntities.end()) {
-        biggerEntities.erase(biggerEntityIt);
+    if(biggerEntityIt != biggerEntitiesRegister.end()) {
+        biggerEntitiesRegister.erase(biggerEntityIt);
     }
 
     /* Remove entity's components from registers.
@@ -117,7 +117,7 @@ Elevation* World::appendElevation() {
 }
 
 std::optional<Elevation*> World::getElevation(int elevation) {
-    if(elevations < 0 || elevations >= static_cast<int>(floors.size())) {
+    if(elevation < 0 || elevation >= static_cast<int>(elevations.size())) {
         return std::nullopt;
     }
 
@@ -149,7 +149,7 @@ std::optional<Entity *> World::createFloorEntity(int elevation) {
     return createFloorEntity(*containingElevationOption);
 }
 
-std::optional<Entity *> createFloorEntity(Elevation* elevation) {
+std::optional<Entity *> World::createFloorEntity(Elevation* elevation) {
     Entity* e = new Entity(elevation);
     elevation->addFloorEntity(e);
     allEntities.push_back(e);
@@ -165,7 +165,7 @@ std::optional<Entity *> World::createClutterEntity(int elevation) {
     return createClutterEntity(*containingElevationOption);
 }
 
-std::optional<Entity *> createClutterEntity(Elevation* elevation) {
+std::optional<Entity *> World::createClutterEntity(Elevation* elevation) {
     Entity* e = new Entity(elevation);
     elevation->addClutterEntity(e);
     allEntities.push_back(e);
@@ -181,7 +181,7 @@ std::optional<Entity *> World::createStaticEntity(int elevation) {
     return createStaticEntity(*containingElevationOption);
 }
 
-std::optional<Entity *> createStaticEntity(Elevation* elevation) {
+std::optional<Entity *> World::createStaticEntity(Elevation* elevation) {
     Entity* e = new Entity(elevation);
     elevation->addStaticEntity(e);
     allEntities.push_back(e);
@@ -197,7 +197,7 @@ std::optional<Entity *> World::createDynamicEntity(int elevation) {
     return createDynamicEntity(*containingElevationOption);
 }
 
-std::optional<Entity *> createDynamicEntity(Elevation* elevation) {
+std::optional<Entity *> World::createDynamicEntity(Elevation* elevation) {
     Entity* e = new Entity(elevation);
     elevation->addDynamicEntity(e);
     allEntities.push_back(e);

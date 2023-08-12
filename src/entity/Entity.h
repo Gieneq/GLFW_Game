@@ -4,6 +4,15 @@
 #include <vector>
 #include "Component.h"
 #include "Maths.h"
+#include "TextureID.h"
+
+enum class EntityType {
+    NONE,
+    FLOOR,
+    CLUTTER,
+    STATIC,
+    DYNAMIC
+};
 
 class Elevation;
 class ColorComponent;
@@ -94,6 +103,8 @@ public:
     std::optional<ControllableComponent*> addControllableComponent();
     std::optional<AnimationComponent*> addAnimationComponent(int interval);
     
+    std::optional<ColorComponent*> getColorComponent() const;
+    std::optional<TextureComponent*> getTextureComponent() const;
     
     /* Position related methods */
     float getWorldSpaceZ() const;
@@ -108,11 +119,20 @@ public:
         return size;
     }
 
+    inline void setSize(float w, float h) {
+        size.w = w;
+        size.h = h;
+    }
+
     inline float getLength() const {
         return length;
     }
+
+    inline void setLength(float len) {
+        length = len;
+    }
     
-    inline const Elevation* getContainingElevation() {
+    inline Elevation* getContainingElevation() {
         return containingElevation;
     }
 
@@ -152,11 +172,32 @@ public:
         heightElevationSpace = z;
     }
 
+        inline void addXElevationSpace(float dx) {
+        positionElevationSpace.x += dx;
+    }
+
+    inline void addYElevationSpace(float dy) {
+        positionElevationSpace.y += dy;
+    }
+
+    inline void addZElevationSpace(float dz) {
+        heightElevationSpace += dz;
+    }
+
+    Rect2F getRectElevationSpace() const;
+    Rect3F getBoxElevationSpace() const;
+    Rect3F getBoxWorldSpace() const;
+
+protected:
+    /* Quick access to popular components */
+    ColorComponent* colorComponent{nullptr};
+    TextureComponent* textureComponent{nullptr};
+
 private:
     /**
      * ID is ised to distinguish entities.
     */
-    long long id{nextId++};
+    long long id{nextID++};
     std::vector<Component*> components;
 
     /**
@@ -180,12 +221,8 @@ private:
     Vect2F positionElevationSpace{0.0F, 0.0F};
     float heightElevationSpace{0.0F};
 
-    /* Quick access to popular components */
-    ColorComponent* colorComponent{nullptr};
-    TextureComponent* textureComponent{nullptr};
-
     /* General step in adding components */
     void addComponent(Component* component);
     
-    static long long nextId;
+    static long long nextID;
 };

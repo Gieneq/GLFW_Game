@@ -4,6 +4,7 @@ list(APPEND LIB_DEPENDENCIES
   utils
   component
   world
+  loader
 )
 
 message(STATUS "   -> ${LIB_DEPENDENCIES}")

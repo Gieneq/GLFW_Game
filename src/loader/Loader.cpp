@@ -4,7 +4,6 @@
 #include "Settings.h"
 #include "lodepng.h"
 #include "IO.h"
-#include "LocationComponent.h"
 #include "GraphicsComponent.h"
 #include "AnimationComponent.h"
 #include "MovementComponent.h"
@@ -139,71 +138,53 @@ bool Loader::loadPlayer(World& world) {
     Player* player = &world.player;
 
     /* There is needed at least one Floor */
-    auto someFloorOption = world.getFloor(0);
-    if(!someFloorOption.has_value()) {
+    if(!player->getContainingElevation()) {
         std::cerr << "Error loading player: no floor 0 in world" << std::endl;
         return false;
     }
-    auto someFloor = someFloorOption.value();
-
-
-    /* Add player location component */
-    auto locatiomCmp = new LocationComponent(player);
-    player->addComponent(locatiomCmp);
-    player->locationComponent = locatiomCmp;
 
     /* Set starting position */
-    locatiomCmp->worldRect.top_left.x = 13.5485F;
-    locatiomCmp->worldRect.top_left.y = 18.5593F;
-    locatiomCmp->containingFloor = someFloor;
+    player->setXElevationSpace(13.5485F);
+    player->setYElevationSpace(18.5593F);
+    player->setZElevationSpace(0.0F); // can differ is standing on stair or small elevation
 
     /* Try adding texture to player */
-    auto playersTextureID = Loader::getLoader().getTextureDataByName("some_tiles");
+    auto playersTextureIDOption = Loader::getLoader().getTextureDataByName("some_tiles");
 
-    if(playersTextureID) {
+    if(playersTextureIDOption.has_value()) {
+        auto playersTextureID = playersTextureIDOption.value();
         /* Texture */
         std::cout << "Player has texture" << std::endl;
-        auto texture = new TextureComponent(player, locatiomCmp, (*playersTextureID).id);
-        player->addComponent(texture);
-        player->textureComponent = texture;
+        //todo need refinements 1x1 size not obvious
+        auto textureCmp = player->addTextureComponent(0.0F, 0.0F, 1.0F, 1.0F, playersTextureID.id);
+        textureCmp->setTilesetIndex(0);
     } 
     else {
         /* Color */
         std::cout << "Player has no texture, add placeholder color" << std::endl;
-        auto color = new ColorComponent(player, locatiomCmp);
-        color->r = 1.0F;
-        color->g = 0.0F;
-        color->b = 1.0F;
-        player->addComponent(color);
-        player->colorComponent = color;
+        auto colorCmp = player->addColorComponent(0.0F, 0.0F, 1.0F, 1.0F);
+        colorCmp->r = 1.0F;
+        colorCmp->g = 0.0F;
+        colorCmp->b = 1.0F;
     }
 
     /* Movement option */
-    auto movementCmp = new MovementComponent(player, locatiomCmp);
-    movementCmp->speed = Settings::Player::INITIAL_SPEED;
-    player->addComponent(movementCmp);
-    player->movementComponent = movementCmp;
+    auto movementCmp = player->addMovementComponent(Settings::Player::INITIAL_SPEED);
     movementCmp->setDirection(Direction::NONE);
 
     /* WSAD to control player */
-    auto controllableCmp = new ControllableComponent(player, movementCmp);
-    player->addComponent(controllableCmp);
-    player->controllableComponent = controllableCmp;
-
-    /* Collision detector */
-    auto collisionDetectorCmp = new CollisionDetectorComponent(player, movementCmp);
-    collisionDetectorCmp->boundingRect.size.h = 0.85F;
-    collisionDetectorCmp->boundingRect.top_left.y = 0.15F;
-    player->addComponent(collisionDetectorCmp);
-    player->collisionDetectorComponent = collisionDetectorCmp;
-
-    if(player->locationComponent->containingFloor == nullptr) {
-        std::cerr << "Player has no containing floor" << std::endl;
+    auto controllableCmpOption = player->addControllableComponent();
+    if(!controllableCmpOption.has_value()) {
+        std::cerr << "Error adding controllable component to player" << std::endl;
         return false;
     }
 
-    /* Add player to its floor */
-    player->locationComponent->containingFloor->addDynamicEntity(player);
+    /* Collision detector */
+    auto collisionDetectorCmpOption = player->addCollisionDetectorComponent(Rect2F(0.0F, 0.15F, 1.0F, 0.85F));
+    if(!collisionDetectorCmpOption.has_value()) {
+        std::cerr << "Error adding collision detector component to player" << std::endl;
+        return false;
+    }
 
     return true;
 }
@@ -742,9 +723,14 @@ bool Loader::buildWorld(World& world, const std::string mapName, const MapData& 
 
         std::cout << " + groupName: " << groupName << std::endl;
 
-        /* Create Floor inside world */
-        world.appendFloor(groupIdx);
-        Floor* recentTopFloor = world.getTopFloor().value();
+        /* Create Elevation inside world */
+        auto recentTopElevation = world.appendElevation();
+        
+        /* Check index */
+        if(recentTopElevation->getIndex() != groupIdx) {
+            std::cerr << "Error loading map file: invalid group index" << std::endl;
+            return false;
+        }
 
         /* Iterate over all layers in group */
         for(auto layerNode : groupNode.children("layer")) {
@@ -800,28 +786,24 @@ bool Loader::buildWorld(World& world, const std::string mapName, const MapData& 
             }
 
             std::cout << "     - layerDataIndices.size(): " << layerDataIndices.size() << std::endl;
-
-            /* Append layer */
-            auto appendingLayerResult = createEntitiesLayer(mapData, layerDataIndices, recentTopFloor);
-            if(!appendingLayerResult.has_value()) {
-                std::cerr << "Error loading map file: invalid layer data" << std::endl;
-                return false;
-            }
-
-            /* Append layer to last floor of the world based on layerIDX */
+            
+            /* With layer index find entity type */
+            auto entityType = EntityType::NONE;
             if(layerIdx < 2) {
-                /* 0_floor, 1_details */
-                for(auto entity : appendingLayerResult.value()) {
-                    recentTopFloor->addFloorEntity(entity);
-                }
+                entityType = EntityType::FLOOR;
             }
 
             else if(layerIdx == 2) {
-                /* 2_objects */
-                for(auto entity : appendingLayerResult.value()) {
-                    recentTopFloor->addStaticEntity(entity);
-                }
+                entityType = EntityType::STATIC;
             }
+
+            /* Append layer */
+            auto fillingResult = fillElevationWithEntities(world, recentTopElevation, entityType, mapData, layerDataIndices);
+            if(!fillingResult) {
+                std::cerr << "Error loading map file: couldn't fill Elevation with Entities" << std::endl;
+                return false;
+            }
+
 
 #ifdef USE_ONLY_0_LAYER
             break;
@@ -839,8 +821,12 @@ bool Loader::buildWorld(World& world, const std::string mapName, const MapData& 
     return true;
 }
 
-std::optional<std::vector<Entity*>> Loader::createEntitiesLayer(const MapData& mapData, const std::vector<int> layerDataIndices, Floor* containingFloor) {
-    std::vector<Entity*> layerEntities;
+
+
+
+
+bool Loader::fillElevationWithEntities(World& world, Elevation* elevation, EntityType entityType, const MapData& mapData, const std::vector<int> layerDataIndices) {
+    // std::vector<Entity*> layerEntities;
 
     int tileIndex{0};
     float tileX{0};
@@ -852,70 +838,91 @@ std::optional<std::vector<Entity*>> Loader::createEntitiesLayer(const MapData& m
             continue;
         }
 
-        /* Build tile */
-        Entity *someTile = new Entity();
-
         /* Retrive TilesetData corresponding to GID */
         auto tilesetDataOption = mapData.getTilesetDataCorrespondingToGID(tileGID);
         if(!tilesetDataOption.has_value()) {
             std::cerr << "Error getting TilesetData: invalid tile GID " << tileGID << std::endl;
-            return std::nullopt;
+            return false;
         }
 
         /* Got tileset data - proceed */
         auto tilesetData = tilesetDataOption.value();
         
-        /* Calculate world location */
+        /* Build tile - register automatically to the world */
+        std::optional<Entity*> newTileOption = std::nullopt;
+
+        if(entityType == EntityType::FLOOR) {
+            newTileOption = world.createFloorEntity(elevation);
+        }
+
+        else if(entityType == EntityType::STATIC) {
+            newTileOption = world.createStaticEntity(elevation);
+        }
+
+        else {
+            std::cerr << "Error creating tile: invalid entity type" << std::endl;
+            return false;
+        }
+
+        if(!newTileOption.has_value()) {
+            std::cerr << "Error creating tile: couldn't create entity" << std::endl;
+            return false;
+        }
+
+        Entity* tileEntity = newTileOption.value();
+
+        /* Set location in elevation space */
         tileX = static_cast<float>(tileIndex % mapData.width);
         tileY = static_cast<float>(tileIndex / mapData.width);
 
-        auto locationCmp = new LocationComponent(someTile);
-        locationCmp->worldRect.top_left.x = tileX;
-        locationCmp->worldRect.top_left.y = tileY - (tilesetData.tileHeightMultiplier > 1 ? 1 : 0);
-        locationCmp->worldRect.size.w = 1.0F * tilesetData.tileWidthMultiplier;
-        locationCmp->worldRect.size.h = 1.0F * tilesetData.tileHeightMultiplier;
-        locationCmp->containingFloor = containingFloor;
-        someTile->addComponent(locationCmp);
+        tileEntity->setXElevationSpace(tileX);
+        tileEntity->setYElevationSpace(tileY);
+        tileEntity->setZElevationSpace(0);
+        tileEntity->setSize(1.0F * tilesetData.tileWidthMultiplier, 1.0F * tilesetData.tileHeightMultiplier);
+        tileEntity->setLength(0);
 
         /* Get TileData by GID */
         auto tileDataOption = tilesetData.getTileDataByGID(tileGID);
         if(!tileDataOption.has_value()) {
             std::cerr << "Error getting TileData: invalid tile GID " << tileGID << std::endl;
-            return std::nullopt;
+            return false;
         }
         auto tileData = tileDataOption.value();
 
         /* Get Texture data from Tileset and Tile Data */
         TextureID textureID = tilesetData.textureID;
-        auto textureCmp = new TextureComponent(someTile, locationCmp, textureID, tileData.tileLID);
-        someTile->addComponent(textureCmp);
+        float textureWidth = static_cast<float>(tilesetData.tileWidth);
+        float textureHeight = static_cast<float>(tilesetData.tileHeight);
+        auto textureCmp = tileEntity->addTextureComponent(0.0F, 0.0F, textureWidth, textureHeight, textureID);
+        textureCmp->setTilesetIndex(tileData.tileLID);
 
         /* Check if tile has animation */
         if(tileData.hasAnimation()) {
-            auto animationCmp = new AnimationComponent(someTile, textureCmp, tileData.animationInterval);
+            auto animationCmpOption = tileEntity->addAnimationComponent(tileData.animationInterval);
+            if(!animationCmpOption.has_value()) {
+                std::cerr << "Error creating AnimationComponent" << std::endl;
+                return false;
+            }
+            auto animationCmp = animationCmpOption.value();
             for(const auto& animationFrameLID : tileData.animationFramesLIDs) {
                 animationCmp->appendIndex(animationFrameLID);
             }
             animationCmp->setActive(true);
-            someTile->addComponent(animationCmp);
         }
 
         /* Check if has collision rects */
         if(tileData.hasCollisionRects()) {
-            auto collisionCmp = new CollisionComponent(someTile, locationCmp);
+            auto collisionCmp = tileEntity->addCollisionComponent();
             for(const auto& collisionRect : tileData.collisionRects) {
                 collisionCmp->appendCollidionRect(collisionRect);
             }
-            someTile->addComponent(collisionCmp);
         }
 
         /* Append new tile to world */
-        layerEntities.push_back(someTile);
         ++tileIndex;
     }
-
     // std::cout << "Layer appended successfully. Total entities count: " << world.entities.size() << std::endl;
-    return layerEntities;
+    return true;
 }
 
 

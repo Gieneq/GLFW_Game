@@ -8,7 +8,6 @@
 #include "Component.h"
 #include "ControllableComponent.h"
 #include "CollisionComponents.h"
-#include "LocationComponent.h"
 
 #include "Entity.h"
 #include "Player.h"
@@ -52,7 +51,7 @@ bool GameBase::init() {
     }
 
     /* Set camera on just loaded player */
-    camera.focusOn(world.player.getComponent<LocationComponent>());
+    camera.focusOn(&world.player);
 
     /* Attach controller to just loaded player */
     userInputSystem.attachControllabe(&world.player);
@@ -64,20 +63,19 @@ bool GameBase::onKeyReleased(int key) {
     if(key == GLFW_KEY_I) {
         /* Print some informations */
         auto player = &world.player;
-        auto containingFloor = player->getFloor().value();
+        auto playersElevation = player->getContainingElevation();
 
         std::cout << " __________________________________________________________" << std::endl;
-        std::cout << "| Player location: " << player->locationComponent->worldRect.top_left << "H: " << player->locationComponent->getWorldZ() << "/" << containingFloor->getZ() << std::endl;
+        std::cout << "| Player location: " << player->getPositionWorldSpace() << "/" << playersElevation->getWorldSpaceZ() << std::endl;
         std::cout << "| Render batch size: " << render_system.getLastEntitesCount() << std::endl;
-        std::cout << "| Floor [" << containingFloor->elevation << "/" << world.getFloorsCount() << "] info:" << std::endl;
-        std::cout << "|  - entities floor:   " << containingFloor->getFloorEntities().size() << std::endl;
-        std::cout << "|  - entities clutter: " << containingFloor->getClutterEntities().size() << std::endl;
-        std::cout << "|  - entities static:  " << containingFloor->getStaticEntities().size() << std::endl;
-        std::cout << "|  - entities dynamic: " << containingFloor->getDynamicEntities().size() << std::endl;
-        std::cout << "|  - entities bigger:  " << containingFloor->getBiggerEntities().size() << std::endl;
-        std::cout << "|  - components location: " << containingFloor->getLocationComponents().size() << std::endl;
-        std::cout << "|  - components movement: " << containingFloor->getMovementComponents().size() << std::endl;
-        std::cout << "|  - components collision: " << containingFloor->getCollisionComponents().size() << std::endl;
+        std::cout << "| Floor [" << playersElevation->getIndex() << "/" << world.getElevationsCount() << "] info:" << std::endl;
+        std::cout << "|  - entities floor:   " << playersElevation->getFloorEntities().size() << std::endl;
+        std::cout << "|  - entities clutter: " << playersElevation->getClutterEntities().size() << std::endl;
+        std::cout << "|  - entities static:  " << playersElevation->getStaticEntities().size() << std::endl;
+        std::cout << "|  - entities dynamic: " << playersElevation->getDynamicEntities().size() << std::endl;
+        std::cout << "|  - entities bigger:  " << playersElevation->getBiggerEntities().size() << std::endl;
+        std::cout << "|  - components movement: " << playersElevation->getMovementComponents().size() << std::endl;
+        std::cout << "|  - components collision: " << playersElevation->getCollisionComponents().size() << std::endl;
         std::cout << "| WorldClipRect: " << render_system.renderBoxWorldSpace << std::endl;
 
         
@@ -102,12 +100,13 @@ bool GameBase::input() {
 }
 
 void GameBase::update(float dt) {
-    auto containingFloorOption = world.player.getFloor();
-    if(!containingFloorOption.has_value()) {
-        std::cerr << "Player is not on floor!" << std::endl;
-        return;
-    }
-    auto containingFloor = containingFloorOption.value();
+    // auto containingFloorOption = world.player.getFloor();
+    // if(!containingFloorOption.has_value()) {
+    //     std::cerr << "Player is not on floor!" << std::endl;
+    //     return;
+    // }
+    //todo apply to all floor with common function
+    auto containingFloor = world.player.getContainingElevation();
 
     /**
      * Update movement is for dynamicEntities only.
@@ -135,12 +134,12 @@ void GameBase::update(float dt) {
 }
 
 void GameBase::render() {
-    auto containingFloorOption = world.player.getFloor();
-    if(!containingFloorOption.has_value()) {
-        std::cerr << "Player is not on floor!" << std::endl;
-        return;
-    }
-    auto containingFloor = containingFloorOption.value();
+    // auto containingFloorOption = world.player.getFloor();
+    // if(!containingFloorOption.has_value()) {
+    //     std::cerr << "Player is not on floor!" << std::endl;
+    //     return;
+    // }
+    auto containingFloor = world.player.getContainingElevation();
     
 
     /* Render from bottom of containingFloor */
@@ -170,7 +169,8 @@ void GameBase::render() {
     if(debugView) {
         render_system.prepare();
         render_system.renderCollisionBoxes(containingFloor->getCollisionComponents());
-        render_system.renderTranslucentFilledBox(world.player.collisionDetectorComponent->getWorldSpaceBoundingRect(), 0.1F, 0.2F, 1.0F, 0.5F);
+        //->getWorldSpaceBoundingRect()
+        render_system.renderTranslucentFilledBox(world.player.collisionDetectorComponent->getElevationSpaceBoundingRect(), 0.1F, 0.2F, 1.0F, 0.5F);
 
         for(auto collisionRect: collisionsSystem.getLastCheckResults()) {
             render_system.renderTranslucentFilledBox(collisionRect, 0.0F, 1.0F, 1.0F, 0.2F);

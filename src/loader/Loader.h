@@ -174,8 +174,9 @@ protected:
     std::optional<TextureID> loadTextureFromAbsolutePath(const std::string& abs_path, int div_w, int div_h, const std::string& name);
     std::optional<TextureID> loadTextureFromAssets(const std::string& relativePath, int div_w, int div_h, const std::string& name);
     std::optional<MapData> loadMapData(World& world, const std::string& mapName);
-    std::optional<std::vector<Entity*>> Loader::createEntitiesLayer(const MapData& mapData, const std::vector<int> layerDataIndices, Floor* containingFloor);
+    // std::optional<std::vector<Entity*>> Loader::createEntitiesLayer(const MapData& mapData, const std::vector<int> layerDataIndices, Floor* containingFloor);
     bool buildWorld(World& world, const std::string mapName, const MapData& mapData);
+    bool fillElevationWithEntities(World& world, Elevation* elevation, EntityType entityType, const MapData& mapData, const std::vector<int> layerDataIndices);
 
 private:
     std::optional<std::map<std::string, int>> getMapInfo(const pugi::xml_node& mapNode);

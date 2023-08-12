@@ -3,7 +3,6 @@
 #include "Entity.h"
 #include <optional>
 
-class LocationComponent;
 class MovementComponent;
 class CollisionDetectorComponent;
 class ControllableComponent;
@@ -13,11 +12,11 @@ class Floor;
 class Player : public Entity {
 public:
     Player() = default;
+    Player(float elevationSpaceX, float elevationSpaceY, float elevationSpaceZ, float width, float height, float length, Elevation* elevation) :
+        Entity(elevationSpaceX, elevationSpaceY, elevationSpaceZ, width, height, length, elevation) {}
+    Player(float elevationSpaceX, float elevationSpaceY, Elevation* elevation) : Entity(elevationSpaceX, elevationSpaceY, elevation) {}
+    Player(Elevation* elevation) : Entity(elevation) {}
 
-    bool isOnFloor() const;
-    std::optional<Floor*> getFloor() const;
-
-    LocationComponent* locationComponent{nullptr};
     MovementComponent* movementComponent{nullptr};
     CollisionDetectorComponent* collisionDetectorComponent{nullptr};
     ControllableComponent* controllableComponent{nullptr};

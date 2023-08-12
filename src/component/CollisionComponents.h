@@ -16,10 +16,12 @@ public:
     }
 
     std::vector<Rect2F> getElevationSpaceCollisionRects() const;
+    std::vector<Rect3F> getWorldSpaceCollisionRects() const;
 
 private:
     std::vector<Rect2F> collisionRects;
 };
+
 
 class MovementComponent;
 class CollisionDetectorComponent : public Component {

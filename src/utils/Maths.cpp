@@ -10,6 +10,11 @@ Vect2F Vect2F::getTranslated(const Vect2F& translation) const {
     return Vect2F{x + translation.x, y + translation.y};
 }
 
+
+Vect2F Vect3F::getXY() const {
+    return Vect2F{x, y};
+}
+
 float Rect2F::left() const {
     return top_left.x;
 }
@@ -47,3 +52,31 @@ Rect2F Rect2F::get_scaled(Size2F scale) const {
         bottom() * scale.h
     );
 }
+
+
+/* Rect3F */
+
+float Rect3F::left() const {
+    return top_left.x;
+}
+
+float Rect3F::right() const {
+    return top_left.x + size.w;
+}
+
+float Rect3F::top() const {
+    return top_left.y;
+}
+
+float Rect3F::bottom() const {
+    return top_left.y + size.h;
+}
+
+float Rect3F::front() const {
+    return top_left.z;
+}
+
+float Rect3F::back() const {
+    return top_left.z + size.l;
+}
+

@@ -12,6 +12,7 @@ enum class MovementControlKey {
 };
 
 class Entity;
+class MovementComponent;
 class ControllableComponent : public Component {
 public:
     ControllableComponent(Entity* e, MovementComponent* move);

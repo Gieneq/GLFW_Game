@@ -9,6 +9,7 @@ public:
     ColorComponent(Entity* e, float relX, float relY, float boxWidth, float boxHeight) : Component(e), size{boxWidth, boxHeight} {}
     virtual ~ColorComponent() = default;
     Vect2F getPositionElevationSpace() const;
+    Rect2F getRectElevationSpace() const;
     Vect3F getPositionWorldSpace() const;
     Size2F getSize() const { return size; }
     float r{0.56f};
@@ -28,6 +29,7 @@ public:
     virtual ~TextureComponent() = default;
 
     Vect2F getPositionElevationSpace() const;
+    Rect2F getRectElevationSpace() const;
     Vect3F getPositionWorldSpace() const;
     Size2F getSize() const { return size; }
 

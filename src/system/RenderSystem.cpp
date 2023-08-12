@@ -3,7 +3,6 @@
 #include "Window.h"
 #include "Loader.h"
 #include "GraphicsComponent.h"
-#include "LocationComponent.h"
 #include "CollisionComponents.h"
 #include "Entity.h"
 #include <algorithm>
@@ -26,7 +25,7 @@ void RenderSystem::attachCamera(Camera *cam) {
 
 
 void RenderSystem::renderTexturedBox(const TextureData& textureData, const Rect2F& worldRect, int tilesetIndex) {
-    auto eyeRect = worldRect.get_translated(camera->position.get_negated()).get_scaled(camera->zoom);
+    auto eyeRect = worldRect.get_translated(camera->position.getXY().get_negated()).get_scaled(camera->zoom);
     auto projRect = Rect2F{eyeRect.top_left.x, -eyeRect.top_left.y - eyeRect.size.h, eyeRect.size.w, eyeRect.size.h}.get_scaled(Size2F{1.0F/aspect_ratio, 1.0F});
 
     /** 
@@ -94,7 +93,7 @@ void RenderSystem::renderTexturedBox(const TextureData& textureData, const Rect2
 }
 
 void RenderSystem::renderFilledBox(Rect2F worldRect, float r, float g, float b) {
-    auto eyeRect = worldRect.get_translated(camera->position.get_negated()).get_scaled(camera->zoom);
+    auto eyeRect = worldRect.get_translated(camera->position.getXY().get_negated()).get_scaled(camera->zoom);
     auto projRect = Rect2F{eyeRect.top_left.x, -eyeRect.top_left.y - eyeRect.size.h, eyeRect.size.w, eyeRect.size.h}.get_scaled(Size2F{1.0F/aspect_ratio, 1.0F});
     glColor3f(r, g, b);
 
@@ -107,7 +106,7 @@ void RenderSystem::renderFilledBox(Rect2F worldRect, float r, float g, float b) 
 }
 
 void RenderSystem::renderTranslucentFilledBox(Rect2F worldRect, float r, float g, float b, float fillingAlpha) {
-    auto eyeRect = worldRect.get_translated(camera->position.get_negated()).get_scaled(camera->zoom);
+    auto eyeRect = worldRect.get_translated(camera->position.getXY().get_negated()).get_scaled(camera->zoom);
     auto projRect = Rect2F{eyeRect.top_left.x, -eyeRect.top_left.y - eyeRect.size.h, eyeRect.size.w, eyeRect.size.h}.get_scaled(Size2F{1.0F/aspect_ratio, 1.0F});
 
     float vertices[] = {
@@ -153,21 +152,20 @@ void RenderSystem::prepare() {
 }
 
 void RenderSystem::processEntity(const Entity* entity) {
-    auto locationCmp = entity->getComponent<LocationComponent>();
-    if(locationCmp) {
-        if(renderBoxWorldSpace.checkIntersection(locationCmp->worldRect)) {
-            auto entityData = EntityRenderData{
-                entity, 
-                /* Sort value */
-                locationCmp->worldRect.top_left.y + locationCmp->worldRect.size.h
-            };
-            enititesBatch.push_back(entityData);
-        }
+    if(renderBoxWorldSpace.checkIntersection(entity->getRectElevationSpace())) {
+        auto entityData = EntityRenderData{
+            entity, 
+            /* Sort value */
+            // locationCmp->worldRect.top_left.y + locationCmp->worldRect.size.h
+            entity->getBottomElevationSpace()
+        };
+        enititesBatch.push_back(entityData);
     }
 }
 
 void RenderSystem::render(bool sorted) {
     lastEntitesCount = static_cast<int>(enititesBatch.size());
+    //todo collect all per loop
 
     /* Sort entities by Y axis */
     if(sorted) {
@@ -183,10 +181,12 @@ void RenderSystem::render(bool sorted) {
 void RenderSystem::renderCollisionBoxes(const std::vector<CollisionComponent*>& collisionComponents) {
     /* Render entities */
     for(auto collisionComponent : collisionComponents) {
-        auto rects = collisionComponent->getWorldSpaceCollisionRects();
-        for(auto worldRect : rects) {
-            if(renderBoxWorldSpace.checkIntersection(worldRect)) {
-                renderTranslucentFilledBox(worldRect, 0.9F, 0.0F, 1.0F, 0.5F);
+        auto WorldSpaceRects = collisionComponent->getWorldSpaceCollisionRects();
+        for(auto worldRect : WorldSpaceRects) {
+            auto flattenRect = worldRect.getFlatten();
+            //todo
+            if(renderBoxWorldSpace.checkIntersection(flattenRect)) {
+                renderTranslucentFilledBox(flattenRect, 0.9F, 0.0F, 1.0F, 0.5F);
             }
         }
     }
@@ -194,24 +194,27 @@ void RenderSystem::renderCollisionBoxes(const std::vector<CollisionComponent*>& 
 
 void RenderSystem::renderEntity(const Entity* entity) {
     /* Textured quad rendering */
-    auto texture_component = entity->getComponent<TextureComponent>();
-    if(texture_component) {
+    auto textureCmpOption = entity->getTextureComponent();
+    if(textureCmpOption.has_value()) {
+        auto textureCmp = textureCmpOption.value();
 
         /* Check if has valid texture */
-        auto textureData = Loader::getLoader().getTextureDataByID(texture_component->textureID);
+        auto textureData = Loader::getLoader().getTextureDataByID(textureCmp->getTextureID());
         if(!textureData) {
             /* Corrupted */
-            renderFilledBox(texture_component->getWorldRect(), 1.0F, 0.0F, 0.0F);
+            renderFilledBox(textureCmp->getRectElevationSpace(), 1.0F, 0.0F, 0.0F);
         }
         else {
-            renderTexturedBox(*textureData, texture_component->getWorldRect(), texture_component->tilesetIndex);
+            renderTexturedBox(*textureData, textureCmp->getRectElevationSpace(), textureCmp->getTilesetIndex());
         }
     }
 
     /* Colored quad rendering */
-    auto color_component = entity->getComponent<ColorComponent>();
-    if(color_component) {
-        renderFilledBox(color_component->getWorldRect(), color_component->r, color_component->g, color_component->b);
+    auto colorCmpOption = entity->getColorComponent();
+    if(colorCmpOption.has_value()) {
+        auto colorCmp = colorCmpOption.value();
+        //todo colorCmp->a
+        renderFilledBox(colorCmp->getRectElevationSpace(), colorCmp->r, colorCmp->g, colorCmp->b);
     }
 }
 
