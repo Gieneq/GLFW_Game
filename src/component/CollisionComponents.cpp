@@ -51,16 +51,14 @@ void CollisionDetectorComponent::onCollision(std::vector<Rect2F> collidingRectsE
         
         else if(movementCmp->direction.x < 0) {
             movementCmp->direction.x = 0;
-            parent->getCuboidElevationSpace()->topLeft.x = rect.left();
+            parent->getCuboidElevationSpace()->topLeft.x = rect.right();
             //todo offset to fit bounding box
         }
 
         /* Align vertically */
         if(movementCmp->direction.y > 0) {
             movementCmp->direction.y = 0;
-            parent->getCuboidElevationSpace()->topLeft.y = rect.top() - boundingRect.size.h;
-            float diffY = parent->getCuboidElevationSpace()->size.h - boundingRect.bottom();
-            parent->getCuboidElevationSpace()->topLeft.y += diffY;
+            parent->getCuboidElevationSpace()->topLeft.y = rect.top() - (boundingRect.size.h + boundingRect.topLeft.y);
         } 
         
         else if(movementCmp->direction.y < 0) {

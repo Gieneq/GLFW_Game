@@ -12,6 +12,8 @@ list(APPEND LIB_DEPENDENCIES
 message(STATUS "   -> ${LIB_DEPENDENCIES}")
 
 add_library(loader 
+  LoaderDatatypes.cpp
+  LoaderBase.cpp
   Loader.cpp
 )
 

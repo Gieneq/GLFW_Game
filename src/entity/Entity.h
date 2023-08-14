@@ -144,4 +144,6 @@ private:
     EntityType type{EntityType::NONE};
     
     static long long nextID;
+
+    friend class Loader;
 };

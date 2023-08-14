@@ -5,33 +5,76 @@
 
 class TextureData {
 public:
-    TextureData() = default;
-    TextureData(const std::string& absolute_path, int width, int height, int div_width, int div_height, TextureID id, const std::string& name) : absolute_path(absolute_path), width(width), height(height), tileWidth(div_width), tileHeight(div_height), id(id), name(name) {
-        tilesPerRow = width / div_width;
+    const std::string& getAbsolutePath() const {
+        return absolute_path;
     }
-    std::string absolute_path{""};
-    std::string name{""};
-    int width{0};
-    int height{0};
-    int tileWidth{1};
-    int tileHeight{1};
-    int tilesPerRow{1};
-    TextureID id{};
-    
+
+    const std::string& getName() const {
+        return name;
+    }
+
+    int getImageWidth() const {
+        return imageWidth;
+    }
+
+    int getImageHeight() const {
+        return imageHeight;
+    }
+
+    int getTileWidth() const {
+        return tileWidth;
+    }
+
+    int getTileHeight() const {
+        return tileHeight;
+    }
+
+    int getRows() const {
+        return rows;
+    }
+
+    int getColumns() const {
+        return columns;
+    }
+
+    int getTilesCount() const {
+        return tilesCount;
+    }
+
+    TextureID getTextureID() {
+        return id;
+    }
+
     size_t operator()(const TextureData& textureData) const {
-        return id.value;
+        return id.getID();
     }
 
     bool operator==(const TextureData& other) const {
-        return id.value == other.id.value;
+        return id.getID() == other.id.getID();
     }
 
     bool operator<(const TextureData& other) const {
-        return id.value < other.id.value;
+        return id.getID() < other.id.getID();
     }
 
     friend std::ostream& operator<<(std::ostream& os, const TextureData& texture_data) {
-        os << "\'" << texture_data.name << "\'" << " (" << texture_data.absolute_path << ") " << texture_data.width << "x" << texture_data.height << " (" << texture_data.tileWidth << "x" << texture_data.tileHeight << ") GPU: " << texture_data.id;
+        os << "\'" << texture_data.name << "\'" << " (" << texture_data.absolute_path << ") " << texture_data.getImageWidth() << "x" << texture_data.getImageHeight() << " (" << texture_data.getTileWidth() << ", " << texture_data.getTileHeight() << ") GPU: " << texture_data.id;
         return os;
     }
+
+private:    
+    std::string absolute_path{""};
+    std::string name{""};
+    int imageWidth{300};
+    int imageHeight{300};
+    int tileWidth{20};
+    int tileHeight{20};
+    int rows{15};
+    int columns{15};
+    int tilesCount{15*15};
+    TextureID id{};
+
+    TextureData() = default;
+    TextureData(const std::string& absolute_path, int imageWidth, int imageHeight, TextureID id, const std::string& name) : absolute_path(absolute_path), imageWidth(imageWidth), imageHeight(imageHeight), id(id), name(name) {}
+    friend class LoaderBase;
 };

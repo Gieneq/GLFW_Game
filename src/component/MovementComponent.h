@@ -12,11 +12,12 @@ public:
     void update(float dt);
     void setDirection(float x, float y, float z);
     void setDirectionUnsafe(float x, float y, float z);
+    void stop();
 
     float speed{1.0F};
 
 private:
-    Vect3F direction{0.0F, 1.0F, 0.0F};
+    Vect3F direction{0.0F, 0.0F, 0.0F};
     Vect3F getTranslation(float dt) const;
 
     friend class CollisionDetectorComponent;

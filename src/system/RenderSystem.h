@@ -8,34 +8,38 @@
 #include "Loader.h"
 
 
-class Entity;
-class Elevation;
-class CollisionComponent;
 
+class Entity;
 struct EntityBatchData {
     const Entity* entity;
     float sortValue;
 
-    bool operator<(const EntityRenderData& other) const {
+    bool operator<(const EntityBatchData& other) const {
         return sortValue < other.sortValue;
     }
 
-    bool operator==(const EntityRenderData& other) const {
-        return sortValue < other.sortValue;
+    bool operator==(const EntityBatchData& other) const {
+        return sortValue == other.sortValue;
     }
 };
 
+class Elevation;
+class CollisionComponent;
 class RenderSystem : public RenderSystemBase {
 public:
     RenderSystem() : RenderSystemBase() {}
+    virtual ~RenderSystem() = default;
 
-    
     void loopStart() override;
     void loopEnd() override;
+
     void batchStart();
     void batchAppendEntity(Entity* e);
+    void batchAppendElevation(Elevation* elevation);
     void batchEnd(bool sorted = false);
     void renderBatch();
+
+    void renderCollisionBoxes(const std::vector<CollisionComponent*>& collisionComponents);
 
     
     inline int getLastBatchEntitesCount() const {
@@ -47,6 +51,7 @@ public:
     }
 
 private:
+    void renderEntityData(const EntityBatchData& entityData);
     int lastBatchEntitesCount{0};
 
     int recentLoopEntitesCount{0};

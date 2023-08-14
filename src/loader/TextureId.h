@@ -2,14 +2,22 @@
 #include "GLCommon.h"
 #include <iostream>
 
+class TextureData;
 class TextureID {
 public:
     TextureID() = default;
     TextureID(GLuint id) : value(id) {}
-    GLuint value{0};
 
     bool hasID() const {
         return value != 0;
+    }
+
+    GLuint getID() const {
+        return value;
+    }
+
+    TextureData* getAssosiatedTextureData() const {
+        return assosiatedTextureData;
     }
 
     size_t operator()(const TextureID& id) const {
@@ -28,4 +36,11 @@ public:
         os << id.value;
         return os;
     }
+    
+private:
+    GLuint value{0};
+    TextureData* assosiatedTextureData{nullptr};
+
+    friend class TextureData;
+    friend class LoaderBase;
 };

@@ -11,6 +11,12 @@ void MovementComponent::setDirection(float x, float y, float z) {
     }
 }
 
+void MovementComponent::stop() {
+    direction.x = 0.0F;
+    direction.y = 0.0F;
+    direction.z = 0.0F;
+}
+
 void MovementComponent::setDirectionUnsafe(float x, float y, float z) {
     direction.x = x;
     direction.y = y;

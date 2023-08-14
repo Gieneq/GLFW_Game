@@ -67,7 +67,7 @@ bool GameBase::onKeyReleased(int key) {
 
         std::cout << " __________________________________________________________" << std::endl;
         std::cout << "| Player location: " << player->getCuboidWorldSpace().topLeft << "/" << playersElevation->getWorldSpaceZ() << std::endl;
-        std::cout << "| Render batch size: " << render_system.getLastEntitesCount() << std::endl;
+        std::cout << "| Render rendered entities: " << render_system.getLastLoopEntitesCount() << std::endl;
         std::cout << "| Floor [" << playersElevation->getIndex() << "/" << world.getElevationsCount() << "] info:" << std::endl;
         std::cout << "|  - entities floor:   " << playersElevation->getFloorEntities().size() << std::endl;
         std::cout << "|  - entities clutter: " << playersElevation->getClutterEntities().size() << std::endl;
@@ -76,7 +76,7 @@ bool GameBase::onKeyReleased(int key) {
         std::cout << "|  - entities bigger:  " << playersElevation->getBiggerEntities().size() << std::endl;
         std::cout << "|  - components movement: " << playersElevation->getMovementComponents().size() << std::endl;
         std::cout << "|  - components collision: " << playersElevation->getCollisionComponents().size() << std::endl;
-        std::cout << "| WorldClipRect: " << render_system.renderBoxWorldSpace << std::endl;
+        std::cout << "| WorldClipRect: " << render_system.getRenderBoxWorldSpace() << std::endl;
 
         
         std::cout << std::endl;
@@ -86,7 +86,7 @@ bool GameBase::onKeyReleased(int key) {
     if(key == GLFW_KEY_O) {
         /* Toggle debug view */
         debugView = !debugView;
-        render_system.rendeDebugView = debugView;
+        render_system.debugView = debugView;
         return true;
     }
 
@@ -136,14 +136,16 @@ void GameBase::update(float dt) {
 void GameBase::render() {
     render_system.loopStart();
 
+    render_system.batchStart();
     auto containingFloor = world.player.getContainingElevation();
-    render_system.processElevation(containingFloor);
-
+    render_system.batchAppendElevation(containingFloor);
+    render_system.batchEnd();
+    render_system.renderBatch();
 
     /* Debug shapes */
     if(debugView) {
         render_system.renderCollisionBoxes(containingFloor->getCollisionComponents());
-        //->getWorldSpaceBoundingRect()
+
         render_system.renderTranslucentFilledBox(world.player.collisionDetectorComponent->getElevationSpaceBoundingRect(), 0.1F, 0.2F, 1.0F, 0.5F);
 
         for(auto collisionRect: collisionsSystem.getLastCheckResults()) {

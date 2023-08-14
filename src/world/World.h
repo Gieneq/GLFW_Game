@@ -87,6 +87,8 @@ private:
 
     /* World manages elevation indices */
     friend class World;
+    friend class Loader;
+    friend class Entity;
 };
 
 

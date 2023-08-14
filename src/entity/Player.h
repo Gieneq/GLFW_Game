@@ -14,9 +14,13 @@ public:
     Player() = default;
     Player(Elevation* elevation) : Entity(elevation, EntityType::DYNAMIC) {}
 
+    MovementComponent* addMovementComponent(float speed);
+    std::optional<CollisionDetectorComponent*> addCollisionDetectorComponent(const Rect2F& boundingRect);  
+    std::optional<ControllableComponent*> addControllableComponent();
+
     MovementComponent* movementComponent{nullptr};
     CollisionDetectorComponent* collisionDetectorComponent{nullptr};
     ControllableComponent* controllableComponent{nullptr};
-    TextureComponent* textureComponent{nullptr};
-    ColorComponent* colorComponent{nullptr};
+    // TextureComponent* textureComponent{nullptr};
+    // ColorComponent* colorComponent{nullptr};
 };

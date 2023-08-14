@@ -63,7 +63,7 @@ bool RenderSystemBase::isProjectedRectVisible(const Rect2F& projectionRect) cons
 
 
 
-void RenderSystemBase::renderTexturedBox(const Rect2F& worldRect, const TextureData& textureData, int tilesetIndex) {
+void RenderSystemBase::renderTexturedBox(const Rect2F& worldRect, TextureData* textureData, int tilesetIndex) {
     auto projRect = getProjectionRect(worldRect);
     if(!isProjectedRectVisible(projRect)) {
         return;
@@ -75,16 +75,16 @@ void RenderSystemBase::renderTexturedBox(const Rect2F& worldRect, const TextureD
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glBindTexture(GL_TEXTURE_2D, textureData.id.value);
+    glBindTexture(GL_TEXTURE_2D, textureData->getTextureID().getID());
     glEnable(GL_TEXTURE_2D);
         
-    int u_idx = tilesetIndex % textureData.tilesPerRow;
-    int v_idx = tilesetIndex / textureData.tilesPerRow;
+    int u_idx = tilesetIndex % textureData->getColumns();
+    int v_idx = tilesetIndex / textureData->getColumns();
 
-    float u1 = static_cast<float>((u_idx + 0) * textureData.tileWidth) / static_cast<float>(textureData.width);
-    float u2 = static_cast<float>((u_idx + 1) * textureData.tileWidth) / static_cast<float>(textureData.width);
-    float v1 = static_cast<float>((v_idx + 0) * textureData.tileHeight) / static_cast<float>(textureData.height);
-    float v2 = static_cast<float>((v_idx + 1) * textureData.tileHeight) / static_cast<float>(textureData.height);
+    float u1 = static_cast<float>((u_idx + 0) * textureData->getTileWidth()) / static_cast<float>(textureData->getImageWidth());
+    float u2 = static_cast<float>((u_idx + 1) * textureData->getTileWidth()) / static_cast<float>(textureData->getImageWidth());
+    float v1 = static_cast<float>((v_idx + 0) * textureData->getTileHeight()) / static_cast<float>(textureData->getImageHeight());
+    float v2 = static_cast<float>((v_idx + 1) * textureData->getTileHeight()) / static_cast<float>(textureData->getImageHeight());
 
     glBegin(GL_QUADS);
     glTexCoord2f(u1, v1);
@@ -175,22 +175,6 @@ void RenderSystemBase::renderTranslucentFilledBox(const Rect2F& worldRect, float
     // Disable vertex arrays after drawing
     glDisableClientState(GL_VERTEX_ARRAY);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

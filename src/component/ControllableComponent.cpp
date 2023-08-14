@@ -70,10 +70,10 @@ void ControllableComponent::updateMovement() {
         controlledMovement->setDirectionUnsafe(0.0F, 0.0F, 0.0F);
     } 
     else if(lastPressedKey == MovementControlKey::UP) {
-        controlledMovement->setDirectionUnsafe(0.0F, 1.0F, 0.0F);
+        controlledMovement->setDirectionUnsafe(0.0F, -1.0F, 0.0F);
     }
     else if(lastPressedKey == MovementControlKey::DOWN) {
-        controlledMovement->setDirectionUnsafe(0.0F, -1.0F, 0.0F);
+        controlledMovement->setDirectionUnsafe(0.0F, 1.0F, 0.0F);
     }
     else if(lastPressedKey == MovementControlKey::LEFT) {
         controlledMovement->setDirectionUnsafe(-1.0F, 0.0F, 0.0F);

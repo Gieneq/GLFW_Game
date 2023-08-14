@@ -29,8 +29,8 @@ private:
 
 class TextureComponent : public Component {
 public:
-    TextureComponent(Entity* e, float relX, float relY, float boxWidth, float boxHeight, TextureID id) : Component(e), textureID{id} {}
-    TextureComponent(Entity* e, float relX, float relY, float boxWidth, float boxHeight, TextureID id, int tilesetIdx) : Component(e), textureID{id}, tilesetIndex{tilesetIdx} {}
+    TextureComponent(Entity* e, float relX, float relY, float boxWidth, float boxHeight, TextureID id) : Component(e), rectRelative(relX, relY, boxWidth, boxHeight), textureID{id} {}
+    TextureComponent(Entity* e, float relX, float relY, float boxWidth, float boxHeight, TextureID id, int tilesetIdx) : Component(e), textureID{id}, rectRelative(relX, relY, boxWidth, boxHeight), tilesetIndex{tilesetIdx} {}
     virtual ~TextureComponent() = default;
 
     Rect2F* getRectRelative() {

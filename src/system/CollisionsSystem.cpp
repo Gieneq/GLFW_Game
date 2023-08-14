@@ -27,7 +27,7 @@ void CollisionsSystem::update(const std::vector<CollisionComponent*>& collisionC
         /* Test collision with all entities except considered entity with collision detector */
         for (auto collCmp : collisionCmps) {
             auto otherEntity = collCmp->getParentEntity();
-            if(!otherEntity && (otherEntity->getId() != entity->getId())) {
+            if(otherEntity && (otherEntity->getId() != entity->getId())) {
                 /* Other entity has collision compoinent */
                 auto otherCollisionRects = collCmp->getElevationSpaceCollisionRects();
                 for (auto& otherCollisionRect : otherCollisionRects) {

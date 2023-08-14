@@ -25,26 +25,39 @@ void Entity::addComponent(Component* component) {
 MovementComponent* Entity::addMovementComponent(float speed) {
     auto movementComponent = new MovementComponent(this);
     movementComponent->speed = speed;
-    movementComponent->setDirection(0.0F, 1.0F, 0.0F);
+    movementComponent->stop();
     addComponent(movementComponent);
+
+    
+    /* Register movement component */
+    containingElevation->addEntitisComponentsToRegisters(this);
+
     return movementComponent;
 }
 
 ColorComponent* Entity::addColorComponent(float relX, float relY, float boxWidth, float boxHeight) {
     auto colorComponent = new ColorComponent(this, relX, relY, boxWidth, boxHeight);
     addComponent(colorComponent);
+    
+    this->colorComponent = colorComponent;
     return colorComponent;
 }
 
 TextureComponent* Entity::addTextureComponent(float relX, float relY, float boxWidth, float boxHeight, TextureID id) {
     auto textureComponent = new TextureComponent(this, relX, relY, boxWidth, boxHeight, id);
     addComponent(textureComponent);
+    
+    this->textureComponent = textureComponent;
     return textureComponent;
 }
 
 CollisionComponent* Entity::addCollisionComponent() {
     auto collisionComponent = new CollisionComponent(this);
     addComponent(collisionComponent);
+
+    /* Register collision component */
+    containingElevation->addEntitisComponentsToRegisters(this);
+
     return collisionComponent;
 }
 
@@ -100,6 +113,7 @@ std::optional<ColorComponent*> Entity::getColorComponent() const {
     if(!colorComponent) {
         return std::nullopt;
     }
+    
     return colorComponent;
 }
 

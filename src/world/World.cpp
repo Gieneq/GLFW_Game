@@ -17,7 +17,7 @@ void Elevation::addEntitisComponentsToRegisters(Entity* e) {
 
 void Elevation::addFloorEntity(Entity* e) {
     floorEntities.push_back(e);
-    addEntitisComponentsToRegisters(e);
+    addEntitisComponentsToRegisters(e); //todo remove - on start nothing inside
 }
 
 void Elevation::addClutterEntity(Entity* e) {
