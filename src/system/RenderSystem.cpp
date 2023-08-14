@@ -7,149 +7,57 @@
 #include "Entity.h"
 #include <algorithm>
 
-#define DEBUG_TEXTURE_BORDERS
 
-void RenderSystem::init() {
-    setViewportDimensions(Window::width(), Window::height());
+
+
+void RenderSystem::loopStart() {
+    RenderSystemBase::loopStart();
 }
 
-void RenderSystem::setViewportDimensions(int width, int height) {
-    viewport_width = width;
-    viewport_height = height;
-    aspect_ratio = static_cast<float>(viewport_width) / static_cast<float>(viewport_height);
-}
-
-void RenderSystem::attachCamera(Camera *cam) {
-    camera = cam;
+void RenderSystem::loopEnd() {
+    RenderSystemBase::loopEnd();
+    
+    lastBatchEntitesCount = recentLoopEntitesCount;
+    recentLoopEntitesCount = 0;
 }
 
 
-void RenderSystem::renderTexturedBox(const TextureData& textureData, const Rect2F& worldRect, int tilesetIndex) {
-    auto eyeRect = worldRect.get_translated(camera->position.getXY().get_negated()).get_scaled(camera->zoom);
-    auto projRect = Rect2F{eyeRect.top_left.x, -eyeRect.top_left.y - eyeRect.size.h, eyeRect.size.w, eyeRect.size.h}.get_scaled(Size2F{1.0F/aspect_ratio, 1.0F});
-
-    /** 
-     * Filter notvisible objects.
-     * Check if left < -1 or right > 1 or top < -1 or bottom > 1
-     * */
-
-    if(projRect.right() < -1.0F || projRect.left() > 1.0F || projRect.bottom() < -1.0F || projRect.top() > 1.0F) {
-        //todo consider moving to world space
-        return;
-    }
-
-    glColor3f(1.0F, 1.0F, 1.0F);
-
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glBindTexture(GL_TEXTURE_2D, textureData.id.value);
-    glEnable(GL_TEXTURE_2D);
-        
-    int u_idx = tilesetIndex % textureData.tilesPerRow;
-    int v_idx = tilesetIndex / textureData.tilesPerRow;
-
-    float u1 = static_cast<float>((u_idx + 0) * textureData.tileWidth) / static_cast<float>(textureData.width);
-    float u2 = static_cast<float>((u_idx + 1) * textureData.tileWidth) / static_cast<float>(textureData.width);
-    float v1 = static_cast<float>((v_idx + 0) * textureData.tileHeight) / static_cast<float>(textureData.height);
-    float v2 = static_cast<float>((v_idx + 1) * textureData.tileHeight) / static_cast<float>(textureData.height);
-
-    glBegin(GL_QUADS);
-    glTexCoord2f(u1, v1);
-    glVertex2f(projRect.left(), projRect.bottom());
-    glTexCoord2f(u1, v2);
-    glVertex2f(projRect.left(), projRect.top());
-    glTexCoord2f(u2, v2);
-    glVertex2f(projRect.right(), projRect.top());
-    glTexCoord2f(u2, v1);
-    glVertex2f(projRect.right(), projRect.bottom());
-    glEnd();
-
-
-    glDisable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glDisable(GL_BLEND);
-
-    if(rendeDebugView) {
-        glColor3f(1.0F, 0.0F, 0.0F);
-        float vertices[] = {
-            projRect.left(), projRect.bottom(), // Bottom-left vertex
-            projRect.left(), projRect.top(), // Top-left vertex
-            projRect.right(), projRect.top(), // Top-right vertex
-            projRect.right(), projRect.bottom()  // Bottom-right vertex
-        };
-        glEnableClientState(GL_VERTEX_ARRAY);
-
-        // Define the vertex array data
-        glVertexPointer(2, GL_FLOAT, 0, vertices);
-
-        // Draw the rectangle using GL_LINE_LOOP to form the borders
-        glDrawArrays(GL_LINE_LOOP, 0, 4);
-
-        // Disable vertex arrays after drawing
-        glDisableClientState(GL_VERTEX_ARRAY);
-    }
-}
-
-void RenderSystem::renderFilledBox(Rect2F worldRect, float r, float g, float b) {
-    auto eyeRect = worldRect.get_translated(camera->position.getXY().get_negated()).get_scaled(camera->zoom);
-    auto projRect = Rect2F{eyeRect.top_left.x, -eyeRect.top_left.y - eyeRect.size.h, eyeRect.size.w, eyeRect.size.h}.get_scaled(Size2F{1.0F/aspect_ratio, 1.0F});
-    glColor3f(r, g, b);
-
-    glBegin(GL_QUADS);
-    glVertex2f(projRect.left(), projRect.bottom());
-    glVertex2f(projRect.left(), projRect.top());
-    glVertex2f(projRect.right(), projRect.top());
-    glVertex2f(projRect.right(), projRect.bottom());
-    glEnd();
-}
-
-void RenderSystem::renderTranslucentFilledBox(Rect2F worldRect, float r, float g, float b, float fillingAlpha) {
-    auto eyeRect = worldRect.get_translated(camera->position.getXY().get_negated()).get_scaled(camera->zoom);
-    auto projRect = Rect2F{eyeRect.top_left.x, -eyeRect.top_left.y - eyeRect.size.h, eyeRect.size.w, eyeRect.size.h}.get_scaled(Size2F{1.0F/aspect_ratio, 1.0F});
-
-    float vertices[] = {
-        projRect.left(), projRect.bottom(), // Bottom-left vertex
-        projRect.left(), projRect.top(), // Top-left vertex
-        projRect.right(), projRect.top(), // Top-right vertex
-        projRect.right(), projRect.bottom()  // Bottom-right vertex
-    };
-
-    /* Draw filling */
-    glColor4f(r, g, b, fillingAlpha);
-    glEnable(GL_BLEND);
-    glBegin(GL_QUADS);
-    glVertex2f(projRect.left(), projRect.bottom());
-    glVertex2f(projRect.left(), projRect.top());
-    glVertex2f(projRect.right(), projRect.top());
-    glVertex2f(projRect.right(), projRect.bottom());
-    glEnd();
-    glDisable(GL_BLEND);
-
-    /* Draw borders */
-    glColor3f(r, g, b);
-    glEnableClientState(GL_VERTEX_ARRAY);
-
-    // Define the vertex array data
-    glVertexPointer(2, GL_FLOAT, 0, vertices);
-
-    // Draw the rectangle using GL_LINE_LOOP to form the borders
-    glDrawArrays(GL_LINE_LOOP, 0, 4);
-
-    // Disable vertex arrays after drawing
-    glDisableClientState(GL_VERTEX_ARRAY);
-}
-
-void RenderSystem::prepare() {
+void RenderSystem::batchStart() {
     enititesBatch.clear();
-
+    
     /* Cleare render box in world space from camera position */
+    // todo move to camera
     renderBoxWorldSpace.size.w = 2.0F / (1.0F * camera->zoom.w * (1.0F / aspect_ratio));
     renderBoxWorldSpace.size.h = 2.0F / (1.0F * camera->zoom.h);
-    renderBoxWorldSpace.top_left.x = camera->position.x - renderBoxWorldSpace.size.w / 2.0F;
-    renderBoxWorldSpace.top_left.y = camera->position.y - renderBoxWorldSpace.size.h / 2.0F;
+    renderBoxWorldSpace.topLeft.x = camera->position.x - renderBoxWorldSpace.size.w / 2.0F;
+    renderBoxWorldSpace.topLeft.y = camera->position.y - renderBoxWorldSpace.size.h / 2.0F;
+    //todo probably 3D
 }
+
+void RenderSystem::batchAppendEntity(Entity* e) {
+    enititesBatch.push_back(EntityBatchData{
+        e, 
+        e->getCuboidElevationSpace()->topLeft.y
+    });
+}
+
+void RenderSystem::batchEnd(bool sorted) {
+    if (sorted) {
+        // std::sort(enititesBatch.begin(), enititesBatch.end(), [](const Entity* a, const Entity* b) {
+        //     return a->position.z < b->position.z; #Err
+        // });
+        std::sort(enititesBatch.begin(), enititesBatch.end());
+    }
+    recentLoopEntitesCount += enititesBatch.size();
+}
+
+void RenderSystem::renderBatch() {
+    /* Render entities */
+    for(auto entityData : enititesBatch) {
+        renderEntity(entityData.entity);
+    }
+}
+
 
 void RenderSystem::processEntity(const Entity* entity) {
     if(renderBoxWorldSpace.checkIntersection(entity->getRectElevationSpace())) {
@@ -163,34 +71,7 @@ void RenderSystem::processEntity(const Entity* entity) {
     }
 }
 
-void RenderSystem::render(bool sorted) {
-    lastEntitesCount = static_cast<int>(enititesBatch.size());
-    //todo collect all per loop
 
-    /* Sort entities by Y axis */
-    if(sorted) {
-        std::sort(enititesBatch.begin(), enititesBatch.end());
-    }
-
-    /* Render entities */
-    for(auto entityData : enititesBatch) {
-        renderEntity(entityData.entity);
-    }
-}
-
-void RenderSystem::renderCollisionBoxes(const std::vector<CollisionComponent*>& collisionComponents) {
-    /* Render entities */
-    for(auto collisionComponent : collisionComponents) {
-        auto WorldSpaceRects = collisionComponent->getWorldSpaceCollisionRects();
-        for(auto worldRect : WorldSpaceRects) {
-            auto flattenRect = worldRect.getFlatten();
-            //todo
-            if(renderBoxWorldSpace.checkIntersection(flattenRect)) {
-                renderTranslucentFilledBox(flattenRect, 0.9F, 0.0F, 1.0F, 0.5F);
-            }
-        }
-    }
-}
 
 void RenderSystem::renderEntity(const Entity* entity) {
     /* Textured quad rendering */
@@ -217,6 +98,314 @@ void RenderSystem::renderEntity(const Entity* entity) {
         renderFilledBox(colorCmp->getRectElevationSpace(), colorCmp->r, colorCmp->g, colorCmp->b);
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// #define DEBUG_TEXTURE_BORDERS
+
+// void RenderSystem::init() {
+//     setViewportDimensions(Window::width(), Window::height());
+// }
+
+// void RenderSystem::loopStart() {
+
+// }
+
+// void RenderSystem::loopEnd() {
+
+// }
+
+// void RenderSystem::setViewportDimensions(int width, int height) {
+//     viewport_width = width;
+//     viewport_height = height;
+//     aspect_ratio = static_cast<float>(viewport_width) / static_cast<float>(viewport_height);
+// }
+
+// void RenderSystem::attachCamera(Camera *cam) {
+//     camera = cam;
+// }
+
+
+// void RenderSystem::renderTexturedBox(const TextureData& textureData, const Rect2F& worldRect, int tilesetIndex) {
+//     auto eyeRect = worldRect.get_translated(camera->position.getXY().get_negated()).get_scaled(camera->zoom);
+//     auto projRect = Rect2F{eyeRect.top_left.x, -eyeRect.top_left.y - eyeRect.size.h, eyeRect.size.w, eyeRect.size.h}.get_scaled(Size2F{1.0F/aspect_ratio, 1.0F});
+
+//     /** 
+//      * Filter notvisible objects.
+//      * Check if left < -1 or right > 1 or top < -1 or bottom > 1
+//      * */
+
+//     if(projRect.right() < -1.0F || projRect.left() > 1.0F || projRect.bottom() < -1.0F || projRect.top() > 1.0F) {
+//         //todo consider moving to world space
+//         return;
+//     }
+
+//     glColor3f(1.0F, 1.0F, 1.0F);
+
+
+//     glEnable(GL_BLEND);
+//     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+//     glBindTexture(GL_TEXTURE_2D, textureData.id.value);
+//     glEnable(GL_TEXTURE_2D);
+        
+//     int u_idx = tilesetIndex % textureData.tilesPerRow;
+//     int v_idx = tilesetIndex / textureData.tilesPerRow;
+
+//     float u1 = static_cast<float>((u_idx + 0) * textureData.tileWidth) / static_cast<float>(textureData.width);
+//     float u2 = static_cast<float>((u_idx + 1) * textureData.tileWidth) / static_cast<float>(textureData.width);
+//     float v1 = static_cast<float>((v_idx + 0) * textureData.tileHeight) / static_cast<float>(textureData.height);
+//     float v2 = static_cast<float>((v_idx + 1) * textureData.tileHeight) / static_cast<float>(textureData.height);
+
+//     glBegin(GL_QUADS);
+//     glTexCoord2f(u1, v1);
+//     glVertex2f(projRect.left(), projRect.bottom());
+//     glTexCoord2f(u1, v2);
+//     glVertex2f(projRect.left(), projRect.top());
+//     glTexCoord2f(u2, v2);
+//     glVertex2f(projRect.right(), projRect.top());
+//     glTexCoord2f(u2, v1);
+//     glVertex2f(projRect.right(), projRect.bottom());
+//     glEnd();
+
+
+//     glDisable(GL_TEXTURE_2D);
+//     glBindTexture(GL_TEXTURE_2D, 0);
+//     glDisable(GL_BLEND);
+
+//     if(rendeDebugView) {
+//         glColor3f(1.0F, 0.0F, 0.0F);
+//         float vertices[] = {
+//             projRect.left(), projRect.bottom(), // Bottom-left vertex
+//             projRect.left(), projRect.top(), // Top-left vertex
+//             projRect.right(), projRect.top(), // Top-right vertex
+//             projRect.right(), projRect.bottom()  // Bottom-right vertex
+//         };
+//         glEnableClientState(GL_VERTEX_ARRAY);
+
+//         // Define the vertex array data
+//         glVertexPointer(2, GL_FLOAT, 0, vertices);
+
+//         // Draw the rectangle using GL_LINE_LOOP to form the borders
+//         glDrawArrays(GL_LINE_LOOP, 0, 4);
+
+//         // Disable vertex arrays after drawing
+//         glDisableClientState(GL_VERTEX_ARRAY);
+//     }
+// }
+
+// void RenderSystem::renderFilledBox(Rect2F worldRect, float r, float g, float b) {
+//     auto eyeRect = worldRect.get_translated(camera->position.getXY().get_negated()).get_scaled(camera->zoom);
+//     auto projRect = Rect2F{eyeRect.top_left.x, -eyeRect.top_left.y - eyeRect.size.h, eyeRect.size.w, eyeRect.size.h}.get_scaled(Size2F{1.0F/aspect_ratio, 1.0F});
+//     glColor3f(r, g, b);
+
+//     glBegin(GL_QUADS);
+//     glVertex2f(projRect.left(), projRect.bottom());
+//     glVertex2f(projRect.left(), projRect.top());
+//     glVertex2f(projRect.right(), projRect.top());
+//     glVertex2f(projRect.right(), projRect.bottom());
+//     glEnd();
+// }
+
+// void RenderSystem::renderTranslucentFilledBox(Rect2F worldRect, float r, float g, float b, float fillingAlpha) {
+//     auto eyeRect = worldRect.get_translated(camera->position.getXY().get_negated()).get_scaled(camera->zoom);
+//     auto projRect = Rect2F{eyeRect.top_left.x, -eyeRect.top_left.y - eyeRect.size.h, eyeRect.size.w, eyeRect.size.h}.get_scaled(Size2F{1.0F/aspect_ratio, 1.0F});
+
+//     float vertices[] = {
+//         projRect.left(), projRect.bottom(), // Bottom-left vertex
+//         projRect.left(), projRect.top(), // Top-left vertex
+//         projRect.right(), projRect.top(), // Top-right vertex
+//         projRect.right(), projRect.bottom()  // Bottom-right vertex
+//     };
+
+//     /* Draw filling */
+//     glColor4f(r, g, b, fillingAlpha);
+//     glEnable(GL_BLEND);
+//     glBegin(GL_QUADS);
+//     glVertex2f(projRect.left(), projRect.bottom());
+//     glVertex2f(projRect.left(), projRect.top());
+//     glVertex2f(projRect.right(), projRect.top());
+//     glVertex2f(projRect.right(), projRect.bottom());
+//     glEnd();
+//     glDisable(GL_BLEND);
+
+//     /* Draw borders */
+//     glColor3f(r, g, b);
+//     glEnableClientState(GL_VERTEX_ARRAY);
+
+//     // Define the vertex array data
+//     glVertexPointer(2, GL_FLOAT, 0, vertices);
+
+//     // Draw the rectangle using GL_LINE_LOOP to form the borders
+//     glDrawArrays(GL_LINE_LOOP, 0, 4);
+
+//     // Disable vertex arrays after drawing
+//     glDisableClientState(GL_VERTEX_ARRAY);
+// }
+
+// void RenderSystem::prepareBatch() {
+//     enititesBatch.clear();
+
+//     /* Cleare render box in world space from camera position */
+//     renderBoxWorldSpace.size.w = 2.0F / (1.0F * camera->zoom.w * (1.0F / aspect_ratio));
+//     renderBoxWorldSpace.size.h = 2.0F / (1.0F * camera->zoom.h);
+//     renderBoxWorldSpace.top_left.x = camera->position.x - renderBoxWorldSpace.size.w / 2.0F;
+//     renderBoxWorldSpace.top_left.y = camera->position.y - renderBoxWorldSpace.size.h / 2.0F;
+// }
+
+// void RenderSystem::processElevation(const Elevation* elevation) {
+    
+// }
+
+// void RenderSystem::processEntity(const Entity* entity) {
+//     if(renderBoxWorldSpace.checkIntersection(entity->getRectElevationSpace())) {
+//         auto entityData = EntityRenderData{
+//             entity, 
+//             /* Sort value */
+//             // locationCmp->worldRect.top_left.y + locationCmp->worldRect.size.h
+//             entity->getBottomElevationSpace()
+//         };
+//         enititesBatch.push_back(entityData);
+//     }
+// }
+
+// void RenderSystem::render(bool sorted) {
+//     lastEntitesCount = static_cast<int>(enititesBatch.size());
+//     //todo collect all per loop
+
+//     /* Sort entities by Y axis */
+//     if(sorted) {
+//         std::sort(enititesBatch.begin(), enititesBatch.end());
+//     }
+
+//     /* Render entities */
+//     for(auto entityData : enititesBatch) {
+//         renderEntity(entityData.entity);
+//     }
+// }
+
+// void RenderSystem::renderCollisionBoxes(const std::vector<CollisionComponent*>& collisionComponents) {
+//     /* Render entities */
+//     for(auto collisionComponent : collisionComponents) {
+//         auto WorldSpaceRects = collisionComponent->getWorldSpaceCollisionRects();
+//         for(auto worldRect : WorldSpaceRects) {
+//             auto flattenRect = worldRect.getFlatten();
+//             //todo
+//             if(renderBoxWorldSpace.checkIntersection(flattenRect)) {
+//                 renderTranslucentFilledBox(flattenRect, 0.9F, 0.0F, 1.0F, 0.5F);
+//             }
+//         }
+//     }
+// }
+
+
+// void RenderSystem::renderElevation(const Elevation* elevation) {
+//     /* Floor flat tiles */
+//     this->prepareBatch();
+//     for(auto entity: elevation->getFloorEntities()) {
+//         this->processEntity(entity);
+//     }
+//     this->render();
+
+//     /* Clutter flat tiles */
+//     this->prepareBatch();
+//     for(auto entity: elevation->getClutterEntities()) {
+//         this->processEntity(entity);
+//     }
+//     this->render();
+    
+//     /* Other big tiles */
+//     this->prepareBatch();
+//     for(auto entity: elevation->getBiggerEntities()) {
+//         this->processEntity(entity);
+//     }
+//     this->render(true);
+// }
+
+// void RenderSystem::renderEntity(const Entity* entity) {
+//     /* Textured quad rendering */
+//     auto textureCmpOption = entity->getTextureComponent();
+//     if(textureCmpOption.has_value()) {
+//         auto textureCmp = textureCmpOption.value();
+
+//         /* Check if has valid texture */
+//         auto textureData = Loader::getLoader().getTextureDataByID(textureCmp->getTextureID());
+//         if(!textureData) {
+//             /* Corrupted */
+//             renderFilledBox(textureCmp->getRectElevationSpace(), 1.0F, 0.0F, 0.0F);
+//         }
+//         else {
+//             renderTexturedBox(*textureData, textureCmp->getRectElevationSpace(), textureCmp->getTilesetIndex());
+//         }
+//     }
+
+//     /* Colored quad rendering */
+//     auto colorCmpOption = entity->getColorComponent();
+//     if(colorCmpOption.has_value()) {
+//         auto colorCmp = colorCmpOption.value();
+//         //todo colorCmp->a
+//         renderFilledBox(colorCmp->getRectElevationSpace(), colorCmp->r, colorCmp->g, colorCmp->b);
+//     }
+// }
 
 
 

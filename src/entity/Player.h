@@ -8,14 +8,11 @@ class CollisionDetectorComponent;
 class ControllableComponent;
 class TextureComponent;
 class ColorComponent;
-class Floor;
+class Elevation;
 class Player : public Entity {
 public:
     Player() = default;
-    Player(float elevationSpaceX, float elevationSpaceY, float elevationSpaceZ, float width, float height, float length, Elevation* elevation) :
-        Entity(elevationSpaceX, elevationSpaceY, elevationSpaceZ, width, height, length, elevation) {}
-    Player(float elevationSpaceX, float elevationSpaceY, Elevation* elevation) : Entity(elevationSpaceX, elevationSpaceY, elevation) {}
-    Player(Elevation* elevation) : Entity(elevation) {}
+    Player(Elevation* elevation) : Entity(elevation, EntityType::DYNAMIC) {}
 
     MovementComponent* movementComponent{nullptr};
     CollisionDetectorComponent* collisionDetectorComponent{nullptr};

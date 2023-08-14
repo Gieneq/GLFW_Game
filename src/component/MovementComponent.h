@@ -3,13 +3,6 @@
 #include "Component.h"
 #include "Maths.h"
 
-enum class Direction {
-    NONE,
-    NORTH,
-    SOUTH,
-    WEST,
-    EAST
-};
 class CollisionDetectorComponent;
 class MovementComponent : public Component {
 public:
@@ -17,13 +10,14 @@ public:
     virtual ~MovementComponent() = default;
 
     void update(float dt);
-    void setDirection(Direction dir);
+    void setDirection(float x, float y, float z);
+    void setDirectionUnsafe(float x, float y, float z);
 
     float speed{1.0F};
 
 private:
-    Vect2F direction{0.0F, 1.0F};
-    Vect2F getTranslation(float dt) const;
+    Vect3F direction{0.0F, 1.0F, 0.0F};
+    Vect3F getTranslation(float dt) const;
 
     friend class CollisionDetectorComponent;
 };

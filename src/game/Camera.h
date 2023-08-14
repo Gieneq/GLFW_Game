@@ -1,5 +1,6 @@
 #pragma once
 #include "Settings.h"
+#include "Maths.h"
 
 class Entity;
 class Camera {
@@ -9,5 +10,5 @@ public:
     void update(float dt);
     void focusOn(Entity* e);
 
-    Entity * focusedEntity{nullptr};
+    Entity* focusedEntity{nullptr};
 };

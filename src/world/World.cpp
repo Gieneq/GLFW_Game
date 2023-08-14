@@ -38,7 +38,7 @@ void Elevation::addDynamicEntity(Entity* e) {
 }
 
 
-bool Elevation::removeEntity(Entity* e) {
+bool Elevation::deleteEntity(Entity* e) {
     /* Find entity in any container */
     auto floorEntityIt = std::find(floorEntities.begin(), floorEntities.end(), e);
     auto clutterEntityIt = std::find(clutterEntities.begin(), clutterEntities.end(), e);
@@ -132,8 +132,35 @@ std::optional<Elevation*> World::getTopElevation() {
     return &elevations.back();
 }
 
-bool World::moveEntityToElevation(Entity* e, int newElevation) {
-    return false; //todo
+bool World::moveDynamicEntityToElevation(Entity* e, int destinationElevationIndex) {
+    /* Entity should have some layer - it seems error-free */
+    auto oldElevation = e->getContainingElevation();
+    if(!oldElevation) {
+        return false;
+    }
+
+    /* Entity has to be in dynamic container */
+    auto dynamicEntitiesVector = oldElevation->getDynamicEntities();
+    auto entityIt = std::find(dynamicEntitiesVector.begin(), dynamicEntitiesVector.end(), e);
+    if(entityIt == dynamicEntitiesVector.end()) {
+        return false;
+    }
+
+    /* Find destination elevation */
+    auto destinationElevationOption = getElevation(destinationElevationIndex);
+    if(!destinationElevationOption || (destinationElevationOption == oldElevation)) {
+        return false;
+    }
+    auto destinationElevation = destinationElevationOption.value();
+
+    /* Remove entity from old elevation */
+    oldElevation->deleteEntity(e);
+
+    /* Add dynamic entity to new elevation */
+    destinationElevation->addDynamicEntity(e);
+
+    /* Only pointer is passed between elevations. Inside World structures it stays the same. */
+    return true;
 }
 
 /* 
@@ -150,7 +177,7 @@ std::optional<Entity *> World::createFloorEntity(int elevation) {
 }
 
 std::optional<Entity *> World::createFloorEntity(Elevation* elevation) {
-    Entity* e = new Entity(elevation);
+    Entity* e = new Entity(elevation, EntityType::FLOOR);
     elevation->addFloorEntity(e);
     allEntities.push_back(e);
     return e;
@@ -166,7 +193,7 @@ std::optional<Entity *> World::createClutterEntity(int elevation) {
 }
 
 std::optional<Entity *> World::createClutterEntity(Elevation* elevation) {
-    Entity* e = new Entity(elevation);
+    Entity* e = new Entity(elevation, EntityType::CLUTTER);
     elevation->addClutterEntity(e);
     allEntities.push_back(e);
     return e;
@@ -182,7 +209,7 @@ std::optional<Entity *> World::createStaticEntity(int elevation) {
 }
 
 std::optional<Entity *> World::createStaticEntity(Elevation* elevation) {
-    Entity* e = new Entity(elevation);
+    Entity* e = new Entity(elevation, EntityType::STATIC);
     elevation->addStaticEntity(e);
     allEntities.push_back(e);
     return e;
@@ -198,7 +225,7 @@ std::optional<Entity *> World::createDynamicEntity(int elevation) {
 }
 
 std::optional<Entity *> World::createDynamicEntity(Elevation* elevation) {
-    Entity* e = new Entity(elevation);
+    Entity* e = new Entity(elevation, EntityType::DYNAMIC);
     elevation->addDynamicEntity(e);
     allEntities.push_back(e);
     return e;
@@ -221,7 +248,7 @@ bool World::deleteEntity(Entity* e) {
     allEntities.erase(entityIt);
 
     /* Remove entity from its elevation */
-    e->getContainingElevation()->removeEntity(e);
+    e->getContainingElevation()->deleteEntity(e);
 
     /* Delete entity */
     delete e;

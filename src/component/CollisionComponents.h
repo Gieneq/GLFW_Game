@@ -33,8 +33,9 @@ public:
 
     MovementComponent* movementCmp{nullptr};
     Rect2F getElevationSpaceBoundingRect() const;
+    Rect3F getWorldSpaceBoundingRect() const;
 
 private:
-    Rect2F boundingRect{0, 0.1F, 1, 0.9F};
+    Rect2F boundingRect{0, 0.15F, 1, 0.85F};
 };
 

@@ -66,7 +66,7 @@ bool GameBase::onKeyReleased(int key) {
         auto playersElevation = player->getContainingElevation();
 
         std::cout << " __________________________________________________________" << std::endl;
-        std::cout << "| Player location: " << player->getPositionWorldSpace() << "/" << playersElevation->getWorldSpaceZ() << std::endl;
+        std::cout << "| Player location: " << player->getCuboidWorldSpace().topLeft << "/" << playersElevation->getWorldSpaceZ() << std::endl;
         std::cout << "| Render batch size: " << render_system.getLastEntitesCount() << std::endl;
         std::cout << "| Floor [" << playersElevation->getIndex() << "/" << world.getElevationsCount() << "] info:" << std::endl;
         std::cout << "|  - entities floor:   " << playersElevation->getFloorEntities().size() << std::endl;
@@ -134,40 +134,14 @@ void GameBase::update(float dt) {
 }
 
 void GameBase::render() {
-    // auto containingFloorOption = world.player.getFloor();
-    // if(!containingFloorOption.has_value()) {
-    //     std::cerr << "Player is not on floor!" << std::endl;
-    //     return;
-    // }
+    render_system.loopStart();
+
     auto containingFloor = world.player.getContainingElevation();
-    
+    render_system.processElevation(containingFloor);
 
-    /* Render from bottom of containingFloor */
-
-    /* Floor flat tiles */
-    render_system.prepare();
-    for(auto entity: containingFloor->getFloorEntities()) {
-        render_system.processEntity(entity);
-    }
-    render_system.render();
-
-    /* Clutter flat tiles */
-    render_system.prepare();
-    for(auto entity: containingFloor->getClutterEntities()) {
-        render_system.processEntity(entity);
-    }
-    render_system.render();
-    
-    /* Other big tiles */
-    render_system.prepare();
-    for(auto entity: containingFloor->getBiggerEntities()) {
-        render_system.processEntity(entity);
-    }
-    render_system.render(true);
 
     /* Debug shapes */
     if(debugView) {
-        render_system.prepare();
         render_system.renderCollisionBoxes(containingFloor->getCollisionComponents());
         //->getWorldSpaceBoundingRect()
         render_system.renderTranslucentFilledBox(world.player.collisionDetectorComponent->getElevationSpaceBoundingRect(), 0.1F, 0.2F, 1.0F, 0.5F);
@@ -176,4 +150,6 @@ void GameBase::render() {
             render_system.renderTranslucentFilledBox(collisionRect, 0.0F, 1.0F, 1.0F, 0.2F);
         }
     }
+
+    render_system.loopEnd();
 }

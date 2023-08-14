@@ -67,19 +67,19 @@ void ControllableComponent::updateMovement() {
     }
 
     if(lastPressedKey == MovementControlKey::NONE) {
-        controlledMovement->setDirection(Direction::NONE);
+        controlledMovement->setDirectionUnsafe(0.0F, 0.0F, 0.0F);
     } 
     else if(lastPressedKey == MovementControlKey::UP) {
-        controlledMovement->setDirection(Direction::NORTH);
+        controlledMovement->setDirectionUnsafe(0.0F, 1.0F, 0.0F);
     }
     else if(lastPressedKey == MovementControlKey::DOWN) {
-        controlledMovement->setDirection(Direction::SOUTH);
+        controlledMovement->setDirectionUnsafe(0.0F, -1.0F, 0.0F);
     }
     else if(lastPressedKey == MovementControlKey::LEFT) {
-        controlledMovement->setDirection(Direction::WEST);
+        controlledMovement->setDirectionUnsafe(-1.0F, 0.0F, 0.0F);
     }
     else if(lastPressedKey == MovementControlKey::RIGHT) {
-        controlledMovement->setDirection(Direction::EAST);
+        controlledMovement->setDirectionUnsafe(1.0F, 0.0F, 0.0F);
     }
 }
 

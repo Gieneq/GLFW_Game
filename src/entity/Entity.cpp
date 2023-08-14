@@ -8,9 +8,6 @@
 
 long long Entity::nextID = 0;
 
-float Entity::getWorldSpaceZ() const {
-    return containingElevation->getWorldSpaceZ();
-}
 
 void Entity::addComponent(Component* component) {
     components.push_back(component);
@@ -23,16 +20,12 @@ void Entity::addComponent(Component* component) {
     }
 }
 
-Vect3F Entity::getPositionWorldSpace() const {
-    return Vect3F{positionElevationSpace, getWorldSpaceZ()};
-}
-
 /* Components builders */
 
 MovementComponent* Entity::addMovementComponent(float speed) {
     auto movementComponent = new MovementComponent(this);
     movementComponent->speed = speed;
-    movementComponent->setDirection(Direction::SOUTH);
+    movementComponent->setDirection(0.0F, 1.0F, 0.0F);
     addComponent(movementComponent);
     return movementComponent;
 }
@@ -117,28 +110,14 @@ std::optional<TextureComponent*> Entity::getTextureComponent() const {
     return textureComponent;
 }
 
-Rect2F Entity::getRectElevationSpace() const {
-    return Rect2F{
-        positionElevationSpace.x,
-        positionElevationSpace.y,
-        size.w,
-        size.h
-    };
-}
-Rect3F Entity::getBoxElevationSpace() const {
-    auto box = Rect3F{
-        positionElevationSpace.x,
-        positionElevationSpace.y,
-        heightElevationSpace,
-        size.w,
-        size.h,
-        length
-    };
-    return box;
-}
 
-Rect3F Entity::getBoxWorldSpace() const{
-    auto box = getBoxElevationSpace();
-    box.z() += getWorldSpaceZ();
-    return box;
+Rect3F Entity::getCuboidWorldSpace() const {
+    return Rect3F(
+        cuboidElevationSpace.topLeft.x + 0.0F,
+        cuboidElevationSpace.topLeft.y +  0.0F,
+        cuboidElevationSpace.topLeft.z + containingElevation->getWorldSpaceZ(),
+        cuboidElevationSpace.size.w,
+        cuboidElevationSpace.size.h,
+        cuboidElevationSpace.size.d
+    );
 }

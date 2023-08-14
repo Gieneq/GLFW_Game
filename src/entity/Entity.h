@@ -25,11 +25,10 @@ class AnimationComponent;
 class Entity {
 public:
     Entity() = default;
-    Entity(Elevation* elevation) : containingElevation{elevation} {}
-    Entity(float elevationSpaceX, float elevationSpaceY, Elevation* elevation) : positionElevationSpace{elevationSpaceX, elevationSpaceY}, containingElevation{elevation} {}
-    Entity(float elevationSpaceX, float elevationSpaceY, float elevationSpaceZ, float width, float height, float length, Elevation* elevation) :
-        positionElevationSpace{elevationSpaceX, elevationSpaceY}, heightElevationSpace{elevationSpaceZ}, size{width, height}, length{length}, 
-        containingElevation{elevation}, active{true} {}
+    Entity(Elevation* elevation, EntityType etype) : containingElevation{elevation}, type{etype} {}
+    Entity(float elevationSpaceX, float elevationSpaceY, Elevation* elevation, EntityType etype) : cuboidElevationSpace{elevationSpaceX, elevationSpaceY, 0.0F, 1.0F, 1.0F, 0.0F}, containingElevation{elevation}, type{etype} {}
+    Entity(float elevationSpaceX, float elevationSpaceY, float elevationSpaceZ, float width, float height, float depth, Elevation* elevation, EntityType etype) :
+        cuboidElevationSpace{elevationSpaceX, elevationSpaceY, elevationSpaceZ, width, height, depth}, containingElevation{elevation}, active{true}, type{etype} {}
     
     // todo make Entity responsible for deleting components
     ~Entity() {
@@ -107,86 +106,16 @@ public:
     std::optional<TextureComponent*> getTextureComponent() const;
     
     /* Position related methods */
-    float getWorldSpaceZ() const;
 
-    Vect3F getPositionWorldSpace() const;
-
-    Vect2F& getPositionElevationSpace() {
-        return positionElevationSpace;
-    }
-
-    inline Size2F getSize() const {
-        return size;
-    }
-
-    inline void setSize(float w, float h) {
-        size.w = w;
-        size.h = h;
-    }
-
-    inline float getLength() const {
-        return length;
-    }
-
-    inline void setLength(float len) {
-        length = len;
+    Rect3F* getCuboidElevationSpace() {
+        return &cuboidElevationSpace;
     }
     
     inline Elevation* getContainingElevation() {
         return containingElevation;
     }
 
-    inline float getLeftElevationSpace() const {
-        return positionElevationSpace.x;
-    }
-
-    inline float getRightElevationSpace() const {
-        return positionElevationSpace.x + size.w;
-    }
-
-    inline float getTopElevationSpace() const {
-        return positionElevationSpace.y;
-    }
-
-    inline float getBottomElevationSpace() const {
-        return positionElevationSpace.y + size.h;
-    }
-
-    inline float getDownElevationSpace() const {
-        return heightElevationSpace;
-    }
-
-    inline float getUpElevationSpace() const {
-        return heightElevationSpace + length;
-    }
-
-    inline void setXElevationSpace(float x) {
-        positionElevationSpace.x = x;
-    }
-
-    inline void setYElevationSpace(float y) {
-        positionElevationSpace.y = y;
-    }
-
-    inline void setZElevationSpace(float z) {
-        heightElevationSpace = z;
-    }
-
-        inline void addXElevationSpace(float dx) {
-        positionElevationSpace.x += dx;
-    }
-
-    inline void addYElevationSpace(float dy) {
-        positionElevationSpace.y += dy;
-    }
-
-    inline void addZElevationSpace(float dz) {
-        heightElevationSpace += dz;
-    }
-
-    Rect2F getRectElevationSpace() const;
-    Rect3F getBoxElevationSpace() const;
-    Rect3F getBoxWorldSpace() const;
+    Rect3F getCuboidWorldSpace() const;
 
 protected:
     /* Quick access to popular components */
@@ -207,22 +136,12 @@ private:
 
     Elevation* containingElevation{nullptr};
 
-    /**
-     * Size 1x1 is base tilesize.
-     * Length 1 is space between layers.
-    */
-    Size2F size{1.0F, 1.0F};
-    float length{0.0F};
-
-    /**
-     * Position of top_left corner in relation to containing Elevation.
-     * Height can be used to place object on top of another.
-    */
-    Vect2F positionElevationSpace{0.0F, 0.0F};
-    float heightElevationSpace{0.0F};
+    Rect3F cuboidElevationSpace{0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0.0F};
 
     /* General step in adding components */
     void addComponent(Component* component);
+
+    EntityType type{EntityType::NONE};
     
     static long long nextID;
 };

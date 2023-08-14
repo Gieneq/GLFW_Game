@@ -8,21 +8,30 @@ void CollisionsSystem::init() {
 
 
 void CollisionsSystem::update(const std::vector<CollisionComponent*>& collisionCmps, Entity *entity, float dt) {
+
+    /**
+     * Check is done in elevation space - 
+     * obstacles and entity are on the same elevation.
+     * No need to check Z axis.
+     * Resulting Rect2F are also in elevation space.
+    */
+
     collidingRects.clear();
+
     //todo sweep somehow most colllision checks
     auto collisonDetectorCmp = entity->getComponent<CollisionDetectorComponent>();
     if(collisonDetectorCmp) {
         /* The entity has collision detector */
-        const auto boundingRectWorldSpace = collisonDetectorCmp->getWorldSpaceBoundingRect();
+        const auto boundingRectElevationSpace = collisonDetectorCmp->getElevationSpaceBoundingRect();
 
         /* Test collision with all entities except considered entity with collision detector */
         for (auto collCmp : collisionCmps) {
-            auto otherEntityOption = collCmp->getParent();
-            if(otherEntityOption.has_value() && (otherEntityOption.value()->id != entity->id)) {
+            auto otherEntity = collCmp->getParentEntity();
+            if(!otherEntity && (otherEntity->getId() != entity->getId())) {
                 /* Other entity has collision compoinent */
-                auto otherCollisionRects = collCmp->getWorldSpaceCollisionRects();
+                auto otherCollisionRects = collCmp->getElevationSpaceCollisionRects();
                 for (auto& otherCollisionRect : otherCollisionRects) {
-                    if(boundingRectWorldSpace.checkIntersection(otherCollisionRect)) {
+                    if(boundingRectElevationSpace.checkIntersection(otherCollisionRect)) {
                         collidingRects.push_back(otherCollisionRect);
                     }
                 }
@@ -33,7 +42,7 @@ void CollisionsSystem::update(const std::vector<CollisionComponent*>& collisionC
             collisonDetectorCmp->onCollision(collidingRects);
             
             //to debug render
-            collidingRects.push_back(collisonDetectorCmp->getWorldSpaceBoundingRect());
+            collidingRects.push_back(collisonDetectorCmp->getElevationSpaceBoundingRect());
         }
     }
     

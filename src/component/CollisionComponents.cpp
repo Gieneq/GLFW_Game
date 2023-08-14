@@ -2,11 +2,13 @@
 #include "MovementComponent.h"
 #include <iostream>
 #include "Entity.h"
+#include "World.h"
 
 std::vector<Rect2F> CollisionComponent::getElevationSpaceCollisionRects() const {
+    Vect2F parentElevationSpacePosition = parent->getCuboidElevationSpace()->topLeft.getXY();
     std::vector<Rect2F> elevationSpaceCollisionRects;
     for (auto& rect : collisionRects) {
-        elevationSpaceCollisionRects.push_back(rect.get_translated(parent->getPositionElevationSpace()));
+        elevationSpaceCollisionRects.push_back(rect.getTranslated(parentElevationSpacePosition));
     }
     return elevationSpaceCollisionRects;
 }
@@ -15,12 +17,12 @@ std::vector<Rect3F> CollisionComponent::getWorldSpaceCollisionRects() const {
     std::vector<Rect3F> worldSpaceCollisionRects;
     for (auto& esRect : getElevationSpaceCollisionRects()) {
         auto worldSpaceRect = Rect3F(
-            esRect.left(),
-            esRect.top(),
-            parent->getWorldSpaceZ(),
+            esRect.topLeft.x,
+            esRect.topLeft.y,
+            parent->getContainingElevation()->getWorldSpaceZ(),
             esRect.size.w,
             esRect.size.h,
-            parent->getLength()
+            0.0F
         );
         worldSpaceCollisionRects.push_back(worldSpaceRect);
     }
@@ -43,29 +45,51 @@ void CollisionDetectorComponent::onCollision(std::vector<Rect2F> collidingRectsE
         /* Align horizontally */
         if(movementCmp->direction.x > 0) {
             movementCmp->direction.x = 0;
-            parent->setXElevationSpace(rect.left() - boundingRect.size.w);
+            parent->getCuboidElevationSpace()->topLeft.x = rect.left() - boundingRect.size.w;
             //todo offset to fit bounding box
-        } else if(movementCmp->direction.x < 0) {
+        } 
+        
+        else if(movementCmp->direction.x < 0) {
             movementCmp->direction.x = 0;
-            parent->setXElevationSpace(rect.right());
+            parent->getCuboidElevationSpace()->topLeft.x = rect.left();
             //todo offset to fit bounding box
         }
 
         /* Align vertically */
         if(movementCmp->direction.y > 0) {
             movementCmp->direction.y = 0;
-            parent->setYElevationSpace(rect.top() - boundingRect.size.h);
-            float diffY = parent->getSize().h - boundingRect.bottom();
-            parent->addYElevationSpace(diffY);
-        } else if(movementCmp->direction.y < 0) {
+            parent->getCuboidElevationSpace()->topLeft.y = rect.top() - boundingRect.size.h;
+            float diffY = parent->getCuboidElevationSpace()->size.h - boundingRect.bottom();
+            parent->getCuboidElevationSpace()->topLeft.y += diffY;
+        } 
+        
+        else if(movementCmp->direction.y < 0) {
             movementCmp->direction.y = 0; 
-            parent->setYElevationSpace(rect.bottom());
+            parent->getCuboidElevationSpace()->topLeft.y = rect.bottom();
             float diffY = boundingRect.top();
-            parent->addYElevationSpace(-diffY);
+            parent->getCuboidElevationSpace()->topLeft.y -= diffY;
         }
     }
 }
 
 Rect2F CollisionDetectorComponent::getElevationSpaceBoundingRect() const {
-    return boundingRect.get_translated(parent->getPositionElevationSpace());
+    Vect2F parentElevationSpacePosition = parent->getCuboidElevationSpace()->topLeft.getXY();
+    return Rect2F(
+        boundingRect.topLeft.x + parentElevationSpacePosition.x,
+        boundingRect.topLeft.y + parentElevationSpacePosition.y,
+        boundingRect.size.w,
+        boundingRect.size.h
+    );
+}
+
+Rect3F CollisionDetectorComponent::getWorldSpaceBoundingRect() const {
+    auto elevationSpaceBoundingRect = getElevationSpaceBoundingRect();
+    return Rect3F(
+        elevationSpaceBoundingRect.topLeft.x,
+        elevationSpaceBoundingRect.topLeft.y,
+        parent->getContainingElevation()->getWorldSpaceZ(),
+        elevationSpaceBoundingRect.size.w,
+        elevationSpaceBoundingRect.size.h,
+        0.0F
+    );
 }

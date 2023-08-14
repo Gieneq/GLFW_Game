@@ -4,8 +4,10 @@
 struct Vect2F {
     Vect2F() = default;
     Vect2F(float x, float y) : x{x}, y{y} {}
-    Vect2F get_negated() const;
+
+    Vect2F getNegated() const;
     Vect2F getTranslated(const Vect2F& translation) const;
+    
     float x{0.0F};
     float y{0.0F};
 
@@ -19,6 +21,11 @@ struct Vect3F {
     Vect3F() = default;
     Vect3F(float x, float y, float z) : x{x}, y{y}, z{z} {}
     Vect3F(const Vect2F& xy, float z) : x{xy.x}, y{xy.y}, z{z} {}
+
+    Vect3F getNegated() const;
+    Vect3F getTranslated(const Vect3F& translation) const;
+    void normalize();
+
     float x{0.0F};
     float y{0.0F};
     float z{0.0F};
@@ -45,64 +52,70 @@ struct Size2F {
 
 struct Size3F {
     Size3F() = default;
-    Size3F(float w, float h, float l) : w{w}, h{h}, l{l} {}
+    Size3F(float w, float h, float d) : w{w}, h{h}, d{d} {}
+    Size3F(Size2F wh, float d) : w{wh.w}, h{wh.h}, d{d} {}
     float w{0.0F};
     float h{0.0F};
-    float l{0.0F};
+    float d{0.0F};
 
     friend std::ostream& operator<<(std::ostream& os, const Size3F& size) {
-        os << "[" << size.w << ", " << size.h << ", " << size.l << "]";
+        os << "[" << size.w << ", " << size.h << ", " << size.d << "]";
         return os;
     }
 };
 
 struct Rect2F {
-    Rect2F() : top_left{}, size{} {}
-    Rect2F(Vect2F tl, Size2F s) : top_left{tl}, size{s} {}
-    Rect2F(float x, float y, float w, float h) : top_left{x,y}, size{w,h} {}
+    Rect2F() : topLeft{}, size{} {}
+    Rect2F(Vect2F tl, Size2F s) : topLeft{tl}, size{s} {}
+    Rect2F(float x, float y, float w, float h) : topLeft{x, y}, size{w, h} {}
+    static Rect2F fromSides(float left, float right, float top, float bottom);
 
     float left() const;
     float right() const;
     float top() const;
     float bottom() const;
-    Rect2F get_translated(Vect2F translation) const;
-    Rect2F get_scaled(Size2F scale) const;
-    static Rect2F from_sides(float left, float right, float top, float bottom);
 
-    Vect2F top_left;
+    Rect2F getTranslated(Vect2F translation) const;
+    Rect2F getScaled(const float xScale, const float yScale) const;
+
+    Vect2F topLeft;
     Size2F size;
 
+    inline float& x() { return topLeft.x; }
+    inline float& y() { return topLeft.y; }
+    inline float& w() { return size.w; }
+    inline float& h() { return size.h; }
+
     void alignToLeftOf(const Rect2F& other) {
-        top_left.x = other.left() - size.w;
+        topLeft.x = other.left() - size.w;
     }
 
     void alignToRightOf(const Rect2F& other) {
-        top_left.x = other.right();
+        topLeft.x = other.right();
     }
 
     void alignToTopOf(const Rect2F& other) {
-        top_left.y = other.top() - size.h;
+        topLeft.y = other.top() - size.h;
     }
 
     void alignToBottomOf(const Rect2F& other) {
-        top_left.y = other.bottom();
+        topLeft.y = other.bottom();
     }
 
     bool checkIntersection(const Rect2F& other) const {
-        // return !(left() > other.right() || right() < other.left() || top() > other.bottom() || bottom() < other.top());
         return !(left() >= other.right() || right() <= other.left() || top() >= other.bottom() || bottom() <= other.top());
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Rect2F& rect) {
-        os << "[" << rect.top_left.x << ", " << rect.top_left.y << ", " << rect.size.w << ", " << rect.size.h << "]";
+        os << "[" << rect.topLeft.x << ", " << rect.topLeft.y << ", " << rect.size.w << ", " << rect.size.h << "]";
         return os;
     }
 };
 
 class Rect3F {
 public:
-    Rect3F() : top_left{}, size{} {}
-    Rect3F(float x, float y, float z, float w, float h, float l) : top_left{x,y,z}, size{w,h,l} {}
+    Rect3F() : topLeft{}, size{} {}
+    Rect3F(float x, float y, float z, float w, float h, float d) : topLeft{x, y, z}, size{w, h, d} {}
 
     float left() const;
     float right() const;
@@ -110,43 +123,53 @@ public:
     float bottom() const;
     float front() const;
     float back() const;
-    Rect3F get_translated(Vect3F translation) const;
-    Rect3F get_scaled(Size3F scale) const;
-    static Rect3F from_sides(float left, float right, float top, float bottom, float front, float back);
+    Rect3F getTranslated(Vect3F translation) const;
+    static Rect3F fromSides(float left, float right, float top, float bottom, float front, float back);
 
-    Vect3F top_left;
+    Vect3F topLeft;
     Size3F size;
 
-    inline float& x() { return top_left.x; }
-    inline float& y() { return top_left.y; }
-    inline float& z() { return top_left.z; }
+    inline float& x() { return topLeft.x; }
+    inline float& y() { return topLeft.y; }
+    inline float& z() { return topLeft.z; }
+    inline float& w() { return size.w; }
+    inline float& h() { return size.h; }
+    inline float& d() { return size.d; }
 
     inline Rect2F getFlatten() const {
-        return Rect2F{top_left.x, top_left.y, size.w, size.h};
+        return Rect2F{topLeft.x, topLeft.y, size.w, size.h};
+    }
+
+    inline Vect2F getXY() const {
+        return Vect2F{topLeft.x, topLeft.y};
+    }
+
+    inline Size2F getWH() const {
+        return Size2F{size.w, size.h};
     }
 
     void alignToLeftOf(const Rect3F& other) {
-        top_left.x = other.left() - size.w;
+        topLeft.x = other.left() - size.w;
     }
 
     void alignToRightOf(const Rect3F& other) {
-        top_left.x = other.right();
+        topLeft.x = other.right();
     }
 
     void alignToTopOf(const Rect3F& other) {
-        top_left.y = other.top() - size.h;
+        topLeft.y = other.top() - size.h;
     }
 
     void alignToBottomOf(const Rect3F& other) {
-        top_left.y = other.bottom();
+        topLeft.y = other.bottom();
     }
 
     void alignToFrontOf(const Rect3F& other) {
-        top_left.z = other.front() - size.l;
+        topLeft.z = other.front() - size.d;
     }
 
     void alignToBackOf(const Rect3F& other) {
-        top_left.z = other.back();
+        topLeft.z = other.back();
     }
 
     bool checkIntersection(const Rect3F& other) const {
@@ -154,7 +177,7 @@ public:
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Rect3F& rect) {
-        os << "[" << rect.top_left.x << ", " << rect.top_left.y << ", " << rect.top_left.z << ", " << rect.size.w << ", " << rect.size.h << ", " << rect.size.l << "]";
+        os << "[" << rect.topLeft.x << ", " << rect.topLeft.y << ", " << rect.topLeft.z << ", " << rect.size.w << ", " << rect.size.h << ", " << rect.size.d << "]";
         return os;
     }
 };

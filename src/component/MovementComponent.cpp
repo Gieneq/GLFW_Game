@@ -1,37 +1,30 @@
 #include "MovementComponent.h"
 #include "Entity.h"
 
-void MovementComponent::setDirection(Direction dir) {
-    if(dir == Direction::NORTH) {
-        direction.x = 0.0F;
-        direction.y = -1.0F;
+
+void MovementComponent::setDirection(float x, float y, float z) {
+    setDirectionUnsafe(x, y, z);
+
+    /* If nonzero normalize */
+    if(direction.x != 0.0F || direction.y != 0.0F || direction.z != 0.0F) {
+        direction.normalize();
     }
-    else if(dir == Direction::SOUTH) {
-        direction.x = 0.0F;
-        direction.y = 1.0F;
-    }
-    else if(dir == Direction::WEST) {
-        direction.x = -1.0F;
-        direction.y = 0.0F;
-    }
-    else if(dir == Direction::EAST) {
-        direction.x = 1.0F;
-        direction.y = 0.0F;
-    } 
-    
-    /* Stop */
-    else {
-        direction.x = 0.0F;
-        direction.y = 0.0F;
-    }
+}
+
+void MovementComponent::setDirectionUnsafe(float x, float y, float z) {
+    direction.x = x;
+    direction.y = y;
+    direction.z = z;
 }
 
 void MovementComponent::update(float dt) {
     auto translation = getTranslation(dt);
-    parent->getPositionElevationSpace().x += translation.x;
-    parent->getPositionElevationSpace().y += translation.y;
+    parent->getCuboidElevationSpace()->topLeft.x += translation.x;
+    parent->getCuboidElevationSpace()->topLeft.y += translation.y;
+    parent->getCuboidElevationSpace()->topLeft.z += translation.z;
+    
 }
 
-Vect2F MovementComponent::getTranslation(float dt) const {
-    return Vect2F{direction.x * speed * dt, direction.y * speed * dt};
+Vect3F MovementComponent::getTranslation(float dt) const {
+    return Vect3F{direction.x * speed * dt, direction.y * speed * dt, direction.z * speed * dt};
 }

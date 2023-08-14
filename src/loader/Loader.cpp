@@ -144,9 +144,9 @@ bool Loader::loadPlayer(World& world) {
     }
 
     /* Set starting position */
-    player->setXElevationSpace(13.5485F);
-    player->setYElevationSpace(18.5593F);
-    player->setZElevationSpace(0.0F); // can differ is standing on stair or small elevation
+    player->getCuboidElevationSpace()->topLeft.x = 13.5485F;
+    player->getCuboidElevationSpace()->topLeft.y = 18.5593F;
+    player->getCuboidElevationSpace()->topLeft.z = 0.0F; // can differ is standing on stair or small elevation
 
     /* Try adding texture to player */
     auto playersTextureIDOption = Loader::getLoader().getTextureDataByName("some_tiles");
@@ -170,7 +170,7 @@ bool Loader::loadPlayer(World& world) {
 
     /* Movement option */
     auto movementCmp = player->addMovementComponent(Settings::Player::INITIAL_SPEED);
-    movementCmp->setDirection(Direction::NONE);
+    movementCmp->setDirection(0.0F, 1.0F, 0.0F);
 
     /* WSAD to control player */
     auto controllableCmpOption = player->addControllableComponent();
@@ -875,11 +875,17 @@ bool Loader::fillElevationWithEntities(World& world, Elevation* elevation, Entit
         tileX = static_cast<float>(tileIndex % mapData.width);
         tileY = static_cast<float>(tileIndex / mapData.width);
 
-        tileEntity->setXElevationSpace(tileX);
-        tileEntity->setYElevationSpace(tileY);
-        tileEntity->setZElevationSpace(0);
-        tileEntity->setSize(1.0F * tilesetData.tileWidthMultiplier, 1.0F * tilesetData.tileHeightMultiplier);
-        tileEntity->setLength(0);
+        tileEntity->getCuboidElevationSpace()->topLeft = Vect3F(
+            tileX, 
+            tileY, 
+            0.0F
+        );
+
+        tileEntity->getCuboidElevationSpace()->size = Size3F(
+            1.0F * tilesetData.tileWidthMultiplier, 
+            1.0F * tilesetData.tileHeightMultiplier, 
+            0.0F
+        );
 
         /* Get TileData by GID */
         auto tileDataOption = tilesetData.getTileDataByGID(tileGID);

@@ -31,7 +31,7 @@ public:
 
     bool active{true};
 
-    MovementComponent * controlledMovement{nullptr};
+    MovementComponent* controlledMovement{nullptr};
 
 protected:
     void updateMovement();

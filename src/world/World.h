@@ -13,7 +13,6 @@ public:
     Elevation() = default;
     Elevation(int elevation, World* containingWorld) : elevation(elevation), containingWorld(containingWorld) {}
 
-    
     inline World* getContainingWorld() const {
         return containingWorld;
     }
@@ -39,14 +38,6 @@ public:
         return movementComponentsRegister;
     }
 
-    void addFloorEntity(Entity* e);
-    
-    void addClutterEntity(Entity* e);
-
-    void addStaticEntity(Entity* e);
-
-    void addDynamicEntity(Entity* e);
-
     const std::vector<Entity*>& getFloorEntities() const {
         return floorEntities;
     }
@@ -67,16 +58,20 @@ public:
         return biggerEntitiesRegister;
     }
 
-    /* Only removes data from registers. Dispose of Entity is made separately */
-    bool removeEntity(Entity* e);
-
-    /* World manages elevation indices */
-    friend class World;
-
-
 private:
     int elevation{0};
     void addEntitisComponentsToRegisters(Entity* e);
+    
+    /* Only removes data from registers. Dispose of Entity is made separately in World */
+    bool deleteEntity(Entity* e);
+    
+    void addFloorEntity(Entity* e);
+    
+    void addClutterEntity(Entity* e);
+
+    void addStaticEntity(Entity* e);
+
+    void addDynamicEntity(Entity* e);
 
     World* containingWorld{nullptr};
     
@@ -89,29 +84,46 @@ private:
     std::vector<Entity*> biggerEntitiesRegister;
     std::vector<CollisionComponent*> collisionComponentsRegister;
     std::vector<MovementComponent*> movementComponentsRegister;
+
+    /* World manages elevation indices */
+    friend class World;
 };
 
 
+/**
+ * World is responsible for managing elevations and entities.
+ * 
+*/
 class World {
 public:
-    // todo dispose entities indestructor
+    // todo dispose entities in destructor
+
     Elevation* appendElevation();
+
     std::optional<Elevation*> getElevation(int elevation);
+
     std::optional<Elevation*> getTopElevation();
+
     int getElevationsCount() const;
 
-    bool moveEntityToElevation(Entity* e, int newElevation);
+    bool moveDynamicEntityToElevation(Entity* e, int destinationElevationIndex);
 
     // todo - I see use of Enum and templating here
     std::optional<Entity *> createFloorEntity(int elevation);
-    std::optional<Entity *> createFloorEntity(Elevation* elevation);
-    std::optional<Entity *> createClutterEntity(int elevation);
-    std::optional<Entity *> createClutterEntity(Elevation* elevation);
-    std::optional<Entity *> createStaticEntity(int elevation);
-    std::optional<Entity *> createStaticEntity(Elevation* elevation);
-    std::optional<Entity *> createDynamicEntity(int elevation);
-    std::optional<Entity *> createDynamicEntity(Elevation* elevation);
 
+    std::optional<Entity *> createFloorEntity(Elevation* elevation);
+
+    std::optional<Entity *> createClutterEntity(int elevation);
+
+    std::optional<Entity *> createClutterEntity(Elevation* elevation);
+
+    std::optional<Entity *> createStaticEntity(int elevation);
+
+    std::optional<Entity *> createStaticEntity(Elevation* elevation);
+
+    std::optional<Entity *> createDynamicEntity(int elevation);
+
+    std::optional<Entity *> createDynamicEntity(Elevation* elevation);
 
     bool deleteEntity(Entity* e);
     
