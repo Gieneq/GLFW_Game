@@ -22,6 +22,8 @@ void RenderSystem::loopEnd() {
 
 void RenderSystem::batchStart() {
     enititesBatch.clear();
+    temporaryBatch.clear();
+    batchRenderElevationsProceed = true;
     
     /* Cleare render box in world space from camera position */
     // todo move to camera
@@ -32,9 +34,9 @@ void RenderSystem::batchStart() {
     //todo probably 3D
 }
 
-void RenderSystem::batchAppendEntity(Entity* e) {
+void RenderSystem::temporaryBatchAppendEntity(Entity* e) {
     if(renderBoxWorldSpace.checkIntersection(e->getCuboidWorldSpace().getFlatten())) {
-        enititesBatch.push_back(EntityBatchData {
+        temporaryBatch.push_back(EntityBatchData {
             e, 
             e->getCuboidElevationSpace()->bottom()
         });
@@ -42,14 +44,20 @@ void RenderSystem::batchAppendEntity(Entity* e) {
 }
 
 void RenderSystem::batchAppendElevation(Elevation* elevation) {
+    /* Collect to temporary vector for further check */
+    /* When entering temporaryBatch should be cleared */
+    if(batchRenderElevationsProceed == false) {
+        return;
+    }
+
     /* Floor flat tiles */
     for(auto entity: elevation->getFloorEntities()) {
-        this->batchAppendEntity(entity);
+        this->temporaryBatchAppendEntity(entity);
     }
 
     /* Clutter flat tiles */
     for(auto entity: elevation->getClutterEntities()) {
-        this->batchAppendEntity(entity);
+        this->temporaryBatchAppendEntity(entity);
     }
     
     /* Other big tiles */
@@ -61,7 +69,38 @@ void RenderSystem::batchAppendElevation(Elevation* elevation) {
         });
     }
     std::sort(tmpBatch.begin(), tmpBatch.end());
-    enititesBatch.insert(enititesBatch.end(), tmpBatch.begin(), tmpBatch.end());
+    temporaryBatch.insert(temporaryBatch.end(), tmpBatch.begin(), tmpBatch.end());
+
+    /* Check for camera attached entity (actually player) to 
+    urrent batch intersavion - prevent hiding player behind 
+    upper level objects */
+    auto observedEntity = camera->getFocusedEntity();
+    const auto observedLayerIndex = observedEntity->getContainingElevation()->getIndex();
+
+    /* Not apply to layer with player or below */
+    if(elevation->getIndex() <= observedLayerIndex) {
+        /* For sure visible - move objects to final batch vector */
+        enititesBatch.insert(enititesBatch.end(), temporaryBatch.begin(), temporaryBatch.end());
+    }
+
+    else {
+        /* Above observed entity - check for collision */
+        const auto observedRectElevationSpace = observedEntity->getCuboidElevationSpace()->getFlatten();
+        for(auto tmpEntityData : temporaryBatch) {
+            auto tmpEntity = tmpEntityData.entity;
+            const auto tmpRectElevationSpace = tmpEntity->getCuboidElevationSpace()->getFlatten();
+            if(tmpRectElevationSpace.checkIntersection(observedRectElevationSpace)) {
+                /* Collision - stop rendering elevations */
+                batchRenderElevationsProceed = false;
+                break;
+            }
+        }
+
+        /* No collisions - append temporaryBatch */
+        enititesBatch.insert(enititesBatch.end(), temporaryBatch.begin(), temporaryBatch.end());
+    }
+    
+    temporaryBatch.clear();
 }
 
 void RenderSystem::batchEnd(bool sorted) {

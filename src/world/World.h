@@ -104,6 +104,10 @@ public:
 
     std::optional<Elevation*> getElevation(int elevation);
 
+    inline std::vector<Elevation>& getAllElevations() {
+        return elevations;
+    }
+
     std::optional<Elevation*> getTopElevation();
 
     int getElevationsCount() const;

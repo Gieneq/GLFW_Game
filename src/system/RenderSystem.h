@@ -11,7 +11,7 @@
 
 class Entity;
 struct EntityBatchData {
-    const Entity* entity;
+    Entity* entity;
     float sortValue;
 
     bool operator<(const EntityBatchData& other) const {
@@ -34,7 +34,7 @@ public:
     void loopEnd() override;
 
     void batchStart();
-    void batchAppendEntity(Entity* e);
+    void temporaryBatchAppendEntity(Entity* e);
     void batchAppendElevation(Elevation* elevation);
     void batchEnd(bool sorted = false);
     void renderBatch();
@@ -57,6 +57,9 @@ private:
     int recentLoopEntitesCount{0};
     int lastLoopEntitesCount{0};
 
+    bool batchRenderElevationsProceed{true};
+
+    std::vector<EntityBatchData> temporaryBatch;
     std::vector<EntityBatchData> enititesBatch;
 };
 

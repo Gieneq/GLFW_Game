@@ -135,10 +135,12 @@ void GameBase::update(float dt) {
 
 void GameBase::render() {
     render_system.loopStart();
+    auto containingFloor = world.player.getContainingElevation();
 
     render_system.batchStart();
-    auto containingFloor = world.player.getContainingElevation();
-    render_system.batchAppendElevation(containingFloor);
+    for(auto& elevation : world.getAllElevations()) {
+        render_system.batchAppendElevation(&elevation);
+    }
     render_system.batchEnd();
     render_system.renderBatch();
 

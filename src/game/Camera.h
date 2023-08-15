@@ -10,5 +10,8 @@ public:
     void update(float dt);
     void focusOn(Entity* e);
 
+    inline Entity* getFocusedEntity() {
+        return focusedEntity;
+    }
     Entity* focusedEntity{nullptr};
 };

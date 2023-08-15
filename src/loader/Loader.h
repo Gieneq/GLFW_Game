@@ -20,7 +20,7 @@
 */
 
 // #define BUILD_TESTWORLD 1
-#define USE_ONLY_0_GROUP 1
+// #define USE_ONLY_0_GROUP 1
 // #define USE_ONLY_0_LAYER 1
 
 
