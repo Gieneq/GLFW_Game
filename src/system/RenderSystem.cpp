@@ -6,7 +6,7 @@
 #include "CollisionComponents.h"
 #include "Entity.h"
 #include <algorithm>
-#include "Entity.h"
+#include "World.h"
 
 void RenderSystem::loopStart() {
     RenderSystemBase::loopStart();
@@ -46,6 +46,14 @@ void RenderSystem::temporaryBatchAppendEntity(Entity* e) {
 void RenderSystem::batchAppendElevation(Elevation* elevation) {
     /* Collect to temporary vector for further check */
     /* When entering temporaryBatch should be cleared */
+    if(elevation->getIndex() > 5 || elevation->getIndex() < 0) {
+        int err1 = 1;
+    }
+
+    if(elevation->getIndex() > clipElevationIndex) {
+        return;
+    }
+
     if(batchRenderElevationsProceed == false) {
         return;
     }
@@ -85,16 +93,16 @@ void RenderSystem::batchAppendElevation(Elevation* elevation) {
 
     else {
         /* Above observed entity - check for collision */
-        const auto observedRectElevationSpace = observedEntity->getCuboidElevationSpace()->getFlatten();
-        for(auto tmpEntityData : temporaryBatch) {
-            auto tmpEntity = tmpEntityData.entity;
-            const auto tmpRectElevationSpace = tmpEntity->getCuboidElevationSpace()->getFlatten();
-            if(tmpRectElevationSpace.checkIntersection(observedRectElevationSpace)) {
-                /* Collision - stop rendering elevations */
-                batchRenderElevationsProceed = false;
-                break;
-            }
-        }
+        // const auto observedRectElevationSpace = observedEntity->getCuboidElevationSpace()->getFlatten();
+        // for(auto tmpEntityData : temporaryBatch) {
+        //     auto tmpEntity = tmpEntityData.entity;
+        //     const auto tmpRectElevationSpace = tmpEntity->getCuboidElevationSpace()->getFlatten();
+            // if(tmpRectElevationSpace.checkIntersection(observedRectElevationSpace)) {
+            //     /* Collision - stop rendering elevations */
+            //     batchRenderElevationsProceed = false;
+            //     break;
+            // }
+        // }
 
         /* No collisions - append temporaryBatch */
         enititesBatch.insert(enititesBatch.end(), temporaryBatch.begin(), temporaryBatch.end());
@@ -135,7 +143,14 @@ void RenderSystem::renderEntityData(const EntityBatchData& entityData) {
             renderFilledBox(textureCmp->getRectElevationSpace(), 1.0F, 0.0F, 0.0F);
         }
         else {
-            renderTexturedBox(textureCmp->getRectElevationSpace(), textureDataOption.value(), textureCmp->getTilesetIndex());
+            Rect2F textureRect = textureCmp->getRectElevationSpace();
+            auto currentElevation = entity->getContainingElevation();
+            auto elevationIndex = currentElevation->getWorldSpaceZ();
+            if(elevationIndex > 5 || elevationIndex < 0) {
+                std::cout << textureRect <<  ", ei: " << elevationIndex << ", cuboid: " << entity->getCuboidWorldSpace() << std::endl;
+            }
+            textureRect.topLeft.y -= elevationIndex;
+            renderTexturedBox(textureRect, textureDataOption.value(), textureCmp->getTilesetIndex());
         }
     }
 

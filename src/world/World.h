@@ -9,19 +9,19 @@ class MovementComponent;
 class CollisionComponent;
 class World;
 class Elevation {
-public:
-    Elevation() = default;
+    // Elevation() = default;
     Elevation(int elevation, World* containingWorld) : elevation(elevation), containingWorld(containingWorld) {}
 
+public:
     inline World* getContainingWorld() const {
         return containingWorld;
     }
 
-    inline int getIndex() const {
+    int getIndex() const {
         return elevation;
     }
 
-    inline float getWorldSpaceZ() const {
+    float getWorldSpaceZ() const {
         return static_cast<float>(elevation);
     }
 
@@ -107,6 +107,10 @@ public:
     inline std::vector<Elevation>& getAllElevations() {
         return elevations;
     }
+
+    // std::vector<Elevation>* getElevations() {
+    //     return &elevations;
+    // }
 
     std::optional<Elevation*> getTopElevation();
 

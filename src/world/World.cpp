@@ -112,6 +112,7 @@ int World::getElevationsCount() const {
 
 Elevation* World::appendElevation() {
     int nextElevation = getElevationsCount();
+    std::cout << "            Appending elevation: " << nextElevation << std::endl;
     elevations.push_back(Elevation(nextElevation, this));
     return &elevations.back();
 }

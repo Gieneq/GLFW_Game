@@ -50,6 +50,17 @@ public:
         return lastBatchEntitesCount;
     }
 
+    int getClipElevationIndex() {
+        return clipElevationIndex;
+    }
+    
+    void setClipElevationIndex(int index) {
+        clipElevationIndex = index;
+        if(clipElevationIndex < 0) {
+            clipElevationIndex = 0;
+        }
+    }
+
 private:
     void renderEntityData(const EntityBatchData& entityData);
     int lastBatchEntitesCount{0};
@@ -58,6 +69,7 @@ private:
     int lastLoopEntitesCount{0};
 
     bool batchRenderElevationsProceed{true};
+    int clipElevationIndex{6};
 
     std::vector<EntityBatchData> temporaryBatch;
     std::vector<EntityBatchData> enititesBatch;

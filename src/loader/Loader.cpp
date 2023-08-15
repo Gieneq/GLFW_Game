@@ -351,11 +351,6 @@ std::optional<TilesetData*> Loader::loadTilesetDataFromTSXFile(int firstGid, std
     tilesetData->tileWidth = tileWidth;
     tilesetData->tileHeight = tileHeight;
 
-
-    // TilesetData tilesetData(firstGid, lastGid, absuluteTilesetPath, absoluteTilesetImagePath, imageWidth, imageHeight, columns, tileCount / columns, tileWidth, tileHeight);
-    // tilesetData.tileWidthMultiplier = static_cast<int>(static_cast<float>(tilesetData.tileWidth) / static_cast<float>(mapTileWidth));
-    // tilesetData.tileHeightMultiplier = static_cast<int>(static_cast<float>(tilesetData.tileHeight) / static_cast<float>(mapTileHeight));
-
     /* Load tileset image */
     auto tilesetIdOption = loadTextureFromAbsolutePath(absoluteTilesetImagePath, tileWidth, tileHeight, tileCount / columns, columns, tilesetName);
     if(!tilesetIdOption.has_value()) {
@@ -496,7 +491,7 @@ bool Loader::buildWorldFromMapData(World& world) {
         return false;
     }
 
-    int groupIdx = 0;
+    int groupIdx = 0; // elevation index
     int layerIdx = 0;
 
     /* Iterate over all lavers called group in tmx file */
@@ -504,7 +499,8 @@ bool Loader::buildWorldFromMapData(World& world) {
 
         /* Create Elevation inside world */
         auto recentTopElevation = world.appendElevation();
-        
+        std::cout << "Recently created elevation id: " << recentTopElevation->getIndex() << std::endl;
+                
         /* Check index */
         if(recentTopElevation->getIndex() != groupIdx) {
             std::cerr << "Error loading map file: invalid group index" << std::endl;
@@ -573,8 +569,7 @@ bool Loader::buildWorldFromMapData(World& world) {
 }
 
 
-
-
+#define USE_Y_ELEVATION_FIX 1
 
 bool Loader::fillElevationWithEntities(World& world, Elevation* elevation, EntityType entityType, const std::vector<int> layerDataIndices) {
     int tileIndex{0};
@@ -625,12 +620,18 @@ bool Loader::fillElevationWithEntities(World& world, Elevation* elevation, Entit
         tileX = static_cast<float>(tileIndex % mapData.getTotalWidth());
         tileY = static_cast<float>(tileIndex / mapData.getTotalWidth());
 
+        /* Position */
         tileEntity->getCuboidElevationSpace()->topLeft = Vect3F(
             tileX, 
             tileY - ((tilesetData->getTileRelativeHeightScale() > 1.0F) ? (tilesetData->getTileRelativeHeightScale() - 1.0F) : 0.0F), 
             0.0F
         );
+#ifdef USE_Y_ELEVATION_FIX
+        const int elevationFixY = elevation->getIndex();
+        tileEntity->getCuboidElevationSpace()->topLeft.y += elevationFixY;
+#endif
 
+        /* Size */
         tileEntity->getCuboidElevationSpace()->size = Size3F(
             1.0F * tilesetData->getTileRelativeWidthtScale(), 
             1.0F * tilesetData->getTileRelativeHeightScale(), 

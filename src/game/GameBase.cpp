@@ -65,10 +65,12 @@ bool GameBase::onKeyReleased(int key) {
         auto player = &world.player;
         auto playersElevation = player->getContainingElevation();
 
-        std::cout << " __________________________________________________________" << std::endl;
-        std::cout << "| Player location: " << player->getCuboidWorldSpace().topLeft << "/" << playersElevation->getWorldSpaceZ() << std::endl;
-        std::cout << "| Render rendered entities: " << render_system.getLastLoopEntitesCount() << std::endl;
-        std::cout << "| Floor [" << playersElevation->getIndex() << "/" << world.getElevationsCount() << "] info:" << std::endl;
+        std::cout << " _______________________________________________________________" << std::endl;
+        std::cout << "| Player location world space: " << player->getCuboidWorldSpace().topLeft << ", worldSpaceZ: " << playersElevation->getWorldSpaceZ() << std::endl;
+        std::cout << "| Player CuboidWorldSpace: " << player->getCuboidWorldSpace() << " flatten to: " << player->getCuboidWorldSpace().getFlatten() << std::endl;
+        std::cout << "| Player CuboidElevationSpace: " << *(player->getCuboidElevationSpace()) << " flatten to: " << player->getCuboidElevationSpace()->getFlatten() << std::endl;
+        std::cout << "| Last loop rendered entities: " << render_system.getLastLoopEntitesCount() << std::endl;
+        std::cout << "| Elevation index:" << playersElevation->getIndex() << ", elevations count: " << world.getElevationsCount() << ", this info:" << std::endl;
         std::cout << "|  - entities floor:   " << playersElevation->getFloorEntities().size() << std::endl;
         std::cout << "|  - entities clutter: " << playersElevation->getClutterEntities().size() << std::endl;
         std::cout << "|  - entities static:  " << playersElevation->getStaticEntities().size() << std::endl;
@@ -77,7 +79,11 @@ bool GameBase::onKeyReleased(int key) {
         std::cout << "|  - components movement: " << playersElevation->getMovementComponents().size() << std::endl;
         std::cout << "|  - components collision: " << playersElevation->getCollisionComponents().size() << std::endl;
         std::cout << "| WorldClipRect: " << render_system.getRenderBoxWorldSpace() << std::endl;
-
+        
+        std::cout << "| Elevations data: " << std::endl;
+        for(auto elevation : world.getAllElevations()) {
+            std::cout << "|  - elevation index: " << elevation.getIndex() << ", worldSpaceZ: " << elevation.getWorldSpaceZ() << std::endl;
+        }
         
         std::cout << std::endl;
         return true;
@@ -87,6 +93,30 @@ bool GameBase::onKeyReleased(int key) {
         /* Toggle debug view */
         debugView = !debugView;
         render_system.debugView = debugView;
+        return true;
+    }
+    
+    if(key == GLFW_KEY_UP) {
+        render_system.setClipElevationIndex(render_system.getClipElevationIndex() + 1);
+        
+        std::cout << "Clip elevation index: " << render_system.getClipElevationIndex() << " out of: ";
+        for(auto elevation : world.getAllElevations()) {
+            std::cout << elevation.getIndex() << ", ";
+        }
+        std::cout << std::endl;
+        
+        return true;
+    }
+    
+    if(key == GLFW_KEY_DOWN) {
+        render_system.setClipElevationIndex(render_system.getClipElevationIndex() - 1);
+        
+        std::cout << "Clip elevation index: " << render_system.getClipElevationIndex() << " out of: ";
+        for(auto elevation : world.getAllElevations()) {
+            std::cout << elevation.getIndex() << ", ";
+        }
+        std::cout << std::endl;
+
         return true;
     }
 
@@ -138,9 +168,17 @@ void GameBase::render() {
     auto containingFloor = world.player.getContainingElevation();
 
     render_system.batchStart();
-    for(auto& elevation : world.getAllElevations()) {
-        render_system.batchAppendElevation(&elevation);
+    // auto elevationsAll = world.getAllElevations();
+    //hacky todo - fix
+    for(int i=0; i<world.getElevationsCount(); ++i) {
+        auto elevationPtr = world.getElevation(i).value();
+        render_system.batchAppendElevation(elevationPtr);
     }
+    // for(auto& elevation: elevationsAll) {
+    //     auto elevationPtr = &elevation;
+    //     render_system.batchAppendElevation(elevationPtr);
+    // }
+    // #error
     render_system.batchEnd();
     render_system.renderBatch();
 
