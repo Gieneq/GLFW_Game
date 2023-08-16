@@ -2,6 +2,7 @@
 
 class Game : public GameBase {
 public:
+    Game() : GameBase() {};
     virtual ~Game() = default;
 
     virtual bool init() override;

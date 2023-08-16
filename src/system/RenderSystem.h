@@ -39,7 +39,9 @@ public:
     void batchEnd(bool sorted = false);
     void renderBatch();
 
-    void renderCollisionBoxes(const std::vector<CollisionComponent*>& collisionComponents);
+    void renderCollisionBoxes(
+        std::vector<CollisionComponent*>::const_iterator collisionCmpsBegin,
+        std::vector<CollisionComponent*>::const_iterator collisionCmpsEnd);
 
     
     inline int getLastBatchEntitesCount() const {

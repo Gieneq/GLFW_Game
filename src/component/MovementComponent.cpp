@@ -25,9 +25,9 @@ void MovementComponent::setDirectionUnsafe(float x, float y, float z) {
 
 void MovementComponent::update(float dt) {
     auto translation = getTranslation(dt);
-    parent->getCuboidElevationSpace()->topLeft.x += translation.x;
-    parent->getCuboidElevationSpace()->topLeft.y += translation.y;
-    parent->getCuboidElevationSpace()->topLeft.z += translation.z;
+    parent->getCuboidElevationSpace().topLeft.x += translation.x;
+    parent->getCuboidElevationSpace().topLeft.y += translation.y;
+    parent->getCuboidElevationSpace().topLeft.z += translation.z;
     
 }
 

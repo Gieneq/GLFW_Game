@@ -38,7 +38,7 @@ void RenderSystem::temporaryBatchAppendEntity(Entity* e) {
     if(renderBoxWorldSpace.checkIntersection(e->getCuboidWorldSpace().getFlatten())) {
         temporaryBatch.push_back(EntityBatchData {
             e, 
-            e->getCuboidElevationSpace()->bottom()
+            e->getCuboidElevationSpace().bottom()
         });
     }
 }
@@ -59,21 +59,24 @@ void RenderSystem::batchAppendElevation(Elevation* elevation) {
     }
 
     /* Floor flat tiles */
-    for(auto entity: elevation->getFloorEntities()) {
+    for(auto entityIt = elevation->floorEntitiesBegin(); entityIt != elevation->floorEntitiesEnd(); entityIt++) {
+        auto entity = *entityIt;
         this->temporaryBatchAppendEntity(entity);
     }
 
     /* Clutter flat tiles */
-    for(auto entity: elevation->getClutterEntities()) {
+    for(auto entityIt = elevation->clutterEntitiesBegin(); entityIt != elevation->clutterEntitiesEnd(); entityIt++) {
+        auto entity = *entityIt;
         this->temporaryBatchAppendEntity(entity);
     }
     
     /* Other big tiles */
     std::vector<EntityBatchData> tmpBatch;
-    for(auto entity: elevation->getBiggerEntities()) {
+    for(auto entityIt = elevation->biggerEntitiesRegisterBegin(); entityIt != elevation->biggerEntitiesRegisterEnd(); entityIt++) {
+        auto entity = *entityIt;
         tmpBatch.push_back(EntityBatchData {
             entity, 
-            entity->getCuboidElevationSpace()->bottom()
+            entity->getCuboidElevationSpace().bottom()
         });
     }
     std::sort(tmpBatch.begin(), tmpBatch.end());
@@ -83,7 +86,7 @@ void RenderSystem::batchAppendElevation(Elevation* elevation) {
     urrent batch intersavion - prevent hiding player behind 
     upper level objects */
     auto observedEntity = camera->getFocusedEntity();
-    const auto observedLayerIndex = observedEntity->getContainingElevation()->getIndex();
+    const auto observedLayerIndex = observedEntity->getContainingElevationOrThrow()->getIndex();
 
     /* Not apply to layer with player or below */
     if(elevation->getIndex() <= observedLayerIndex) {
@@ -144,7 +147,7 @@ void RenderSystem::renderEntityData(const EntityBatchData& entityData) {
         }
         else {
             Rect2F textureRect = textureCmp->getRectElevationSpace();
-            auto currentElevation = entity->getContainingElevation();
+            auto currentElevation = entity->getContainingElevationOrThrow();
             auto elevationIndex = currentElevation->getWorldSpaceZ();
             if(elevationIndex > 5 || elevationIndex < 0) {
                 std::cout << textureRect <<  ", ei: " << elevationIndex << ", cuboid: " << entity->getCuboidWorldSpace() << std::endl;
@@ -164,10 +167,11 @@ void RenderSystem::renderEntityData(const EntityBatchData& entityData) {
 }
 
 
-void RenderSystem::renderCollisionBoxes(const std::vector<CollisionComponent*>& collisionComponents) {
-    for(auto collisionCmp : collisionComponents) {
-        // renderFilledBox(collisionCmp->getRectElevationSpace(), 1.0F, 0.0F, 0.0F);
-            // renderFilledBox(box, 1.0F, 0.0F, 0.0F);
+void RenderSystem::renderCollisionBoxes(
+        std::vector<CollisionComponent*>::const_iterator collisionCmpsBegin,
+        std::vector<CollisionComponent*>::const_iterator collisionCmpsEnd) {
+    for(auto collisionCmpIt = collisionCmpsBegin; collisionCmpIt != collisionCmpsEnd; collisionCmpIt++) {
+        auto collisionCmp = *collisionCmpIt;
         for (auto& box : collisionCmp->getElevationSpaceCollisionRects()) {
             renderTranslucentFilledBox(box, 1.0F, 0.0F, 0.0F, 0.5F);
         }

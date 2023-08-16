@@ -23,14 +23,12 @@ class CollisionDetectorComponent;
 class ControllableComponent;
 class AnimationComponent;
 class Entity {
-public:
-    Entity() = default;
+protected:
+    // Entity() = default;
     Entity(Elevation* elevation, EntityType etype) : containingElevation{elevation}, type{etype} {}
-    Entity(float elevationSpaceX, float elevationSpaceY, Elevation* elevation, EntityType etype) : cuboidElevationSpace{elevationSpaceX, elevationSpaceY, 0.0F, 1.0F, 1.0F, 0.0F}, containingElevation{elevation}, type{etype} {}
-    Entity(float elevationSpaceX, float elevationSpaceY, float elevationSpaceZ, float width, float height, float depth, Elevation* elevation, EntityType etype) :
-        cuboidElevationSpace{elevationSpaceX, elevationSpaceY, elevationSpaceZ, width, height, depth}, containingElevation{elevation}, active{true}, type{etype} {}
-    
-    // todo make Entity responsible for deleting components
+
+public:
+    // todo make Entity responsible for deleting components - IMPORTANT!
     ~Entity() {
         for (auto component : components) {
             delete component;
@@ -56,6 +54,12 @@ public:
     inline long long getId() const {
         return id;
     }
+
+    inline EntityType getType() const {
+        return type;
+    } 
+
+    Elevation* getContainingElevationOrThrow() const;
 
     /* Components related methods */
 
@@ -95,31 +99,40 @@ public:
 
     /* Components building methods */
     MovementComponent* addMovementComponent(float speed = 1.0F);
-    ColorComponent* addColorComponent(float relX, float relY, float boxWidth, float boxHeight);
-    TextureComponent* addTextureComponent(float relX, float relY, float boxWidth, float boxHeight, TextureID id);
+
+    ColorComponent* addColorComponent(float relX = 0.0F, float relY = 0.0F, float boxWidth = 1.0F, float boxHeight = 1.0F);
+
+    TextureComponent* addTextureComponent(TextureID id, float relX = 0.0F, float relY = 0.0F, float boxWidth = 1.0F, float boxHeight = 1.0F);
+
     CollisionComponent* addCollisionComponent();
+
     std::optional<CollisionDetectorComponent*> addCollisionDetectorComponent(const Rect2F& boundingRect);
+
     std::optional<ControllableComponent*> addControllableComponent();
+
     std::optional<AnimationComponent*> addAnimationComponent(int interval);
     
+    /* Access components */
     std::optional<ColorComponent*> getColorComponent() const;
+
     std::optional<TextureComponent*> getTextureComponent() const;
     
     /* Position related methods */
 
-    Rect3F* getCuboidElevationSpace() {
-        return &cuboidElevationSpace;
-    }
-    
-    inline Elevation* getContainingElevation() {
-        return containingElevation;
+    inline Rect3F& getCuboidElevationSpace() {
+        return cuboidElevationSpace;
     }
 
+    inline const Rect3F& getCuboidElevationSpace() const {
+        return cuboidElevationSpace;
+    }
+   
     Rect3F getCuboidWorldSpace() const;
 
 protected:
     /* Quick access to popular components */
     ColorComponent* colorComponent{nullptr};
+
     TextureComponent* textureComponent{nullptr};
 
 private:
@@ -127,6 +140,7 @@ private:
      * ID is ised to distinguish entities.
     */
     long long id{nextID++};
+
     std::vector<Component*> components;
 
     /**
@@ -146,4 +160,5 @@ private:
     static long long nextID;
 
     friend class Loader;
+    friend class Elevation;
 };

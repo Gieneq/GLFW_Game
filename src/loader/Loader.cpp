@@ -55,23 +55,33 @@ bool Loader::loadWorld(World& world) {
 bool Loader::loadPlayer(World& world) {
     std::cout << "Loading player data..." << std::endl;
     Player* player = &world.player;
+    
 
-    /* There is needed at least one Elevation */
-    if(!player->getContainingElevation()) {
-        /* Place player on bottom Elevation */
-        auto bottomElevation = world.getElevation(0);
-        if(!bottomElevation.has_value()) {
-            std::cerr << "Error getting bottom Elevation for player" << std::endl;
+    /* Player as all Entities has to have pointer to it's Elevation */
+    try {
+        auto playersElevation = player->getContainingElevationOrThrow();
+    } catch (std::runtime_error&) {
+        std::cout << "Player has no Elevation, create one" << std::endl;
+        try {
+            auto bottomElevation = &world[0];
+
+            /* Player has to be added to the Elevation */
+            player->containingElevation = bottomElevation;
+            bottomElevation->registetedEntityOrThrow(player);
+
+        } catch (std::out_of_range& e) {
+            std::cout << "World has no Elevations: " << e.what() << std::endl;
+            return false;
+        } catch (std::invalid_argument& e) {
+            std::cout << "Error adding player to Elevation: " << e.what() << std::endl;
             return false;
         }
-        player->containingElevation = bottomElevation.value();
-        bottomElevation.value()->addDynamicEntity(player);
     }
 
     /* Set starting position */
-    player->getCuboidElevationSpace()->topLeft.x = 13.5485F;
-    player->getCuboidElevationSpace()->topLeft.y = 18.5593F;
-    player->getCuboidElevationSpace()->topLeft.z = 0.0F; // can differ is standing on stair or small elevation
+    player->getCuboidElevationSpace().topLeft.x = 13.5485F;
+    player->getCuboidElevationSpace().topLeft.y = 18.5593F;
+    player->getCuboidElevationSpace().topLeft.z = 0.0F; // can differ is standing on stair or small elevation
 
     /* Try adding texture to player */
     auto playersTextureIDOption = Loader::getLoader().getTextureDataByName("some_tiles");
@@ -81,7 +91,7 @@ bool Loader::loadPlayer(World& world) {
         /* Texture */
         std::cout << "Player has texture" << std::endl;
         //todo need refinements 1x1 size not obvious
-        auto textureCmp = player->addTextureComponent(0.0F, 0.0F, 1.0F, 1.0F, playersTextureData->getTextureID());
+        auto textureCmp = player->addTextureComponent(playersTextureData->getTextureID(), 0.0F, 0.0F, 1.0F, 1.0F);
         textureCmp->setTilesetIndex(0);
     } 
     else {
@@ -498,7 +508,7 @@ bool Loader::buildWorldFromMapData(World& world) {
     for(auto groupNode : mapNode.children("group")) {
 
         /* Create Elevation inside world */
-        auto recentTopElevation = world.appendElevation();
+        auto recentTopElevation = world.createElevationOrThrow();
         std::cout << "Recently created elevation id: " << recentTopElevation->getIndex() << std::endl;
                 
         /* Check index */
@@ -594,45 +604,32 @@ bool Loader::fillElevationWithEntities(World& world, Elevation* elevation, Entit
         auto tilesetData = tilesetDataOption.value();
         
         /* Build tile - register automatically to the world */
-        std::optional<Entity*> newTileOption = std::nullopt;
+        Entity* tileEntity = nullptr;
 
-        if(entityType == EntityType::FLOOR) {
-            newTileOption = world.createFloorEntity(elevation);
-        }
-
-        else if(entityType == EntityType::STATIC) {
-            newTileOption = world.createStaticEntity(elevation);
-        }
-
-        else {
-            std::cerr << "Error creating tile: invalid entity type" << std::endl;
+        try {
+            tileEntity = world.createEntityOnElevationOrThrow(elevation, entityType);
+        } catch (std::bad_alloc& e) {
+            std::cerr << "Error creating Entity: " << e.what() << std::endl;
             return false;
         }
-
-        if(!newTileOption.has_value()) {
-            std::cerr << "Error creating tile: couldn't create entity" << std::endl;
-            return false;
-        }
-
-        Entity* tileEntity = newTileOption.value();
 
         /* Set location in elevation space */
         tileX = static_cast<float>(tileIndex % mapData.getTotalWidth());
         tileY = static_cast<float>(tileIndex / mapData.getTotalWidth());
 
         /* Position */
-        tileEntity->getCuboidElevationSpace()->topLeft = Vect3F(
+        tileEntity->getCuboidElevationSpace().topLeft = Vect3F(
             tileX, 
             tileY - ((tilesetData->getTileRelativeHeightScale() > 1.0F) ? (tilesetData->getTileRelativeHeightScale() - 1.0F) : 0.0F), 
             0.0F
         );
 #ifdef USE_Y_ELEVATION_FIX
         const int elevationFixY = elevation->getIndex();
-        tileEntity->getCuboidElevationSpace()->topLeft.y += elevationFixY;
+        tileEntity->getCuboidElevationSpace().topLeft.y += elevationFixY;
 #endif
 
         /* Size */
-        tileEntity->getCuboidElevationSpace()->size = Size3F(
+        tileEntity->getCuboidElevationSpace().size = Size3F(
             1.0F * tilesetData->getTileRelativeWidthtScale(), 
             1.0F * tilesetData->getTileRelativeHeightScale(), 
             0.0F
@@ -652,11 +649,11 @@ bool Loader::fillElevationWithEntities(World& world, Elevation* elevation, Entit
         // float textureHeight = static_cast<float>(tilesetData.tileHeight);
 
         auto textureCmp = tileEntity->addTextureComponent(
+            textureID,
             0.0F, 
             0.0F, 
             1.0F * tilesetData->getTileRelativeWidthtScale(), 
-            1.0F * tilesetData->getTileRelativeHeightScale(), 
-            textureID
+            1.0F * tilesetData->getTileRelativeHeightScale()
         );
         textureCmp->setTilesetIndex(tileData->tileLID);
 

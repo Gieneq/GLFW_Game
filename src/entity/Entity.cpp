@@ -8,6 +8,12 @@
 
 long long Entity::nextID = 0;
 
+Elevation* Entity::getContainingElevationOrThrow() const {
+    if(containingElevation == nullptr) {
+        throw std::runtime_error("Entity::getContainingElevationOrThrow: containingElevation is nullptr");
+    }
+    return containingElevation;
+}
 
 void Entity::addComponent(Component* component) {
     components.push_back(component);
@@ -43,7 +49,7 @@ ColorComponent* Entity::addColorComponent(float relX, float relY, float boxWidth
     return colorComponent;
 }
 
-TextureComponent* Entity::addTextureComponent(float relX, float relY, float boxWidth, float boxHeight, TextureID id) {
+TextureComponent* Entity::addTextureComponent(TextureID id, float relX, float relY, float boxWidth, float boxHeight) {
     auto textureComponent = new TextureComponent(this, relX, relY, boxWidth, boxHeight, id);
     addComponent(textureComponent);
     
@@ -129,7 +135,7 @@ Rect3F Entity::getCuboidWorldSpace() const {
     return Rect3F(
         cuboidElevationSpace.topLeft.x + 0.0F,
         cuboidElevationSpace.topLeft.y +  0.0F,
-        cuboidElevationSpace.topLeft.z + containingElevation->getWorldSpaceZ(),
+        cuboidElevationSpace.topLeft.z + getContainingElevationOrThrow()->getWorldSpaceZ(),
         cuboidElevationSpace.size.w,
         cuboidElevationSpace.size.h,
         cuboidElevationSpace.size.d

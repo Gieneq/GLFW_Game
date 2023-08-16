@@ -7,7 +7,7 @@ public:
     virtual ~Component() = default;
     Component(Entity* parent) : parent{parent} {}
 
-    inline const Entity* getParentEntity() {
+    inline Entity* getParentEntity() {
         return parent;
     }
     

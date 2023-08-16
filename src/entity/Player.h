@@ -11,7 +11,7 @@ class ColorComponent;
 class Elevation;
 class Player : public Entity {
 public:
-    Player() = default;
+    Player() : Entity(nullptr, EntityType::DYNAMIC) {};
     Player(Elevation* elevation) : Entity(elevation, EntityType::DYNAMIC) {}
 
     MovementComponent* addMovementComponent(float speed);
@@ -21,6 +21,4 @@ public:
     MovementComponent* movementComponent{nullptr};
     CollisionDetectorComponent* collisionDetectorComponent{nullptr};
     ControllableComponent* controllableComponent{nullptr};
-    // TextureComponent* textureComponent{nullptr};
-    // ColorComponent* colorComponent{nullptr};
 };

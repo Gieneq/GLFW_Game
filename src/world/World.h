@@ -9,79 +9,256 @@ class MovementComponent;
 class CollisionComponent;
 class World;
 class Elevation {
-    // Elevation() = default;
-    Elevation(int elevation, World* containingWorld) : elevation(elevation), containingWorld(containingWorld) {}
+    Elevation(int elevation, World& containingWorld) : elevation(elevation), containingWorld(containingWorld) {}
 
 public:
-    inline World* getContainingWorld() const {
+    inline World& getContainingWorld() {
         return containingWorld;
     }
 
-    int getIndex() const {
+    inline const World& getContainingWorldConst() const {
+        return containingWorld;
+    }
+
+    inline int getIndex() const {
         return elevation;
     }
 
-    float getWorldSpaceZ() const {
+    inline float getWorldSpaceZ() const {
         return static_cast<float>(elevation);
     }
 
+    /* Counts */
     inline int getTotalEntitiesCount() const {
         return static_cast<int>(floorEntities.size() + clutterEntities.size() 
             + staticEntities.size() + dynamicEntities.size());
     }
 
-    inline const std::vector<CollisionComponent*>& getCollisionComponents() const {
-        return collisionComponentsRegister;
+    inline int getFloorEntitiesCount() const {
+        return static_cast<int>(floorEntities.size());
     }
 
-    inline const std::vector<MovementComponent*>& getMovementComponents() const {
-        return movementComponentsRegister;
+    inline int getClutterEntitiesCount() const {
+        return static_cast<int>(clutterEntities.size());
     }
 
-    const std::vector<Entity*>& getFloorEntities() const {
-        return floorEntities;
+    inline int getStaticEntitiesCount() const {
+        return static_cast<int>(staticEntities.size());
     }
 
-    const std::vector<Entity*>& getClutterEntities() const {
-        return clutterEntities;
+    inline int getDynamicEntitiesCount() const {
+        return static_cast<int>(dynamicEntities.size());
     }
 
-    const std::vector<Entity*>& getStaticEntities() const {
-        return staticEntities;
+    inline int getBiggerEntitiesCount() const {
+        return static_cast<int>(biggerEntitiesRegister.size());
     }
 
-    const std::vector<Entity*>& getDynamicEntities() const {
-        return dynamicEntities;
+    inline int getMovementComponentsCount() const {
+        return static_cast<int>(movementComponentsRegister.size());
     }
 
-    const std::vector<Entity*>& getBiggerEntities() const {
-        return biggerEntitiesRegister;
+    inline int getCollisionComponentsCount() const {
+        return static_cast<int>(collisionComponentsRegister.size());
     }
+
+
+    /* Access elements & iterators - Floor Entities */
+    inline Entity& getFloorEntityOrThrow(int index) {
+        return *floorEntities.at(index);
+    }
+
+    inline const Entity& getFloorEntityConstOrThrow(int index) const {
+        return *floorEntities.at(index);
+    }
+
+    inline std::vector<Entity*>::iterator floorEntitiesBegin() {
+        return floorEntities.begin();
+    }
+
+    inline std::vector<Entity*>::iterator floorEntitiesEnd() {
+        return floorEntities.end();
+    }
+
+    inline std::vector<Entity*>::const_iterator floorEntitiesBegin() const {
+        return floorEntities.begin();
+    }
+
+    inline std::vector<Entity*>::const_iterator floorEntitiesEnd() const {
+        return floorEntities.end();
+    }
+
+    
+    /* Access elements & iterators - Clutter Entities */
+    inline Entity& getClutterEntityOrThrow(int index) {
+        return *clutterEntities.at(index);
+    }
+
+    inline const Entity& getClutterEntityConstOrThrow(int index) const {
+        return *clutterEntities.at(index);
+    }
+
+    inline std::vector<Entity*>::iterator clutterEntitiesBegin() {
+        return clutterEntities.begin();
+    }
+
+    inline std::vector<Entity*>::iterator clutterEntitiesEnd() {
+        return clutterEntities.end();
+    }
+
+    inline std::vector<Entity*>::const_iterator clutterEntitiesBegin() const {
+        return clutterEntities.begin();
+    }
+
+    inline std::vector<Entity*>::const_iterator clutterEntitiesEnd() const {
+        return clutterEntities.end();
+    }
+
+
+    /* Access elements & iterators - Static Entities */
+    inline Entity& getStaticEntityOrThrow(int index) {
+        return *staticEntities.at(index);
+    }
+
+    inline const Entity& getStaticEntityConstOrThrow(int index) const {
+        return *staticEntities.at(index);
+    }
+
+    inline std::vector<Entity*>::iterator staticEntitiesBegin() {
+        return staticEntities.begin();
+    }
+
+    inline std::vector<Entity*>::iterator staticEntitiesEnd() {
+        return staticEntities.end();
+    }
+
+    inline std::vector<Entity*>::const_iterator staticEntitiesBegin() const {
+        return staticEntities.begin();
+    }
+
+    inline std::vector<Entity*>::const_iterator staticEntitiesEnd() const {
+        return staticEntities.end();
+    }
+
+
+    /* Access elements & iterators - Dynamic Entities */
+    inline Entity& getDynamicEntityOrThrow(int index) {
+        return *dynamicEntities.at(index);
+    }
+
+    inline const Entity& getDynamicEntityConstOrThrow(int index) const {
+        return *dynamicEntities.at(index);
+    }
+
+    inline std::vector<Entity*>::iterator dynamicEntitiesBegin() {
+        return dynamicEntities.begin();
+    }
+
+    inline std::vector<Entity*>::iterator dynamicEntitiesEnd() {
+        return dynamicEntities.end();
+    }
+
+    inline std::vector<Entity*>::const_iterator dynamicEntitiesBegin() const {
+        return dynamicEntities.begin();
+    }
+
+    inline std::vector<Entity*>::const_iterator dynamicEntitiesEnd() const {
+        return dynamicEntities.end();
+    }
+
+    
+    /* Iterators - Bigger Entities Register */
+    inline std::vector<Entity*>::iterator biggerEntitiesRegisterBegin() {
+        return biggerEntitiesRegister.begin();
+    }
+
+    inline std::vector<Entity*>::iterator biggerEntitiesRegisterEnd() {
+        return biggerEntitiesRegister.end();
+    }
+
+    inline std::vector<Entity*>::const_iterator biggerEntitiesRegisterBegin() const {
+        return biggerEntitiesRegister.begin();
+    }
+
+    inline std::vector<Entity*>::const_iterator biggerEntitiesRegisterEnd() const {
+        return biggerEntitiesRegister.end();
+    }
+
+
+    /* Iterators - All Entities Register */
+    inline std::vector<Entity*>::iterator allEntitiesRegisterBegin() {
+        return allEntitiesRegister.begin();
+    }
+
+    inline std::vector<Entity*>::iterator allEntitiesRegisterEnd() {
+        return allEntitiesRegister.end();
+    }
+
+    inline std::vector<Entity*>::const_iterator allEntitiesRegisterBegin() const {
+        return allEntitiesRegister.begin();
+    }
+
+    inline std::vector<Entity*>::const_iterator allEntitiesRegisterEnd() const {
+        return allEntitiesRegister.end();
+    }
+
+
+    /* Iterators - Collision Components Register */
+    inline std::vector<CollisionComponent*>::iterator collisionComponentsRegisterBegin() {
+        return collisionComponentsRegister.begin();
+    }
+
+    inline std::vector<CollisionComponent*>::iterator collisionComponentsRegisterEnd() {
+        return collisionComponentsRegister.end();
+    }
+
+    inline std::vector<CollisionComponent*>::const_iterator collisionComponentsRegisterBegin() const {
+        return collisionComponentsRegister.begin();
+    }
+
+    inline std::vector<CollisionComponent*>::const_iterator collisionComponentsRegisterEnd() const {
+        return collisionComponentsRegister.end();
+    }
+
+
+    /* Iterators - Movement Components Register */
+    inline std::vector<MovementComponent*>::iterator movementComponentsRegisterBegin() {
+        return movementComponentsRegister.begin();
+    }
+
+    inline std::vector<MovementComponent*>::iterator movementComponentsRegisterEnd() {
+        return movementComponentsRegister.end();
+    }
+
+    inline std::vector<MovementComponent*>::const_iterator movementComponentsRegisterBegin() const {
+        return movementComponentsRegister.begin();
+    }
+
+    inline std::vector<MovementComponent*>::const_iterator movementComponentsRegisterEnd() const {
+        return movementComponentsRegister.end();
+    }
+    
 
 private:
     int elevation{0};
-    void addEntitisComponentsToRegisters(Entity* e);
-    
-    /* Only removes data from registers. Dispose of Entity is made separately in World */
-    bool deleteEntity(Entity* e);
-    
-    void addFloorEntity(Entity* e);
-    
-    void addClutterEntity(Entity* e);
+    void addEntitisComponentsToRegisters(Entity* entity); //Used by Entity
 
-    void addStaticEntity(Entity* e);
-
-    void addDynamicEntity(Entity* e);
-
-    World* containingWorld{nullptr};
+    void moveEntityToElevationOrThrow(Entity* entity, Elevation* nextElevation); //Used by World
     
-    // todo - I see use of Enum and templating here
+    Entity* createEntityOrThrow(EntityType type); //Used by World
+    void registetedEntityOrThrow(Entity* newEntity);
+    void deregisterEntityOrThrow(Entity* entity);
+    bool deleteEntityIfExists(Entity* entity); //Used by World
+
+    World& containingWorld;
+    
     std::vector<Entity*> floorEntities;
     std::vector<Entity*> clutterEntities;
     std::vector<Entity*> staticEntities;
     std::vector<Entity*> dynamicEntities;
 
     std::vector<Entity*> biggerEntitiesRegister;
+    std::vector<Entity*> allEntitiesRegister;
     std::vector<CollisionComponent*> collisionComponentsRegister;
     std::vector<MovementComponent*> movementComponentsRegister;
 
@@ -94,52 +271,70 @@ private:
 
 /**
  * World is responsible for managing elevations and entities.
- * 
 */
 class World {
 public:
     // todo dispose entities in destructor
+    World() = default;
 
-    Elevation* appendElevation();
-
-    std::optional<Elevation*> getElevation(int elevation);
-
-    inline std::vector<Elevation>& getAllElevations() {
-        return elevations;
-    }
-
-    // std::vector<Elevation>* getElevations() {
-    //     return &elevations;
-    // }
-
-    std::optional<Elevation*> getTopElevation();
+    Elevation* createElevationOrThrow();
 
     int getElevationsCount() const;
 
-    bool moveDynamicEntityToElevation(Entity* e, int destinationElevationIndex);
+    /* Access Elevation */
+    std::optional<Elevation*> getElevationOption(int elevation);
 
-    // todo - I see use of Enum and templating here
-    std::optional<Entity *> createFloorEntity(int elevation);
+    std::optional<Elevation*> getTopElevationOption();
 
-    std::optional<Entity *> createFloorEntity(Elevation* elevation);
+    Elevation& operator[](int elevation);
 
-    std::optional<Entity *> createClutterEntity(int elevation);
+    const Elevation& operator[](int elevation) const;
 
-    std::optional<Entity *> createClutterEntity(Elevation* elevation);
+    Elevation& getTopElevationOrThrow();
 
-    std::optional<Entity *> createStaticEntity(int elevation);
+    const Elevation& getTopElevationConstOrThrow();
 
-    std::optional<Entity *> createStaticEntity(Elevation* elevation);
+    /* Iterators over Elevaions */
 
-    std::optional<Entity *> createDynamicEntity(int elevation);
+    std::vector<Elevation*>::iterator begin();
 
-    std::optional<Entity *> createDynamicEntity(Elevation* elevation);
+    std::vector<Elevation*>::iterator end();
 
-    bool deleteEntity(Entity* e);
+    std::vector<Elevation*>::const_iterator begin() const;
+
+    std::vector<Elevation*>::const_iterator end() const;
+
+    /* Iterator over all Entities */
+    inline std::vector<Entity*>::iterator allEntitiesRegisterBegin() {
+        return allEntitiesRegister.begin();
+    }
+
+    inline std::vector<Entity*>::iterator allEntitiesRegisterEnd() {
+        return allEntitiesRegister.end();
+    }
+
+    inline std::vector<Entity*>::const_iterator allEntitiesRegisterBegin() const {
+        return allEntitiesRegister.begin();
+    }
+
+    inline std::vector<Entity*>::const_iterator allEntitiesRegisterEnd() const {
+        return allEntitiesRegister.end();
+    }
+
+    /* Other */
+    void moveDynamicEntityToElevationOrThrow(Entity* e, int destinationElevationIndex);// todo
+
+    /* Creation Entities on Elevations */
+    Entity* createEntityOnElevationOrThrow(int elevationIndex, EntityType type);
+
+    Entity* createEntityOnElevationOrThrow(Elevation* elevation, EntityType type);
+
+    /* Deletion */
+    void deleteEntityOrThrow(Entity* e);
     
     Player player;
 
 private:
-    std::vector<Elevation> elevations;
-    std::vector<Entity *> allEntities;
+    std::vector<Elevation*> elevations;
+    std::vector<Entity*> allEntitiesRegister;
 };

@@ -12,6 +12,7 @@
 
 class GameBase : public Core, public KeyboardEventListener {
 public:
+    GameBase() : Core() {};
     virtual ~GameBase() = default;
 
     virtual bool init() override;

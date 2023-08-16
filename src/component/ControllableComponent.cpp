@@ -87,7 +87,17 @@ void ControllableComponent::onPressSpaceKey() {
 }
 
 void ControllableComponent::onReleaseSpaceKey() {
+    std::cout << "Attempt to jump up!" << std::endl;
+    
+    auto parent = getParentEntity();
+    auto elevation = parent->getContainingElevationOrThrow();
+    auto& world = elevation->getContainingWorld();
 
+    /* Check if next layer exists */
+    if(elevation->getIndex() + 1 >= world.getElevationsCount()) {
+        return;
+    }
+    world.moveDynamicEntityToElevationOrThrow(parent, elevation->getIndex() + 1);
 }
 
 void ControllableComponent::onPressLShiftKey() {
@@ -95,5 +105,15 @@ void ControllableComponent::onPressLShiftKey() {
 }
 
 void ControllableComponent::onReleaseLShiftKey() {
+    std::cout << "Attempt to jump down!" << std::endl;
 
+    auto parent = getParentEntity();
+    auto elevation = parent->getContainingElevationOrThrow();
+    auto& world = elevation->getContainingWorld();
+
+    /* Check if next layer exists */
+    if(elevation->getIndex() -1 < 0) {
+        return;
+    }
+    world.moveDynamicEntityToElevationOrThrow(parent, elevation->getIndex() - 1);
 }

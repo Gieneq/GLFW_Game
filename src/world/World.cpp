@@ -4,56 +4,144 @@
 #include "MovementComponent.h"
 #include <algorithm>
 
-void Elevation::addEntitisComponentsToRegisters(Entity* e) {
-    CollisionComponent* cc = e->getComponent<CollisionComponent>();
+/* Elevation class */
+
+void Elevation::addEntitisComponentsToRegisters(Entity* entity) {
+    CollisionComponent* cc = entity->getComponent<CollisionComponent>();
     if(cc) {
         collisionComponentsRegister.push_back(cc);
     }
-    MovementComponent* mc = e->getComponent<MovementComponent>();
+    MovementComponent* mc = entity->getComponent<MovementComponent>();
     if(mc) {
         movementComponentsRegister.push_back(mc);
     }
 }
 
-void Elevation::addFloorEntity(Entity* e) {
-    floorEntities.push_back(e);
-    addEntitisComponentsToRegisters(e); //todo remove - on start nothing inside
+void Elevation::moveEntityToElevationOrThrow(Entity* entity, Elevation* nextElevation) {
+    /* Check if entity is in this elevation */
+    auto entityIt = std::find(allEntitiesRegister.begin(), allEntitiesRegister.end(), entity);
+    if(entityIt == allEntitiesRegister.end()) {
+        std::cerr << "Elevation::moveEntityToElevationOrThrow: Entity not found in this elevation" << std::endl;
+        throw std::invalid_argument("Elevation::moveEntityToElevationOrThrow: Entity not found in this elevation");
+    }
+
+    /* Deregister from current elevation */
+    deregisterEntityOrThrow(entity);
+
+    /* Register in next elevation */
+    nextElevation->registetedEntityOrThrow(entity);
+    std::cout << "Entity moved to elevation " << nextElevation->getIndex() << std::endl;
 }
 
-void Elevation::addClutterEntity(Entity* e) {
-    clutterEntities.push_back(e);
-    addEntitisComponentsToRegisters(e);
+Entity* Elevation::createEntityOrThrow(EntityType type) {
+    /* Add entity to proper container */
+    Entity* newEntity = nullptr;
+    try {
+        newEntity = new Entity(this, type);
+    } catch(std::bad_alloc& e) {
+        std::cerr << "Elevation::createEntityOrThrow: " << e.what() << std::endl;
+        throw e;
+    }
+
+    try {
+        registetedEntityOrThrow(newEntity);
+    } catch(std::invalid_argument& e) {
+        std::cerr << "Elevation::createEntityOrThrow: " << e.what() << std::endl;
+        throw std::bad_alloc();
+    }
+
+    return newEntity;
 }
 
-void Elevation::addStaticEntity(Entity* e) {
-    staticEntities.push_back(e);
-    biggerEntitiesRegister.push_back(e);
-    addEntitisComponentsToRegisters(e);
+void Elevation::registetedEntityOrThrow(Entity* newEntity) {
+    /* Check if entity already registered in world */
+    auto entityIt = std::find(containingWorld.allEntitiesRegisterBegin(), containingWorld.allEntitiesRegisterEnd(), newEntity);
+    if(entityIt != containingWorld.allEntitiesRegisterEnd()) {
+        std::cerr << "Elevation::addEntity: Entity already registered in world" << std::endl;
+        throw std::invalid_argument("Elevation::addEntity: Entity already registered in world");
+    }
+
+    /* Assign to specific group */
+    switch(newEntity->getType()) {
+        case EntityType::FLOOR:
+            floorEntities.push_back(newEntity);
+            break;
+        case EntityType::CLUTTER:
+            clutterEntities.push_back(newEntity);
+            break;
+        case EntityType::STATIC:
+            staticEntities.push_back(newEntity);
+            biggerEntitiesRegister.push_back(newEntity);
+            break;
+        case EntityType::DYNAMIC:
+            dynamicEntities.push_back(newEntity);
+            biggerEntitiesRegister.push_back(newEntity);
+            break;
+        default:
+            std::cout << "Elevation::addEntity: Unknown entity type" << std::endl;
+            throw std::invalid_argument("Elevation::addEntity: Unknown entity type");
+            break;
+    }
+
+    addEntitisComponentsToRegisters(newEntity);
+    
+    /* Finally add to all elevations entities register */
+    allEntitiesRegister.push_back(newEntity);
+
+    newEntity->containingElevation = this;
 }
 
-void Elevation::addDynamicEntity(Entity* e) {
-    dynamicEntities.push_back(e);
-    biggerEntitiesRegister.push_back(e);
-    addEntitisComponentsToRegisters(e);
-}
-
-
-bool Elevation::deleteEntity(Entity* e) {
+void Elevation::deregisterEntityOrThrow(Entity* entity) {
     /* Find entity in any container */
-    auto floorEntityIt = std::find(floorEntities.begin(), floorEntities.end(), e);
-    auto clutterEntityIt = std::find(clutterEntities.begin(), clutterEntities.end(), e);
-    auto staticEntityIt = std::find(staticEntities.begin(), staticEntities.end(), e);
-    auto dynamicEntityIt = std::find(dynamicEntities.begin(), dynamicEntities.end(), e);
-    auto biggerEntityIt = std::find(biggerEntitiesRegister.begin(), biggerEntitiesRegister.end(), e);
+    auto floorEntityIt = std::find(floorEntities.begin(), floorEntities.end(), entity);
+    auto clutterEntityIt = std::find(clutterEntities.begin(), clutterEntities.end(), entity);
+    auto staticEntityIt = std::find(staticEntities.begin(), staticEntities.end(), entity);
+    auto dynamicEntityIt = std::find(dynamicEntities.begin(), dynamicEntities.end(), entity);
 
     /* If entity not found in any container, return false */
     if(floorEntityIt == floorEntities.end() 
         && clutterEntityIt == clutterEntities.end() 
         && staticEntityIt == staticEntities.end() 
-        && dynamicEntityIt == dynamicEntities.end()
-        && biggerEntityIt == biggerEntitiesRegister.end()) {
-        return false;
+        && dynamicEntityIt == dynamicEntities.end()) {
+        std::cerr << "Elevation::deregisterEntityOrThrow: Entity not found in any container" << std::endl;
+        throw std::invalid_argument("Elevation::deregisterEntityOrThrow: Entity not found in any container");
     }
+
+    /* Remove entity from registers */
+    auto biggerEntityIt = std::find(biggerEntitiesRegister.begin(), biggerEntitiesRegister.end(), entity);
+    if(biggerEntityIt != biggerEntitiesRegister.end()) {
+        biggerEntitiesRegister.erase(biggerEntityIt);
+    }
+
+    auto allEntityIt = std::find(allEntitiesRegister.begin(), allEntitiesRegister.end(), entity);
+    if(allEntityIt != allEntitiesRegister.end()) {
+        allEntitiesRegister.erase(allEntityIt);
+    }
+
+    /* Remove entity's components from registers.
+     * Find them by checking their parent entity's pointer 
+    */
+    
+    /* CollisionComponent */
+    auto collisionCmpFindResult = std::find_if(collisionComponentsRegister.begin(), collisionComponentsRegister.end(), 
+        [entity](CollisionComponent* cc) {
+            return cc->getParentEntity() == entity;
+        });
+    
+    if(collisionCmpFindResult != collisionComponentsRegister.end()) {
+        collisionComponentsRegister.erase(collisionCmpFindResult);
+    }
+
+    /* MovementComponent */
+    auto movementCmpFindResult = std::find_if(movementComponentsRegister.begin(), movementComponentsRegister.end(), 
+        [entity](MovementComponent* mc) {
+            return mc->getParentEntity() == entity;
+        });
+
+    if(movementCmpFindResult != movementComponentsRegister.end()) {
+        movementComponentsRegister.erase(movementCmpFindResult);
+    }
+
 
     /* Remove entity from container */
     if(floorEntityIt != floorEntities.end()) {
@@ -68,191 +156,175 @@ bool Elevation::deleteEntity(Entity* e) {
     if(dynamicEntityIt != dynamicEntities.end()) {
         dynamicEntities.erase(dynamicEntityIt);
     }
-    if(biggerEntityIt != biggerEntitiesRegister.end()) {
-        biggerEntitiesRegister.erase(biggerEntityIt);
+
+    entity->containingElevation = nullptr;
+}
+
+bool Elevation::deleteEntityIfExists(Entity* entity) {
+    try {
+        deregisterEntityOrThrow(entity);
+    } catch(std::invalid_argument& e) {
+        std::cerr << "Elevation::deleteEntityIfExists: " << e.what() << std::endl;
+        return false;
     }
-
-    /* Remove entity's components from registers.
-     * Find them by checking their parent entity's pointer 
-    */
-    
-    /* CollisionComponent */
-    auto collisionCmpFindResult = std::find_if(collisionComponentsRegister.begin(), collisionComponentsRegister.end(), 
-        [e](CollisionComponent* cc) {
-            return cc->getParentEntity() == e;
-        });
-    
-    if(collisionCmpFindResult != collisionComponentsRegister.end()) {
-        collisionComponentsRegister.erase(collisionCmpFindResult);
-    }
-
-    /* MovementComponent */
-    auto movementCmpFindResult = std::find_if(movementComponentsRegister.begin(), movementComponentsRegister.end(), 
-        [e](MovementComponent* mc) {
-            return mc->getParentEntity() == e;
-        });
-
-    if(movementCmpFindResult != movementComponentsRegister.end()) {
-        movementComponentsRegister.erase(movementCmpFindResult);
-    }
-
     /*
-     *Seems entity and all its component are removed
+     * Seems entity registers and all its component are removed.
+        * Now delete entity.
     */
+    delete entity;
+
     return true;
 }
 
 
 
-/* World */
+
+
+
+
+/* World class */
 
 int World::getElevationsCount() const {
     return static_cast<int>(elevations.size());
 }
 
-Elevation* World::appendElevation() {
-    int nextElevation = getElevationsCount();
-    std::cout << "            Appending elevation: " << nextElevation << std::endl;
-    elevations.push_back(Elevation(nextElevation, this));
-    return &elevations.back();
+Elevation* World::createElevationOrThrow() {
+    int nextElevationIndex = getElevationsCount();
+    Elevation* nextElevation = nullptr;
+    try {
+        nextElevation = new Elevation(nextElevationIndex, *this);
+    } catch (std::bad_alloc& e) {
+        std::cerr << "World failed to allocate Elevation: " << e.what() << std::endl;
+        throw e;
+    }
+    elevations.push_back(nextElevation);
+    return nextElevation;
 }
 
-std::optional<Elevation*> World::getElevation(int elevation) {
+std::optional<Elevation*> World::getElevationOption(int elevation) {
     if(elevation < 0 || elevation >= static_cast<int>(elevations.size())) {
         return std::nullopt;
     }
-
-    return &elevations[elevation];
+    return elevations[elevation];
 }
 
-std::optional<Elevation*> World::getTopElevation() {
+std::optional<Elevation*> World::getTopElevationOption() {
     if(elevations.empty()) {
         return std::nullopt;
     }
-
-    return &elevations.back();
+    return elevations.back();
 }
 
-bool World::moveDynamicEntityToElevation(Entity* e, int destinationElevationIndex) {
+Elevation& World::operator[](int elevation) {
+    auto elevationsCount = getElevationsCount();
+    if(elevation < 0 || elevation >= elevationsCount) {
+        throw std::out_of_range("World::operator[]: Elevation index out of range");
+    }
+    return *elevations[elevation];
+}
+
+const Elevation& World::operator[](int elevation) const {
+        auto elevationsCount = getElevationsCount();
+    if(elevation < 0 || elevation >= elevationsCount) {
+        throw std::out_of_range("World::operator[]: Elevation index out of range");
+    }
+    return *elevations[elevation];
+}
+
+
+Elevation& World::getTopElevationOrThrow() {
+    if(elevations.empty()) {
+        throw std::out_of_range("World::getTopElevationOrThrow: No elevations");
+    }
+
+    return *elevations.back();
+}
+
+const Elevation& World::getTopElevationConstOrThrow() {
+    if(elevations.empty()) {
+        throw std::out_of_range("World::getTopElevationOrThrow: No elevations");
+    }
+
+    return *elevations.back();
+}
+
+/* Iterators */
+
+
+std::vector<Elevation*>::iterator World::begin() {
+    return elevations.begin();
+}
+
+std::vector<Elevation*>::iterator World::end() {
+    return elevations.end();
+}
+
+std::vector<Elevation*>::const_iterator World::begin() const {
+    return elevations.begin();
+}
+
+std::vector<Elevation*>::const_iterator World::end() const {
+    return elevations.end();
+}
+
+/* Other */
+
+void World::moveDynamicEntityToElevationOrThrow(Entity* e, int destinationElevationIndex) {
     /* Entity should have some layer - it seems error-free */
-    auto oldElevation = e->getContainingElevation();
-    if(!oldElevation) {
-        return false;
-    }
+    auto oldElevation = e->getContainingElevationOrThrow();
+    auto nextElevation = &(*this)[destinationElevationIndex];
 
-    /* Entity has to be in dynamic container */
-    auto dynamicEntitiesVector = oldElevation->getDynamicEntities();
-    auto entityIt = std::find(dynamicEntitiesVector.begin(), dynamicEntitiesVector.end(), e);
-    if(entityIt == dynamicEntitiesVector.end()) {
-        return false;
-    }
-
-    /* Find destination elevation */
-    auto destinationElevationOption = getElevation(destinationElevationIndex);
-    if(!destinationElevationOption || (destinationElevationOption == oldElevation)) {
-        return false;
-    }
-    auto destinationElevation = destinationElevationOption.value();
-
-    /* Remove entity from old elevation */
-    oldElevation->deleteEntity(e);
-
-    /* Add dynamic entity to new elevation */
-    destinationElevation->addDynamicEntity(e);
-
-    /* Only pointer is passed between elevations. Inside World structures it stays the same. */
-    return true;
+    /* Delegate this task to Elevations */
+    oldElevation->moveEntityToElevationOrThrow(e, nextElevation);
 }
 
 /* 
  * Creation
 */
 
-std::optional<Entity *> World::createFloorEntity(int elevation) {
-    auto containingElevationOption = getElevation(elevation);
-    if(!containingElevationOption) {
-        return std::nullopt;
+Entity* World::createEntityOnElevationOrThrow(int elevationIndex, EntityType type) {
+    try {
+        auto& containingElevation = (*this)[elevationIndex];
+        return createEntityOnElevationOrThrow(&containingElevation, type);
+    } catch (std::out_of_range& e) {
+        std::cerr << "World::createEntityOnElevationOrThrow: " << e.what() << std::endl;
+        throw e;
     }
-
-    return createFloorEntity(*containingElevationOption);
 }
 
-std::optional<Entity *> World::createFloorEntity(Elevation* elevation) {
-    Entity* e = new Entity(elevation, EntityType::FLOOR);
-    elevation->addFloorEntity(e);
-    allEntities.push_back(e);
-    return e;
-}
-
-std::optional<Entity *> World::createClutterEntity(int elevation) {
-    auto containingElevationOption = getElevation(elevation);
-    if(!containingElevationOption) {
-        return std::nullopt;
+Entity* World::createEntityOnElevationOrThrow(Elevation* elevation, EntityType type) {
+    Entity* newEntity = nullptr;
+    try {
+        newEntity = elevation->createEntityOrThrow(type);
+    } catch(std::bad_alloc& e) {
+        std::cerr << "World::createEntityOnElevationOrThrow: " << e.what() << std::endl;
+        throw e;
     }
-
-    return createClutterEntity(*containingElevationOption);
-}
-
-std::optional<Entity *> World::createClutterEntity(Elevation* elevation) {
-    Entity* e = new Entity(elevation, EntityType::CLUTTER);
-    elevation->addClutterEntity(e);
-    allEntities.push_back(e);
-    return e;
-}
-
-std::optional<Entity *> World::createStaticEntity(int elevation) {
-    auto containingElevationOption = getElevation(elevation);
-    if(!containingElevationOption) {
-        return std::nullopt;
-    }
-
-    return createStaticEntity(*containingElevationOption);
-}
-
-std::optional<Entity *> World::createStaticEntity(Elevation* elevation) {
-    Entity* e = new Entity(elevation, EntityType::STATIC);
-    elevation->addStaticEntity(e);
-    allEntities.push_back(e);
-    return e;
-}
-
-std::optional<Entity *> World::createDynamicEntity(int elevation) {
-    auto containingElevationOption = getElevation(elevation);
-    if(!containingElevationOption) {
-        return std::nullopt;
-    }
-
-    return createDynamicEntity(*containingElevationOption);
-}
-
-std::optional<Entity *> World::createDynamicEntity(Elevation* elevation) {
-    Entity* e = new Entity(elevation, EntityType::DYNAMIC);
-    elevation->addDynamicEntity(e);
-    allEntities.push_back(e);
-    return e;
+    allEntitiesRegister.push_back(newEntity);
+    return newEntity;
 }
 
 /* 
  * Destruction
 */
 
-bool World::deleteEntity(Entity* e) {
+void World::deleteEntityOrThrow(Entity* e) {
     /* Find entity in any container */
-    auto entityIt = std::find(allEntities.begin(), allEntities.end(), e);
+    auto entityIt = std::find(allEntitiesRegister.begin(), allEntitiesRegister.end(), e);
 
     /* If entity not found in any container, return false */
-    if(entityIt == allEntities.end()) {
-        return false;
+    if(entityIt == allEntitiesRegister.end()) {
+        throw std::invalid_argument("World::deleteEntityOrThrow: Entity not found in World");
     }
 
     /* Remove entity from container */
-    allEntities.erase(entityIt);
+    allEntitiesRegister.erase(entityIt);
 
-    /* Remove entity from its elevation */
-    e->getContainingElevation()->deleteEntity(e);
+    /* Remove entity from its elevation.
+    Elevation takes care of deletion. */
+    auto deletionResult = e->getContainingElevationOrThrow()->deleteEntityIfExists(e);
 
-    /* Delete entity */
-    delete e;
-
-    return true;
+    if(!deletionResult) {
+        throw std::invalid_argument("World::deleteEntityOrThrow: Entity not found in its elevation");
+    }
 }

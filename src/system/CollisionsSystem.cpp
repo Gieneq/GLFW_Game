@@ -7,7 +7,10 @@ void CollisionsSystem::init() {
 }
 
 
-void CollisionsSystem::update(const std::vector<CollisionComponent*>& collisionCmps, Entity *entity, float dt) {
+void CollisionsSystem::update(
+    std::vector<CollisionComponent*>::iterator collisionCmpsBegin,
+    std::vector<CollisionComponent*>::iterator collisionCmpsEnd,
+    Entity *entity, float dt) {
 
     /**
      * Check is done in elevation space - 
@@ -25,7 +28,8 @@ void CollisionsSystem::update(const std::vector<CollisionComponent*>& collisionC
         const auto boundingRectElevationSpace = collisonDetectorCmp->getElevationSpaceBoundingRect();
 
         /* Test collision with all entities except considered entity with collision detector */
-        for (auto collCmp : collisionCmps) {
+        for (auto collCmpIt = collisionCmpsBegin; collCmpIt != collisionCmpsEnd; ++collCmpIt) {
+            auto collCmp = *collCmpIt;
             auto otherEntity = collCmp->getParentEntity();
             if(otherEntity && (otherEntity->getId() != entity->getId())) {
                 /* Other entity has collision compoinent */

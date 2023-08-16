@@ -30,6 +30,14 @@ bool UserInputSystem::onKeyPressed(int key) {
             controllableObject->onPressWSADKey(GLFW_KEY_D);
             return true;
         }   
+        
+        if(key == GLFW_KEY_SPACE) {
+            controllableObject->onPressSpaceKey();
+            return true;
+        } else if(key == GLFW_KEY_LEFT_SHIFT) {
+            controllableObject->onPressLShiftKey();
+            return true;
+        }
     }
     return false;
 }
@@ -48,6 +56,14 @@ bool UserInputSystem::onKeyReleased(int key) {
             return true;
         } else if(key == GLFW_KEY_D) {
             controllableObject->onReleaseWSADKey(GLFW_KEY_D);
+            return true;
+        }
+
+        if(key == GLFW_KEY_SPACE) {
+            controllableObject->onReleaseSpaceKey();
+            return true;
+        } else if(key == GLFW_KEY_LEFT_SHIFT) {
+            controllableObject->onReleaseLShiftKey();
             return true;
         }
     }

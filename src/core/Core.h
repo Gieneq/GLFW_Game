@@ -4,6 +4,7 @@
 
 class Core {
 public:
+    Core() = default;
     virtual ~Core() = default;
     virtual bool init();
     void loop();
