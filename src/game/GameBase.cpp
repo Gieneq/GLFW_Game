@@ -161,13 +161,18 @@ void GameBase::render() {
     render_system.loopStart();
     auto containingFloor = world.player.getContainingElevationOrThrow();
 
-    render_system.batchStart();
     for(auto elevation : world) {
+    render_system.batchStart();
         //todo probably can be const
+        if(elevation->getIndex() == world.player.getContainingElevationOrThrow()->getIndex()) {
+            const float minOpacity = 0.2F;
+            const float opacity = minOpacity +  (1.0F - minOpacity) * elevation->getWorldSpaceZ() / static_cast<float>(world.getElevationsCount());
+            render_system.fillScreen(0.0F, 0.0F, 0.0F, opacity);
+        }
         render_system.batchAppendElevation(elevation);
+        render_system.batchEnd();
+        render_system.renderBatch();
     }
-    render_system.batchEnd();
-    render_system.renderBatch();
 
     /* Debug shapes */
     if(debugView) {

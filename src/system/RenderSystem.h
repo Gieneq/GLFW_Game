@@ -43,6 +43,8 @@ public:
         std::vector<CollisionComponent*>::const_iterator collisionCmpsBegin,
         std::vector<CollisionComponent*>::const_iterator collisionCmpsEnd);
 
+    void fillScreen(float r, float g, float b, float a);
+
     
     inline int getLastBatchEntitesCount() const {
         return lastBatchEntitesCount;

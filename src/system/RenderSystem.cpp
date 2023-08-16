@@ -58,6 +58,7 @@ void RenderSystem::batchAppendElevation(Elevation* elevation) {
         return;
     }
 
+
     /* Floor flat tiles */
     for(auto entityIt = elevation->floorEntitiesBegin(); entityIt != elevation->floorEntitiesEnd(); entityIt++) {
         auto entity = *entityIt;
@@ -179,5 +180,8 @@ void RenderSystem::renderCollisionBoxes(
 }
 
 
+void RenderSystem::fillScreen(float r, float g, float b, float a) {
+    renderTranslucentFilledBox(renderBoxWorldSpace, r, g, b, a);
+}
 
 

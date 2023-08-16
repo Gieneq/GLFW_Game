@@ -572,6 +572,7 @@ bool Loader::buildWorldFromMapData(World& world) {
 #ifdef USE_ONLY_0_GROUP
         break;
 #endif
+    layerIdx = 0;
     ++groupIdx;
     }
 
