@@ -39,7 +39,7 @@ public:
     void batchEnd(bool sorted = false);
     void renderBatch();
 
-    void renderCollisionBoxes(
+    void renderCollisionBoxes(int elevationIndex,
         std::vector<CollisionComponent*>::const_iterator collisionCmpsBegin,
         std::vector<CollisionComponent*>::const_iterator collisionCmpsEnd);
 

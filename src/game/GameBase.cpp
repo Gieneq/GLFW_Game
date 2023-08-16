@@ -176,12 +176,14 @@ void GameBase::render() {
 
     /* Debug shapes */
     if(debugView) {
-        render_system.renderCollisionBoxes(containingFloor->collisionComponentsRegisterBegin(), containingFloor->collisionComponentsRegisterEnd());
-
-        render_system.renderTranslucentFilledBox(world.player.collisionDetectorComponent->getElevationSpaceBoundingRect(), 0.1F, 0.2F, 1.0F, 0.5F);
+        render_system.renderCollisionBoxes(containingFloor->getIndex(), containingFloor->collisionComponentsRegisterBegin(), containingFloor->collisionComponentsRegisterEnd());
+        auto playerBoundingRect = world.player.collisionDetectorComponent->getElevationSpaceBoundingRect();
+        playerBoundingRect.topLeft.y -= containingFloor->getWorldSpaceZ();
+        render_system.renderTranslucentFilledBox(playerBoundingRect, 0.1F, 0.2F, 1.0F, 0.5F);
 
         for(auto collisionRectIt = collisionsSystem.getCollidingRectsBegin(), end = collisionsSystem.getCollidingRectsEnd(); collisionRectIt != end; ++collisionRectIt) {
-            const auto& collisionRect = *collisionRectIt;
+            auto collisionRect = *collisionRectIt;
+            collisionRect.topLeft.y -= containingFloor->getWorldSpaceZ();
             render_system.renderTranslucentFilledBox(collisionRect, 0.0F, 1.0F, 1.0F, 0.2F);
         }
     }

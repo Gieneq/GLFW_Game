@@ -168,12 +168,13 @@ void RenderSystem::renderEntityData(const EntityBatchData& entityData) {
 }
 
 
-void RenderSystem::renderCollisionBoxes(
+void RenderSystem::renderCollisionBoxes(int elevationIndex,
         std::vector<CollisionComponent*>::const_iterator collisionCmpsBegin,
         std::vector<CollisionComponent*>::const_iterator collisionCmpsEnd) {
     for(auto collisionCmpIt = collisionCmpsBegin; collisionCmpIt != collisionCmpsEnd; collisionCmpIt++) {
         auto collisionCmp = *collisionCmpIt;
-        for (auto& box : collisionCmp->getElevationSpaceCollisionRects()) {
+        for (auto box : collisionCmp->getElevationSpaceCollisionRects()) {
+            box.topLeft.y -= elevationIndex;
             renderTranslucentFilledBox(box, 1.0F, 0.0F, 0.0F, 0.5F);
         }
     }
