@@ -34,11 +34,10 @@ void RenderSystem::batchStart() {
     //todo probably 3D
 }
 
-void RenderSystem::temporaryBatchAppendEntity(Entity* e) {
-    if(renderBoxWorldSpace.checkIntersection(e->getCuboidWorldSpace().getFlatten())) {
+void RenderSystem::temporaryBatchAppendEntity(Entity* entity) {
+    if(renderBoxWorldSpace.checkIntersection(entity->getCuboidWorldSpace().getFlatten())) {
         temporaryBatch.push_back(EntityBatchData {
-            e, 
-            e->getCuboidElevationSpace().bottom()
+            entity
         });
     }
 }
@@ -46,29 +45,18 @@ void RenderSystem::temporaryBatchAppendEntity(Entity* e) {
 void RenderSystem::batchAppendElevation(Elevation* elevation) {
     /* Collect to temporary vector for further check */
     /* When entering temporaryBatch should be cleared */
-    if(elevation->getIndex() > 5 || elevation->getIndex() < 0) {
-        int err1 = 1;
-    }
-
-    if(elevation->getIndex() > clipElevationIndex) {
+    if((elevation->getIndex() > clipElevationIndex) || (batchRenderElevationsProceed == false)) {
         return;
     }
-
-    if(batchRenderElevationsProceed == false) {
-        return;
-    }
-
 
     /* Floor flat tiles */
     for(auto entityIt = elevation->floorEntitiesBegin(); entityIt != elevation->floorEntitiesEnd(); entityIt++) {
-        auto entity = *entityIt;
-        this->temporaryBatchAppendEntity(entity);
+        this->temporaryBatchAppendEntity(*entityIt);
     }
 
     /* Clutter flat tiles */
     for(auto entityIt = elevation->clutterEntitiesBegin(); entityIt != elevation->clutterEntitiesEnd(); entityIt++) {
-        auto entity = *entityIt;
-        this->temporaryBatchAppendEntity(entity);
+        this->temporaryBatchAppendEntity(*entityIt);
     }
     
     /* Other big tiles */
@@ -76,8 +64,7 @@ void RenderSystem::batchAppendElevation(Elevation* elevation) {
     for(auto entityIt = elevation->biggerEntitiesRegisterBegin(); entityIt != elevation->biggerEntitiesRegisterEnd(); entityIt++) {
         auto entity = *entityIt;
         tmpBatch.push_back(EntityBatchData {
-            entity, 
-            entity->getCuboidElevationSpace().bottom()
+            entity
         });
     }
     std::sort(tmpBatch.begin(), tmpBatch.end());
@@ -142,18 +129,13 @@ void RenderSystem::renderEntityData(const EntityBatchData& entityData) {
 
         /* Check if has valid texture */
         auto textureDataOption = Loader::getLoader().getTextureDataByID(textureCmp->getTextureID());
+        const auto textureRect = textureCmp->getDrawableRectFromWorldSpace();
+
         if(!textureDataOption.has_value()) {
             /* Corrupted */
-            renderFilledRect4F(textureCmp->getRectElevationSpace(), 1.0F, 0.0F, 0.0F);
+            renderFilledRect4F(textureRect, 1.0F, 0.0F, 0.0F);
         }
         else {
-            Rect4F textureRect = textureCmp->getRectElevationSpace();
-            auto currentElevation = entity->getContainingElevationOrThrow();
-            auto elevationIndex = currentElevation->getWorldSpaceZ();
-            if(elevationIndex > 5 || elevationIndex < 0) {
-                std::cout << textureRect <<  ", ei: " << elevationIndex << ", cuboid: " << entity->getCuboidWorldSpace() << std::endl;
-            }
-            textureRect.topLeft.y -= elevationIndex;
             renderTexturedRect4F(textureRect, textureDataOption.value(), textureCmp->getTilesetIndex());
         }
     }
@@ -163,7 +145,7 @@ void RenderSystem::renderEntityData(const EntityBatchData& entityData) {
     if(colorCmpOption.has_value()) {
         auto colorCmp = colorCmpOption.value();
         //todo colorCmp->a
-        renderFilledRect4F(colorCmp->getRectElevationSpace(), colorCmp->r, colorCmp->g, colorCmp->b);
+        renderFilledRect4F(colorCmp->getDrawableRectFromWorldSpace(), colorCmp->r, colorCmp->g, colorCmp->b);
     }
 }
 

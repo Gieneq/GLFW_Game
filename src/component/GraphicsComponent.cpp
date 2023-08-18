@@ -2,42 +2,81 @@
 #include "Entity.h"
 #include "World.h"
 
-Rect4F ColorComponent::getRectElevationSpace() const {
-    return Rect4F{
-        rectRelative.topLeft.getTranslated(parent->getCuboidElevationSpace().topLeft.getXY()),
-        rectRelative.size
+
+
+Rect4F ColorComponent::getDrawableRectFromWorldSpace() const {
+    const auto wolrdCuboid = getCuboidWorldSpace();
+    const Rect4F textureRect{
+        wolrdCuboid.topLeft.x,
+        wolrdCuboid.topLeft.y - wolrdCuboid.topLeft.z,
+        wolrdCuboid.size.w,
+        wolrdCuboid.size.h
     };
+    return textureRect;
 }
 
-Cuboid6F ColorComponent::getCubiodWorldSpace() const {
-    auto rectElevationSpace = getRectElevationSpace();
+Cuboid6F ColorComponent::getCuboidElevationSpace() const {
+    const auto parentEleveationSpacePosition = parent->getCuboidElevationSpace().topLeft;
+
     return Cuboid6F{
-        rectElevationSpace.topLeft.x,
-        rectElevationSpace.topLeft.y,
-        parent->getContainingElevationOrThrow()->getWorldSpaceZ(),
-        rectElevationSpace.size.w,
-        rectElevationSpace.size.h,
+        rectRelative.topLeft.x + parentEleveationSpacePosition.x,
+        rectRelative.topLeft.y + parentEleveationSpacePosition.y,
+        0.0F + parentEleveationSpacePosition.z,
+        rectRelative.size.w,
+        rectRelative.size.h,
         0.0F
     };  
 }
 
-/* Texture Cmp */
+Cuboid6F ColorComponent::getCuboidWorldSpace() const {
+    const auto parentWorldSpacePosition = parent->getCuboidWorldSpace().topLeft;
 
-Rect4F TextureComponent::getRectElevationSpace() const {
-    return Rect4F{
-        rectRelative.topLeft.getTranslated(parent->getCuboidElevationSpace().topLeft.getXY()),
-        rectRelative.size
-    };
+    return Cuboid6F{
+        rectRelative.topLeft.x + parentWorldSpacePosition.x,
+        rectRelative.topLeft.y + parentWorldSpacePosition.y,
+        0.0F + parentWorldSpacePosition.z,
+        rectRelative.size.w,
+        rectRelative.size.h,
+        0.0F
+    };  
 }
 
-Cuboid6F TextureComponent::getCubiodWorldSpace() const {
-    auto rectElevationSpace = getRectElevationSpace();
+
+/* Texture Cmp */
+
+Rect4F TextureComponent::getDrawableRectFromWorldSpace() const {
+    const auto wolrdCuboid = getCuboidWorldSpace();
+    const Rect4F textureRect{
+        wolrdCuboid.topLeft.x,
+        wolrdCuboid.topLeft.y - wolrdCuboid.topLeft.z,
+        wolrdCuboid.size.w,
+        wolrdCuboid.size.h
+    };
+    return textureRect;
+}
+
+Cuboid6F TextureComponent::getCuboidElevationSpace() const {
+    const auto parentEleveationSpacePosition = parent->getCuboidElevationSpace().topLeft;
+
     return Cuboid6F{
-        rectElevationSpace.topLeft.x,
-        rectElevationSpace.topLeft.y,
-        parent->getContainingElevationOrThrow()->getWorldSpaceZ(),
-        rectElevationSpace.size.w,
-        rectElevationSpace.size.h,
+        rectRelative.topLeft.x + parentEleveationSpacePosition.x,
+        rectRelative.topLeft.y + parentEleveationSpacePosition.y,
+        0.0F + parentEleveationSpacePosition.z,
+        rectRelative.size.w,
+        rectRelative.size.h,
+        0.0F
+    };  
+}
+
+Cuboid6F TextureComponent::getCuboidWorldSpace() const {
+    const auto parentWorldSpacePosition = parent->getCuboidWorldSpace().topLeft;
+
+    return Cuboid6F{
+        rectRelative.topLeft.x + parentWorldSpacePosition.x,
+        rectRelative.topLeft.y + parentWorldSpacePosition.y,
+        0.0F + parentWorldSpacePosition.z,
+        rectRelative.size.w,
+        rectRelative.size.h,
         0.0F
     };  
 }

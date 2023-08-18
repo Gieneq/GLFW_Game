@@ -397,11 +397,15 @@ public:
     }
 
     inline bool checkIntersection(const Cuboid6F& other) const {
-        return !(left() >= other.right() || right() <= other.left() || top() >= other.bottom() || bottom() <= other.top() || front() <= other.back() || back() >= other.front());
+        return !(left() >= other.right() || right() <= other.left() || top() >= other.bottom() || bottom() <= other.top() 
+            || front() < other.back() || back() > other.front());
+        /* Be careful - in z condition is slightly different */
     }
 
     inline bool checkIntersection(const Cuboid5F& other) const {
-        return !(left() >= other.right() || right() <= other.left() || top() >= other.bottom() || bottom() <= other.top() || back() >= other.front());
+        return !(left() >= other.right() || right() <= other.left() || top() >= other.bottom() || bottom() <= other.top() 
+            || back() > other.front());
+        /* Be careful - in z condition is slightly different */
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Cuboid6F& rect) {

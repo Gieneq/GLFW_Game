@@ -20,16 +20,11 @@ public:
         Entity *entity, float dt);
 
 private:
-    void onCollision(
-        CollisionDetectorComponent* collisionDetectorCmp,
-        Entity* collidedEntity, 
-        std::vector<Cuboid6F>::const_iterator elevationSpaceCuboidsBegin, 
-        std::vector<Cuboid6F>::const_iterator elevationSpaceCuboidsEnd);
+    void onCollision(CollisionDetectorComponent* collisionDetectorCmp, 
+        CollisionComponent* collidedComponent, const Cuboid6F& collidedCuboidElevationSpace);
 
     void CollisionsSystem::stopMovingComponent(MovementComponent* movementCmp,
-        const Cuboid6F& boundingCuboidElevationSpace,
-        std::vector<Cuboid6F>::const_iterator elevationSpaceCuboidsBegin, 
-        std::vector<Cuboid6F>::const_iterator elevationSpaceCuboidsEnd);
+        const Cuboid6F& boundingCuboidElevationSpace, const Cuboid6F& collidedCuboidElevationSpace);
 
 public:    
     inline std::vector<Cuboid6F>::iterator getCollidingCuboidsWorldSpaceBegin() {

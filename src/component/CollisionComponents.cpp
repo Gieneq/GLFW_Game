@@ -27,7 +27,6 @@ std::vector<Cuboid6F> CollisionComponent::getWorldSpaceCollisionCuboids() const 
 /* CollisionDetectorComponent */
 
 CollisionResult CollisionDetectorComponent::checkCollision(CollisionComponent& other) const {
-    std::vector<Cuboid6F> collisionCuboidsElevationSpaceResult;
     /* Filter out check with self */
     if (other.getParentEntity()->getId() == parent->getId()) {
         return CollisionResult::NONE();
@@ -37,11 +36,11 @@ CollisionResult CollisionDetectorComponent::checkCollision(CollisionComponent& o
     const auto thisBoundingElevationSpaceCuboids = getElevationSpaceBoundingCuboid();
     for (const auto& otherCuboidElevationSpace : otherCollisionElevationSpaceCuboids) {
         if (thisBoundingElevationSpaceCuboids.checkIntersection(otherCuboidElevationSpace)) {
-            collisionCuboidsElevationSpaceResult.push_back(otherCuboidElevationSpace);
+            return CollisionResult{other.getParentEntity(), otherCuboidElevationSpace};
         }
     }
-
-    return CollisionResult{other.getParentEntity(), collisionCuboidsElevationSpaceResult};
+    
+    return CollisionResult::NONE();
 }
 
 Cuboid6F CollisionDetectorComponent::getElevationSpaceBoundingCuboid() const {

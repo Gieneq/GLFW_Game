@@ -14,6 +14,10 @@ public:
     void setDirectionUnsafe(float x, float y, float z);
     void stop();
 
+    const Vect3F& getDirection() const {
+        return direction;
+    }
+
     float speed{1.0F};
 
 private:

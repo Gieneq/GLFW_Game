@@ -6,37 +6,17 @@
 
 class CollisionResult {
 public:
-    CollisionResult(Entity* collidedEntity, const std::vector<Cuboid6F>& collidingCuboidsElevationSpace) : collidedEntity{collidedEntity}, collidingCuboidsElevationSpace{collidingCuboidsElevationSpace} {}
+    CollisionResult(Entity* collidedEntity, const Cuboid6F& collidingCuboidElevationSpace) : collidedEntity{collidedEntity}, collidingCuboidElevationSpace{collidingCuboidElevationSpace} {}
     operator bool() const {
-        return collidingCuboidsElevationSpace.size() > 0;
+        return (collidedEntity != nullptr);
     }
 
     Entity* getCollidedEntity() const {
         return collidedEntity;
     }
 
-    std::vector<Cuboid6F>::iterator begin() {
-        return collidingCuboidsElevationSpace.begin();
-    }
-
-    std::vector<Cuboid6F>::iterator end() {
-        return collidingCuboidsElevationSpace.end();
-    }
-
-    std::vector<Cuboid6F>::const_iterator begin() const {
-        return collidingCuboidsElevationSpace.begin();
-    }
-
-    std::vector<Cuboid6F>::const_iterator end() const {
-        return collidingCuboidsElevationSpace.end();
-    }
-
-    Cuboid6F& operator[](int index) {
-        return collidingCuboidsElevationSpace[index];
-    }
-
-    const Cuboid6F& operator[](int index) const {
-        return collidingCuboidsElevationSpace[index];
+    const Cuboid6F& getCollidingCuboidElevationSpace() const {
+        return collidingCuboidElevationSpace;
     }
 
     static CollisionResult NONE() {
@@ -45,8 +25,7 @@ public:
 
 private:
     Entity* collidedEntity{nullptr};
-
-    std::vector<Cuboid6F> collidingCuboidsElevationSpace;
+    Cuboid6F collidingCuboidElevationSpace;
 };
 
 class Loader;
@@ -59,6 +38,10 @@ public:
     std::vector<Cuboid6F> getElevationSpaceCollisionCuboids() const;
     std::vector<Cuboid6F> getWorldSpaceCollisionCuboids() const;
 
+    inline bool canWalkOn() const {
+        return allowWalkOn;
+    }
+
 private:
     inline void appendCollisionCuboid(const Cuboid6F& cuboid) {
         collisionCuboids.push_back(cuboid);
@@ -66,6 +49,7 @@ private:
     
     /* Local spaced */
     std::vector<Cuboid6F> collisionCuboids;
+    bool allowWalkOn{false};
     friend class Loader;
 };
 
@@ -76,7 +60,7 @@ public:
     CollisionDetectorComponent(Entity* e, MovementComponent* movmnt, const Cuboid6F& bnd) : Component(e), movementCmp{movmnt}, boundingCuboid{bnd} {}
     virtual ~CollisionDetectorComponent() = default;
 
-    void onCollision(Entity* collidedEntity, std::vector<Cuboid6F>::const_iterator elevationSpaceCuboidsBegin, std::vector<Cuboid6F>::const_iterator elevationSpaceCuboidsEnd) {};
+    void onCollision(Entity* collidedEntity, const Cuboid6F& collidedCuboidElevationSpace) {};
 
     CollisionResult checkCollision(CollisionComponent& other) const;
 

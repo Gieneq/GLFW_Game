@@ -14,9 +14,11 @@ public:
         return &rectRelative;
     }
 
-    Rect4F getRectElevationSpace() const;
+    Rect4F getDrawableRectFromWorldSpace() const;
 
-    Cuboid6F getCubiodWorldSpace() const;
+    Cuboid6F getCuboidElevationSpace() const;
+
+    Cuboid6F getCuboidWorldSpace() const;
 
     float r{0.56f};
     float g{1.0f};
@@ -37,9 +39,11 @@ public:
         return &rectRelative;
     }
 
-    Rect4F getRectElevationSpace() const;
+    Rect4F getDrawableRectFromWorldSpace() const;
 
-    Cuboid6F getCubiodWorldSpace() const;
+    Cuboid6F getCuboidElevationSpace() const;
+
+    Cuboid6F getCuboidWorldSpace() const;
 
     TextureID getTextureID() const { return textureID; }
 

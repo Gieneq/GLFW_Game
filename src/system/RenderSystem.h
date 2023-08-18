@@ -11,6 +11,10 @@
 
 class Entity;
 struct EntityBatchData {
+    EntityBatchData(Entity* entity) : entity{entity} {
+        sortValue = entity->getCuboidElevationSpace().bottom() + entity->getCuboidElevationSpace().z();
+    }
+    
     Entity* entity;
     float sortValue;
 
@@ -34,7 +38,7 @@ public:
     void loopEnd() override;
 
     void batchStart();
-    void temporaryBatchAppendEntity(Entity* e);
+    void temporaryBatchAppendEntity(Entity* entity);
     void batchAppendElevation(Elevation* elevation);
     void batchEnd(bool sorted = false);
     void renderBatch();

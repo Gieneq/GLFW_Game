@@ -3,6 +3,7 @@
 #include "MovementComponent.h"
 #include "Entity.h"
 #include "World.h"
+#include "Settings.h"
 
 void CollisionsSystem::init() {
 
@@ -26,78 +27,96 @@ void CollisionsSystem::update(
             const auto collisionCheckResult = collisonDetectorCmp->checkCollision(*collCmp);
 
             if(collisionCheckResult) {
-                collisonDetectorCmp->onCollision(collisionCheckResult.getCollidedEntity(), collisionCheckResult.begin(), collisionCheckResult.end());
+                auto collidedEntity = collisionCheckResult.getCollidedEntity();
+                const auto& collidingCuboidElevationSpace = collisionCheckResult.getCollidingCuboidElevationSpace();
+                collisonDetectorCmp->onCollision(collidedEntity, collidingCuboidElevationSpace);
 
                 /* Append to recent results but in world space to easier render */
-                for( const auto& cuboidElevationSpace : collisionCheckResult) {
-                    const auto cuboidWorldSpace = entity->getContainingElevationOrThrow()->elevationToWorldSpace(cuboidElevationSpace);
-                    collidingCuboidsWorldSpace.push_back(cuboidWorldSpace);
-                }
+                const auto cuboidWorldSpace = entity->getContainingElevationOrThrow()->elevationToWorldSpace(collidingCuboidElevationSpace);
+                collidingCuboidsWorldSpace.push_back(cuboidWorldSpace);
+                
 
                 /**
                  * On collision execution.
                  * 
                  * Here add logic to handle all collision related components.
                 */
-               onCollision(collisonDetectorCmp, collisionCheckResult.getCollidedEntity(), collisionCheckResult.begin(), collisionCheckResult.end());
+               onCollision(collisonDetectorCmp, collCmp, collidingCuboidElevationSpace);
+
+               /* No need to check any other - will be done in next loop */
+               return;
             }
         }
+    }
+
+    /* Seems no collision */
+    if(entity->getCuboidElevationSpace().z() > 0.0) {
+
+        /* Entity is in air */
+        entity->getCuboidElevationSpace().z() = 0.0F;
     }
     
 }
 
-void CollisionsSystem::onCollision(
-    CollisionDetectorComponent* collisionDetectorCmp,
-    Entity* collidedEntity, 
-    std::vector<Cuboid6F>::const_iterator elevationSpaceCuboidsBegin, 
-    std::vector<Cuboid6F>::const_iterator elevationSpaceCuboidsEnd) {
+void CollisionsSystem::onCollision(CollisionDetectorComponent* collisionDetectorCmp, 
+        CollisionComponent* collidedComponent, const Cuboid6F& collidedCuboidElevationSpace) {
 
         /**
          * Here check if Entity has some more collision related components.
          * Execute specific interactions to handle them.
         */
 
-       //todo examin objects depth to eventualy stand on them
+        if(collidedComponent->canWalkOn()) {
+            /* Check if depth is acceptable */
+            const auto obstacleDepth = collidedCuboidElevationSpace.depth();
+            //todo - should be relative
+            if(obstacleDepth < Settings::Systems::Collisions::MAX_WALKABLE_DEPTH) {
+                /* Place entity ontop */
+                auto parent = collisionDetectorCmp->getParentEntity();
+                auto& parentElevationSpaceCuboid = parent->getCuboidElevationSpace();
+                parentElevationSpaceCuboid.z() = collidedCuboidElevationSpace.z() + collidedCuboidElevationSpace.depth();
+                return;
+            }
+        }
 
         /* Stop movement */
         auto movementCmp = collisionDetectorCmp->getParentEntity()->getComponent<MovementComponent>();
         const auto boundingCuboidElevationSpace = collisionDetectorCmp->getElevationSpaceBoundingCuboid();
         if(movementCmp) {
-            stopMovingComponent(movementCmp, boundingCuboidElevationSpace, elevationSpaceCuboidsBegin, elevationSpaceCuboidsEnd);
+            stopMovingComponent(movementCmp, boundingCuboidElevationSpace, collidedCuboidElevationSpace);
        }
     }
 
 void CollisionsSystem::stopMovingComponent(MovementComponent* movementCmp,
-    const Cuboid6F& boundingCuboidElevationSpace,
-    std::vector<Cuboid6F>::const_iterator elevationSpaceCuboidsBegin, 
-    std::vector<Cuboid6F>::const_iterator elevationSpaceCuboidsEnd) {
+        const Cuboid6F& boundingCuboidElevationSpace, const Cuboid6F& collidedCuboidElevationSpace) {
 
     auto parent = movementCmp->getParentEntity();
     auto& parentElevationSpaceCuboid = parent->getCuboidElevationSpace();
 
-    /* Align in X direction */
-    // if(movementCmp->direction.x > 0) {
-    //     movementCmp->direction.x = 0;
-    //     parent->getCuboidElevationSpace().topLeft.x = rect.left() - boundingCuboidElevationSpace.width();
-    //     //todo offset to fit bounding box
-    // }
 
-    // else if(movementCmp->direction.x < 0) {
-    //     movementCmp->direction.x = 0;
-    //     parent->getCuboidElevationSpace().topLeft.x = rect.right();
-    //     //todo offset to fit bounding box
-    // }
+    /* Align position to colliding cuboids */
 
-    /* Align in Y direction */
-    // if(movementCmp->direction.y > 0) {
-    //     movementCmp->direction.y = 0;
-    //     parent->getCuboidElevationSpace().topLeft.y = rect.top() - (boundingRect.size.h + boundingRect.topLeft.y);
-    // }
+    /* Align in X */
+    if(movementCmp->getDirection().x > 0.0F) {
+        parentElevationSpaceCuboid.alignToLeftOf(collidedCuboidElevationSpace);
+    }
 
-    // else if(movementCmp->direction.y < 0) {
-    //     movementCmp->direction.y = 0;
-    //     parent->getCuboidElevationSpace().topLeft.y = rect.bottom();
-    //     float diffY = boundingRect.top();
-    //     parent->getCuboidElevationSpace().topLeft.y -= diffY;
-    // }
+    else if(movementCmp->getDirection().x < 0.0F) {
+        parentElevationSpaceCuboid.alignToRightOf(collidedCuboidElevationSpace);
+    }
+
+    /* Align in Y */
+    if(movementCmp->getDirection().y > 0.0F) {
+        parentElevationSpaceCuboid.alignToTopOf(collidedCuboidElevationSpace);
+    }
+
+    else if(movementCmp->getDirection().y < 0.0F) {
+        parentElevationSpaceCuboid.alignToBottomOf(collidedCuboidElevationSpace);
+        const auto diffY = parentElevationSpaceCuboid.y() - boundingCuboidElevationSpace.y();
+        parentElevationSpaceCuboid.y() -= diffY;
+    }
+
+    
+    /* Stop entity */
+    movementCmp->stop();
 }
