@@ -3,13 +3,14 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "tilesets/details.tsx",
+    "activeFile": "maps/testmap.tmx",
     "expandedProjectPaths": [
-        ".",
-        "maps",
         "entities",
-        "tilesets"
+        "maps",
+        "tilesets",
+        "."
     ],
+    "file.lastUsedOpenFilter": "Wszystkie pliki (*)",
     "fileStates": {
         "entities/player.tsx": {
             "scaleInDock": 1,
@@ -18,15 +19,15 @@
         "maps/testmap.tmx": {
             "expandedGroupLayers": [
                 5,
-                2,
+                7,
                 3,
-                7
+                2
             ],
-            "scale": 1.5,
+            "scale": 3,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 452,
-                "y": 289.6666666666667
+                "x": 327.16666666666663,
+                "y": 296.5
             }
         },
         "tilesets/details.tsx": {
@@ -70,12 +71,12 @@
     "project": "LochPython.tiled-project",
     "property.type": "int",
     "recentFiles": [
-        "maps/testmap.tmx",
-        "tilesets/objects.tsx",
         "tilesets/objects_2x2.tsx",
         "tilesets/objects_1x2.tsx",
         "tilesets/floor.tsx",
         "tilesets/details.tsx",
+        "tilesets/objects.tsx",
+        "maps/testmap.tmx",
         "tilesets/particles.tsx",
         "entities/player.tsx"
     ],

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.9" tiledversion="1.9.2" name="objects" tilewidth="20" tileheight="20" tilecount="225" columns="15">
+<tileset version="1.10" tiledversion="1.10.0" name="objects" tilewidth="20" tileheight="20" tilecount="225" columns="15">
  <image source="objects.png" width="300" height="300"/>
  <tile id="0">
   <objectgroup draworder="index" id="2">
@@ -16,7 +16,12 @@
    <property name="use" type="bool" value="false"/>
   </properties>
   <objectgroup draworder="index" id="2">
-   <object id="1" x="0" y="3" width="20" height="14"/>
+   <object id="1" x="0" y="3" width="20" height="14">
+    <properties>
+     <property name="depth" type="int" value="12"/>
+     <property name="stand" type="bool" value="true"/>
+    </properties>
+   </object>
   </objectgroup>
  </tile>
  <tile id="3">
@@ -36,6 +41,19 @@
   <properties>
    <property name="use" type="bool" value="true"/>
   </properties>
+ </tile>
+ <tile id="6">
+  <properties>
+   <property name="depth" type="int" value="7"/>
+  </properties>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="4" width="20" height="15">
+    <properties>
+     <property name="depth" type="int" value="7"/>
+     <property name="stand" type="bool" value="true"/>
+    </properties>
+   </object>
+  </objectgroup>
  </tile>
  <tile id="10">
   <objectgroup draworder="index" id="2">

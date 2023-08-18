@@ -88,6 +88,8 @@ private:
     int animationInterval{1000};
     std::vector<int> animationFramesLIDs;
     std::vector<Cuboid6F> collisionCuboids;
+    bool walkable{false};
+    int depthPx{20};
 
     friend class TilesetData;
     friend class Loader;

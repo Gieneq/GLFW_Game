@@ -460,6 +460,29 @@ bool Loader::getTilesDataFromTilesetNode(const pugi::xml_node& mapNode, TilesetD
 
                 tileData->collisionCuboids.push_back(collisionCuboid);
             }
+
+            /* Find additional properties - depth */
+            auto propertiesNode = tileNode.child("properties");
+            if(propertiesNode) {
+                /* Has some properties */
+
+                /* Find property with arribute name depth */
+                auto propertyNode = propertiesNode.child("property");
+
+                if(propertyNode) {
+                    auto nameAttrib = propertyNode.attribute("name");
+                    auto valueAttrib = propertyNode.attribute("value");
+
+                    if(nameAttrib && valueAttrib) {
+                        std::string name = nameAttrib.as_string("");
+                        if(name == "depth") {
+                            tileData->walkable = true;
+                            int value = valueAttrib.as_int(-1);
+                            tileData->depthPx = value;
+                        }
+                    }
+                }    
+            }
         }
     }
 
@@ -657,10 +680,15 @@ bool Loader::fillElevationWithEntities(World& world, Elevation* elevation, Entit
         /* Check if has collision cuboids */
         if(tileData->hasCollisionRects()) {
             auto collisionCmp = tileEntity->addCollisionComponent();
+            collisionCmp->allowWalkOn = tileData->walkable;
+
             for(auto collisionCuboidIt = tileData->collisionCuboids.begin(); collisionCuboidIt != tileData->collisionCuboids.end(); ++collisionCuboidIt) {
-                const auto& collisionCuboid = *collisionCuboidIt;
+                auto collisionCuboid = *collisionCuboidIt;
+                collisionCuboid.size.d = static_cast<float>(tileData->depthPx) / static_cast<float>(mapData.getBaseTileHeight());
                 collisionCmp->appendCollisionCuboid(collisionCuboid);
             }
+
+
         }
 
         /* Append new tile to world */

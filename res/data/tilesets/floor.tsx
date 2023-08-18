@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.9" tiledversion="1.9.2" name="floor" tilewidth="20" tileheight="20" tilecount="450" columns="15">
+<tileset version="1.10" tiledversion="1.10.0" name="floor" tilewidth="20" tileheight="20" tilecount="450" columns="15">
  <image source="floor.png" width="300" height="600"/>
- <tile id="0">
+ <tile id="0" type="Static">
   <animation>
    <frame tileid="0" duration="1000"/>
    <frame tileid="1" duration="1000"/>
@@ -25,6 +25,7 @@
    <object id="1" x="0" y="0" width="20" height="20"/>
   </objectgroup>
  </tile>
+ <tile id="29" type="Static"/>
  <tile id="30">
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="16" width="20" height="4"/>
