@@ -16,7 +16,7 @@ void CollisionsSystem::update(
      * Check is done in elevation space - 
      * obstacles and entity are on the same elevation.
      * No need to check Z axis.
-     * Resulting Rect2F are also in elevation space.
+     * Resulting Rect4F are also in elevation space.
     */
 
     collidingRects.clear();

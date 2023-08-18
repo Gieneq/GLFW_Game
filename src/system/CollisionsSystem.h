@@ -17,19 +17,19 @@ public:
         std::vector<CollisionComponent*>::iterator collisionCmpsEnd,
         Entity *entity, float dt);
 
-    inline std::vector<Rect2F>::iterator getCollidingRectsBegin() {
+    inline std::vector<Rect4F>::iterator getCollidingRectsBegin() {
         return collidingRects.begin();
     }
 
-    inline std::vector<Rect2F>::iterator getCollidingRectsEnd() {
+    inline std::vector<Rect4F>::iterator getCollidingRectsEnd() {
         return collidingRects.end();
     }
 
-    inline std::vector<Rect2F>::const_iterator getCollidingRectsBegin() const {
+    inline std::vector<Rect4F>::const_iterator getCollidingRectsBegin() const {
         return collidingRects.begin();
     }
 
-    inline std::vector<Rect2F>::const_iterator getCollidingRectsEnd() const {
+    inline std::vector<Rect4F>::const_iterator getCollidingRectsEnd() const {
         return collidingRects.end();
     }
 
@@ -39,6 +39,6 @@ public:
 
 
 private:
-    std::vector<Rect2F> collidingRects;
+    std::vector<Rect4F> collidingRects;
 };
 

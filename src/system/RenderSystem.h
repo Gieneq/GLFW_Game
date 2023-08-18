@@ -122,9 +122,9 @@ private:
 //     void setViewportDimensions(int width, int height);
 //     void attachCamera(Camera *cam);
 
-//     void renderTexturedBox(const TextureData& textureData, const Rect2F& worldRect, int tilesetIndex);
-//     void renderFilledBox(Rect2F worldRect, float r, float g, float b);
-//     void renderTranslucentFilledBox(Rect2F worldRect, float r, float g, float b, float fillingAlpha);
+//     void renderTexturedBox(const TextureData& textureData, const Rect4F& worldRect, int tilesetIndex);
+//     void renderFilledBox(Rect4F worldRect, float r, float g, float b);
+//     void renderTranslucentFilledBox(Rect4F worldRect, float r, float g, float b, float fillingAlpha);
     
 //     void renderCollisionBoxes(const std::vector<CollisionComponent*>& collisionComponents);
 
@@ -132,7 +132,7 @@ private:
 //         return lastEntitesCount;
 //     }
 
-//     Rect2F renderBoxWorldSpace;
+//     Rect4F renderBoxWorldSpace;
 //     bool rendeDebugView{false};
     
 // private:

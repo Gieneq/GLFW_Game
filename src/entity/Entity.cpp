@@ -67,7 +67,7 @@ CollisionComponent* Entity::addCollisionComponent() {
     return collisionComponent;
 }
 
-std::optional<CollisionDetectorComponent*> Entity::addCollisionDetectorComponent(const Rect2F& boundingRect) {
+std::optional<CollisionDetectorComponent*> Entity::addCollisionDetectorComponent(const Rect4F& boundingRect) {
     auto movementCmp = getComponent<MovementComponent>();
     if(!movementCmp) {
         return std::nullopt;
@@ -131,8 +131,8 @@ std::optional<TextureComponent*> Entity::getTextureComponent() const {
 }
 
 
-Rect3F Entity::getCuboidWorldSpace() const {
-    return Rect3F(
+Rect6F Entity::getCuboidWorldSpace() const {
+    return Rect6F(
         cuboidElevationSpace.topLeft.x + 0.0F,
         cuboidElevationSpace.topLeft.y +  0.0F,
         cuboidElevationSpace.topLeft.z + getContainingElevationOrThrow()->getWorldSpaceZ(),

@@ -15,7 +15,7 @@ public:
     Player(Elevation* elevation) : Entity(elevation, EntityType::DYNAMIC) {}
 
     MovementComponent* addMovementComponent(float speed);
-    std::optional<CollisionDetectorComponent*> addCollisionDetectorComponent(const Rect2F& boundingRect);  
+    std::optional<CollisionDetectorComponent*> addCollisionDetectorComponent(const Rect4F& boundingRect);  
     std::optional<ControllableComponent*> addControllableComponent();
 
     MovementComponent* movementComponent{nullptr};

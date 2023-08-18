@@ -40,28 +40,13 @@ void Vect3F::normalize() {
 /* Size3F */
 
 
-/* Rect2F */
-float Rect2F::left() const {
-    return topLeft.x;
+/* Rect4F */
+
+Rect4F Rect4F::fromSides(float left, float right, float top, float bottom) {
+    return Rect4F{left, top, right-left, bottom-top};
 }
 
-float Rect2F::right() const {
-    return topLeft.x + size.w;
-}
-
-float Rect2F::top() const {
-    return topLeft.y;
-}
-
-float Rect2F::bottom() const {
-    return topLeft.y + size.h;
-}
-
-Rect2F Rect2F::fromSides(float left, float right, float top, float bottom) {
-    return Rect2F{left, top, right-left, bottom-top};
-}
-
-Rect2F Rect2F::getTranslated(Vect2F translation) const {
+Rect4F Rect4F::getTranslated(Vect2F translation) const {
     return {
         topLeft.x + translation.x,
         topLeft.y + translation.y,
@@ -71,7 +56,7 @@ Rect2F Rect2F::getTranslated(Vect2F translation) const {
 }
 
 
-Rect2F Rect2F::getScaled(const float xScale, const float yScale) const {
+Rect4F Rect4F::getScaled(const float xScale, const float yScale) const {
     return {
         topLeft.x * xScale,
         topLeft.y * yScale,
@@ -81,34 +66,19 @@ Rect2F Rect2F::getScaled(const float xScale, const float yScale) const {
 }
 
 
-/* Rect3F */
-
-float Rect3F::left() const {
-    return topLeft.x;
+/* Rect 5F */
+    
+bool Rect5F::checkIntersection(const Rect6F* other) const {
+    return !(left() >= other->right() || right() <= other->left() || top() >= other->bottom() || bottom() <= other->top() || front() <= other->back());
 }
 
-float Rect3F::right() const {
-    return topLeft.x + size.w;
+Rect5F Rect5F::fromSides(float left, float right, float top, float bottom, float front) {
+    return Rect5F{left, top, right-left, bottom-top, front};
 }
 
-float Rect3F::top() const {
-    return topLeft.y;
-}
+/* Rect6F */
 
-float Rect3F::bottom() const {
-    return topLeft.y + size.h;
-}
-
-float Rect3F::front() const {
-    return topLeft.z;
-}
-
-float Rect3F::back() const {
-    return topLeft.z + size.d;
-}
-
-
-Rect3F Rect3F::getTranslated(Vect3F translation) const {
+Rect6F Rect6F::getTranslated(Vect3F translation) const {
     return {
         topLeft.x + translation.x,
         topLeft.y + translation.y,
@@ -119,6 +89,6 @@ Rect3F Rect3F::getTranslated(Vect3F translation) const {
     };
 }
 
-Rect3F Rect3F::fromSides(float left, float right, float top, float bottom, float front, float back) {
-    return Rect3F{left, top, front, right-left, bottom-top, back-front};
+Rect6F Rect6F::fromSides(float left, float right, float top, float bottom, float back, float front) {
+    return Rect6F{left, top, back, right-left, bottom-top, front-back};
 }

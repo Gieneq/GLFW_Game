@@ -35,7 +35,7 @@ public:
 
     std::vector<TileData*> getAnimationFramesTileDatas();
 
-    const std::vector<Rect2F>& getCollisionRects() const {
+    const std::vector<Rect4F>& getCollisionRects() const {
         return collisionRects;
     }
 
@@ -55,7 +55,7 @@ private:
     TilesetData* containingTilesetData{nullptr};
     int animationInterval{1000};
     std::vector<int> animationFramesLIDs;
-    std::vector<Rect2F> collisionRects;
+    std::vector<Rect4F> collisionRects;
 
     friend class TilesetData;
     friend class Loader;

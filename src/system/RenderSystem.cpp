@@ -147,7 +147,7 @@ void RenderSystem::renderEntityData(const EntityBatchData& entityData) {
             renderFilledBox(textureCmp->getRectElevationSpace(), 1.0F, 0.0F, 0.0F);
         }
         else {
-            Rect2F textureRect = textureCmp->getRectElevationSpace();
+            Rect4F textureRect = textureCmp->getRectElevationSpace();
             auto currentElevation = entity->getContainingElevationOrThrow();
             auto elevationIndex = currentElevation->getWorldSpaceZ();
             if(elevationIndex > 5 || elevationIndex < 0) {

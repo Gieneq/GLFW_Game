@@ -11,31 +11,31 @@ public:
     virtual ~CollisionComponent() = default;
 
 
-    void appendCollidionRect(const Rect2F& rect) {
+    void appendCollidionRect(const Rect4F& rect) {
         collisionRects.push_back(rect);
     }
 
-    std::vector<Rect2F> getElevationSpaceCollisionRects() const;
-    std::vector<Rect3F> getWorldSpaceCollisionRects() const;
+    std::vector<Rect4F> getElevationSpaceCollisionRects() const;
+    std::vector<Rect6F> getWorldSpaceCollisionRects() const;
 
 private:
-    std::vector<Rect2F> collisionRects;
+    std::vector<Rect4F> collisionRects;
 };
 
 
 class MovementComponent;
 class CollisionDetectorComponent : public Component {
 public:
-    CollisionDetectorComponent(Entity* e, MovementComponent* movmnt, const Rect2F& bnd) : Component(e), movementCmp{movmnt}, boundingRect{bnd} {}
+    CollisionDetectorComponent(Entity* e, MovementComponent* movmnt, const Rect4F& bnd) : Component(e), movementCmp{movmnt}, boundingRect{bnd} {}
     virtual ~CollisionDetectorComponent() = default;
 
-    void onCollision(std::vector<Rect2F> collidingRectsElevationSpace);
+    void onCollision(std::vector<Rect4F> collidingRectsElevationSpace);
 
     MovementComponent* movementCmp{nullptr};
-    Rect2F getElevationSpaceBoundingRect() const;
-    Rect3F getWorldSpaceBoundingRect() const;
+    Rect4F getElevationSpaceBoundingRect() const;
+    Rect6F getWorldSpaceBoundingRect() const;
 
 private:
-    Rect2F boundingRect{0, 0.15F, 1, 0.85F};
+    Rect4F boundingRect{0, 0.15F, 1, 0.85F};
 };
 

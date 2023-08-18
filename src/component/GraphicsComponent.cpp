@@ -2,16 +2,16 @@
 #include "Entity.h"
 #include "World.h"
 
-Rect2F ColorComponent::getRectElevationSpace() const {
-    return Rect2F{
+Rect4F ColorComponent::getRectElevationSpace() const {
+    return Rect4F{
         rectRelative.topLeft.getTranslated(parent->getCuboidElevationSpace().topLeft.getXY()),
         rectRelative.size
     };
 }
 
-Rect3F ColorComponent::getCubiodWorldSpace() const {
+Rect6F ColorComponent::getCubiodWorldSpace() const {
     auto rectElevationSpace = getRectElevationSpace();
-    return Rect3F{
+    return Rect6F{
         rectElevationSpace.topLeft.x,
         rectElevationSpace.topLeft.y,
         parent->getContainingElevationOrThrow()->getWorldSpaceZ(),
@@ -23,16 +23,16 @@ Rect3F ColorComponent::getCubiodWorldSpace() const {
 
 /* Texture Cmp */
 
-Rect2F TextureComponent::getRectElevationSpace() const {
-    return Rect2F{
+Rect4F TextureComponent::getRectElevationSpace() const {
+    return Rect4F{
         rectRelative.topLeft.getTranslated(parent->getCuboidElevationSpace().topLeft.getXY()),
         rectRelative.size
     };
 }
 
-Rect3F TextureComponent::getCubiodWorldSpace() const {
+Rect6F TextureComponent::getCubiodWorldSpace() const {
     auto rectElevationSpace = getRectElevationSpace();
-    return Rect3F{
+    return Rect6F{
         rectElevationSpace.topLeft.x,
         rectElevationSpace.topLeft.y,
         parent->getContainingElevationOrThrow()->getWorldSpaceZ(),

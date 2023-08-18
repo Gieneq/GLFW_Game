@@ -4,19 +4,19 @@
 #include "Entity.h"
 #include "World.h"
 
-std::vector<Rect2F> CollisionComponent::getElevationSpaceCollisionRects() const {
+std::vector<Rect4F> CollisionComponent::getElevationSpaceCollisionRects() const {
     Vect2F parentElevationSpacePosition = parent->getCuboidElevationSpace().topLeft.getXY();
-    std::vector<Rect2F> elevationSpaceCollisionRects;
+    std::vector<Rect4F> elevationSpaceCollisionRects;
     for (auto& rect : collisionRects) {
         elevationSpaceCollisionRects.push_back(rect.getTranslated(parentElevationSpacePosition));
     }
     return elevationSpaceCollisionRects;
 }
 
-std::vector<Rect3F> CollisionComponent::getWorldSpaceCollisionRects() const {
-    std::vector<Rect3F> worldSpaceCollisionRects;
+std::vector<Rect6F> CollisionComponent::getWorldSpaceCollisionRects() const {
+    std::vector<Rect6F> worldSpaceCollisionRects;
     for (auto& esRect : getElevationSpaceCollisionRects()) {
-        auto worldSpaceRect = Rect3F(
+        auto worldSpaceRect = Rect6F(
             esRect.topLeft.x,
             esRect.topLeft.y,
             parent->getContainingElevationOrThrow()->getWorldSpaceZ(),
@@ -29,7 +29,7 @@ std::vector<Rect3F> CollisionComponent::getWorldSpaceCollisionRects() const {
     return worldSpaceCollisionRects;
 }
 
-void CollisionDetectorComponent::onCollision(std::vector<Rect2F> collidingRectsElevationSpace) {
+void CollisionDetectorComponent::onCollision(std::vector<Rect4F> collidingRectsElevationSpace) {
     // std::cout << "[!] Collision of " << getWorldSpaceBoundingRect() << "detected with:";
     // for (auto& rect : collidingRects) {
     //     std::cout << rect << ", " << std::endl;
@@ -70,9 +70,9 @@ void CollisionDetectorComponent::onCollision(std::vector<Rect2F> collidingRectsE
     }
 }
 
-Rect2F CollisionDetectorComponent::getElevationSpaceBoundingRect() const {
+Rect4F CollisionDetectorComponent::getElevationSpaceBoundingRect() const {
     Vect2F parentElevationSpacePosition = parent->getCuboidElevationSpace().topLeft.getXY();
-    return Rect2F(
+    return Rect4F(
         boundingRect.topLeft.x + parentElevationSpacePosition.x,
         boundingRect.topLeft.y + parentElevationSpacePosition.y,
         boundingRect.size.w,
@@ -80,9 +80,9 @@ Rect2F CollisionDetectorComponent::getElevationSpaceBoundingRect() const {
     );
 }
 
-Rect3F CollisionDetectorComponent::getWorldSpaceBoundingRect() const {
+Rect6F CollisionDetectorComponent::getWorldSpaceBoundingRect() const {
     auto elevationSpaceBoundingRect = getElevationSpaceBoundingRect();
-    return Rect3F(
+    return Rect6F(
         elevationSpaceBoundingRect.topLeft.x,
         elevationSpaceBoundingRect.topLeft.y,
         parent->getContainingElevationOrThrow()->getWorldSpaceZ(),

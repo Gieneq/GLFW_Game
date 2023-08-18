@@ -10,13 +10,13 @@ public:
         Component(e), rectRelative{relX, relY, boxWidth, boxHeight} {}
     virtual ~ColorComponent() = default;
 
-    Rect2F* getRectRelative() {
+    Rect4F* getRectRelative() {
         return &rectRelative;
     }
 
-    Rect2F getRectElevationSpace() const;
+    Rect4F getRectElevationSpace() const;
 
-    Rect3F getCubiodWorldSpace() const;
+    Rect6F getCubiodWorldSpace() const;
 
     float r{0.56f};
     float g{1.0f};
@@ -24,7 +24,7 @@ public:
     float a{1.0f};
 
 private:
-    Rect2F rectRelative{0.0F, 0.0F, 1.0F, 1.0F};
+    Rect4F rectRelative{0.0F, 0.0F, 1.0F, 1.0F};
 };
 
 class TextureComponent : public Component {
@@ -33,13 +33,13 @@ public:
     TextureComponent(Entity* e, float relX, float relY, float boxWidth, float boxHeight, TextureID id, int tilesetIdx) : Component(e), textureID{id}, rectRelative(relX, relY, boxWidth, boxHeight), tilesetIndex{tilesetIdx} {}
     virtual ~TextureComponent() = default;
 
-    Rect2F* getRectRelative() {
+    Rect4F* getRectRelative() {
         return &rectRelative;
     }
 
-    Rect2F getRectElevationSpace() const;
+    Rect4F getRectElevationSpace() const;
 
-    Rect3F getCubiodWorldSpace() const;
+    Rect6F getCubiodWorldSpace() const;
 
     TextureID getTextureID() const { return textureID; }
 
@@ -48,7 +48,7 @@ public:
     void setTilesetIndex(int idx) { tilesetIndex = idx; }
 
 private:
-    Rect2F rectRelative{0.0F, 0.0F, 1.0F, 1.0F};
+    Rect4F rectRelative{0.0F, 0.0F, 1.0F, 1.0F};
     TextureID textureID{};
     int tilesetIndex{0};
 };

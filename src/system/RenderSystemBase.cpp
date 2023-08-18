@@ -31,29 +31,29 @@ void RenderSystemBase::attachCamera(Camera *cam) {
     camera = cam;
 }
 
-Rect2F RenderSystemBase::getProjectionRect(const Rect2F& worldRect) const {
+Rect4F RenderSystemBase::getProjectionRect(const Rect4F& worldRect) const {
     // get_translated(camera->position.getXY().get_negated()).get_scaled(camera->zoom);
-    // auto projRect = Rect2F{eyeRect.top_left.x, -eyeRect.top_left.y - eyeRect.size.h, eyeRect.size.w, eyeRect.size.h}
+    // auto projRect = Rect4F{eyeRect.top_left.x, -eyeRect.top_left.y - eyeRect.size.h, eyeRect.size.w, eyeRect.size.h}
     //.get_scaled(Size2F{1.0F/aspect_ratio, 1.0F});
     auto eyeRect = worldRect.getTranslated(camera->position.getXY().getNegated()).getScaled(camera->zoom.w, camera->zoom.h);
-    auto projRect = Rect2F{eyeRect.topLeft.x, -eyeRect.topLeft.y - eyeRect.size.h, eyeRect.size.w, eyeRect.size.h}
+    auto projRect = Rect4F{eyeRect.topLeft.x, -eyeRect.topLeft.y - eyeRect.size.h, eyeRect.size.w, eyeRect.size.h}
         .getScaled(1.0F/aspect_ratio, 1.0F);
     return projRect;
 }
 
 //todo - figure out somehow
-// Rect2F RenderSystemBase::getProjectionRect(const Rect3F& worldRect) const {
+// Rect4F RenderSystemBase::getProjectionRect(const Rect3F& worldRect) const {
 //     auto eyeRect = worldRect.getTranslated(camera->position.getXY().getNegated());
 //     eyeRect.topLeft.x += camera->position.z;
     
     
 //     .getScaled(camera->zoom.w, camera->zoom.h);
-//     auto projRect = Rect2F{eyeRect.topLeft.x, -eyeRect.topLeft.y - eyeRect.size.h, eyeRect.size.w, eyeRect.size.h}
+//     auto projRect = Rect4F{eyeRect.topLeft.x, -eyeRect.topLeft.y - eyeRect.size.h, eyeRect.size.w, eyeRect.size.h}
 //         .getScaled(1.0F/aspect_ratio, 1.0F);
 //     return projRect;
 // }
 
-bool RenderSystemBase::isProjectedRectVisible(const Rect2F& projectionRect) const {
+bool RenderSystemBase::isProjectedRectVisible(const Rect4F& projectionRect) const {
     if(projectionRect.right() < -1.0F || projectionRect.left() > 1.0F || projectionRect.bottom() < -1.0F || projectionRect.top() > 1.0F) {
         return false;
     }
@@ -63,7 +63,7 @@ bool RenderSystemBase::isProjectedRectVisible(const Rect2F& projectionRect) cons
 
 
 
-void RenderSystemBase::renderTexturedBox(const Rect2F& worldRect, TextureData* textureData, int tilesetIndex) {
+void RenderSystemBase::renderTexturedBox(const Rect4F& worldRect, TextureData* textureData, int tilesetIndex) {
     auto projRect = getProjectionRect(worldRect);
     if(!isProjectedRectVisible(projRect)) {
         return;
@@ -123,7 +123,7 @@ void RenderSystemBase::renderTexturedBox(const Rect2F& worldRect, TextureData* t
     }
 }
 
-void RenderSystemBase::renderFilledBox(const Rect2F& worldRect, float r, float g, float b) {
+void RenderSystemBase::renderFilledBox(const Rect4F& worldRect, float r, float g, float b) {
         auto projRect = getProjectionRect(worldRect);
     if(!isProjectedRectVisible(projRect)) {
         return;
@@ -138,7 +138,7 @@ void RenderSystemBase::renderFilledBox(const Rect2F& worldRect, float r, float g
     glEnd();
 }
 
-void RenderSystemBase::renderTranslucentFilledBox(const Rect2F& worldRect, float r, float g, float b, float fillingAlpha) {
+void RenderSystemBase::renderTranslucentFilledBox(const Rect4F& worldRect, float r, float g, float b, float fillingAlpha) {
     auto projRect = getProjectionRect(worldRect);
     if(!isProjectedRectVisible(projRect)) {
         return;

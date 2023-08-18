@@ -14,7 +14,6 @@
 #include "Settings.h"
 
 
-
 bool Loader::loadAssets() {
     std::cout << "Loading assets data..." << std::endl;
     
@@ -24,8 +23,6 @@ bool Loader::loadAssets() {
         std::cerr << "Error loading texture from assets" << std::endl;
         return false;
     }
-
-    // std::cout << Loader::getLoader() << std::endl;
     return true;
 }
 
@@ -45,10 +42,8 @@ bool Loader::loadWorld(World& world) {
         return false;
     }
 
-
     /* Use mapData to build World */
     auto worldBuildResult = buildWorldFromMapData(world);
-
     return true;
 }
 
@@ -56,7 +51,6 @@ bool Loader::loadPlayer(World& world) {
     std::cout << "Loading player data..." << std::endl;
     Player* player = &world.player;
     
-
     /* Player as all Entities has to have pointer to it's Elevation */
     try {
         auto playersElevation = player->getContainingElevationOrThrow();
@@ -114,7 +108,7 @@ bool Loader::loadPlayer(World& world) {
     }
 
     /* Collision detector */
-    auto collisionDetectorCmpOption = player->addCollisionDetectorComponent(Rect2F(0.0F, 0.15F, 1.0F, 0.85F));
+    auto collisionDetectorCmpOption = player->addCollisionDetectorComponent(Rect4F(0.0F, 0.15F, 1.0F, 0.85F));
     if(!collisionDetectorCmpOption.has_value()) {
         std::cerr << "Error adding collision detector component to player" << std::endl;
         return false;
@@ -174,21 +168,11 @@ bool Loader::loadMapDataFromTMXFile(World& world, const std::string& mapName) {
             std::cerr << "Error loading map file: invalid tileset data" << std::endl;
             return false;
         }
-
-        /* Store tileset data */
-        // mapData.tilesetsData.push_back(tilesetData.value());
     }
-
     std::cout << mapData << std::endl;
     std::cout << "Map file loaded successfully" << std::endl;
     return true;
 }
-
-
-
-
-
-
 
 std::optional<std::map<std::string, int>> Loader::getMapInfoFromMapNode(const pugi::xml_node& mapNode) {
     /* Get all attributes heck if they exist */
@@ -453,10 +437,10 @@ bool Loader::getTilesDataFromTilesetNode(const pugi::xml_node& mapNode, TilesetD
                 }
 
                 /* Get attibutes values */
-                int x = collisionRectNode.attribute("x").as_int(-1);
-                int y = collisionRectNode.attribute("y").as_int(-1);
-                int width = collisionRectNode.attribute("width").as_int(-1);
-                int height = collisionRectNode.attribute("height").as_int(-1);
+                int x = xAttrib.as_int(-1);
+                int y = yAttrib.as_int(-1);
+                int width = widthAttrib.as_int(-1);
+                int height = heightAttrib.as_int(-1);
 
                 /* Validate retrived values */
                 if(x < 0 || y < 0 || width < 0 || height < 0) {
@@ -465,7 +449,7 @@ bool Loader::getTilesDataFromTilesetNode(const pugi::xml_node& mapNode, TilesetD
                 }
 
                 /* Store in TilesetData */
-                auto collisionRect = Rect2F(
+                auto collisionRect = Rect4F(
                     static_cast<float>(x) / tileData->containingTilesetData->containingMapData->tileWidthBase,
                     static_cast<float>(y) / tileData->containingTilesetData->containingMapData->tileHeightBase,
                     static_cast<float>(width) / tileData->containingTilesetData->containingMapData->tileWidthBase,
@@ -479,7 +463,6 @@ bool Loader::getTilesDataFromTilesetNode(const pugi::xml_node& mapNode, TilesetD
 
     return true;
 }
-
 
 
 bool Loader::buildWorldFromMapData(World& world) {
@@ -560,7 +543,6 @@ bool Loader::buildWorldFromMapData(World& world) {
                 std::cerr << "Error loading map file: couldn't fill Elevation with Entities" << std::endl;
                 return false;
             }
-
 
 #ifdef USE_ONLY_0_LAYER
             break;
@@ -646,8 +628,6 @@ bool Loader::fillElevationWithEntities(World& world, Elevation* elevation, Entit
 
         /* Get Texture data from Tileset and Tile Data */
         auto textureID = tilesetData->getTextureID();
-        // float textureWidth = static_cast<float>(tilesetData.tileWidth);
-        // float textureHeight = static_cast<float>(tilesetData.tileHeight);
 
         auto textureCmp = tileEntity->addTextureComponent(
             textureID,
@@ -680,11 +660,9 @@ bool Loader::fillElevationWithEntities(World& world, Elevation* elevation, Entit
             }
         }
 
-
         /* Append new tile to world */
         ++tileIndex;
     }
-    // std::cout << "Layer appended successfully. Total entities count: " << world.entities.size() << std::endl;
     return true;
 }
 
