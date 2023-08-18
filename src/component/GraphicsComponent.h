@@ -16,7 +16,7 @@ public:
 
     Rect4F getRectElevationSpace() const;
 
-    Rect6F getCubiodWorldSpace() const;
+    Cuboid6F getCubiodWorldSpace() const;
 
     float r{0.56f};
     float g{1.0f};
@@ -39,7 +39,7 @@ public:
 
     Rect4F getRectElevationSpace() const;
 
-    Rect6F getCubiodWorldSpace() const;
+    Cuboid6F getCubiodWorldSpace() const;
 
     TextureID getTextureID() const { return textureID; }
 

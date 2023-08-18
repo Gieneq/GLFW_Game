@@ -106,7 +106,7 @@ public:
 
     CollisionComponent* addCollisionComponent();
 
-    std::optional<CollisionDetectorComponent*> addCollisionDetectorComponent(const Rect4F& boundingRect);
+    std::optional<CollisionDetectorComponent*> addCollisionDetectorComponent(const Cuboid6F& boundingCuboid);
 
     std::optional<ControllableComponent*> addControllableComponent();
 
@@ -119,15 +119,15 @@ public:
     
     /* Position related methods */
 
-    inline Rect6F& getCuboidElevationSpace() {
+    inline Cuboid6F& getCuboidElevationSpace() {
         return cuboidElevationSpace;
     }
 
-    inline const Rect6F& getCuboidElevationSpace() const {
+    inline const Cuboid6F& getCuboidElevationSpace() const {
         return cuboidElevationSpace;
     }
    
-    Rect6F getCuboidWorldSpace() const;
+    Cuboid6F getCuboidWorldSpace() const;
 
 protected:
     /* Quick access to popular components */
@@ -150,7 +150,7 @@ private:
 
     Elevation* containingElevation{nullptr};
 
-    Rect6F cuboidElevationSpace{0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0.0F};
+    Cuboid6F cuboidElevationSpace{0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0.0F};
 
     /* General step in adding components */
     void addComponent(Component* component);

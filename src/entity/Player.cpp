@@ -13,8 +13,8 @@ MovementComponent* Player::addMovementComponent(float speed) {
     return cmp;
 }
 
-std::optional<CollisionDetectorComponent*> Player::addCollisionDetectorComponent(const Rect4F& boundingRect) {
-    auto cmpOption = Entity::addCollisionDetectorComponent(boundingRect);\
+std::optional<CollisionDetectorComponent*> Player::addCollisionDetectorComponent(const Cuboid6F& boundingCuboid) {
+    auto cmpOption = Entity::addCollisionDetectorComponent(boundingCuboid);
     if (cmpOption.has_value()) {
         this->collisionDetectorComponent = cmpOption.value();
     }

@@ -63,7 +63,7 @@ bool RenderSystemBase::isProjectedRectVisible(const Rect4F& projectionRect) cons
 
 
 
-void RenderSystemBase::renderTexturedBox(const Rect4F& worldRect, TextureData* textureData, int tilesetIndex) {
+void RenderSystemBase::renderTexturedRect4F(const Rect4F& worldRect, TextureData* textureData, int tilesetIndex) {
     auto projRect = getProjectionRect(worldRect);
     if(!isProjectedRectVisible(projRect)) {
         return;
@@ -123,8 +123,8 @@ void RenderSystemBase::renderTexturedBox(const Rect4F& worldRect, TextureData* t
     }
 }
 
-void RenderSystemBase::renderFilledBox(const Rect4F& worldRect, float r, float g, float b) {
-        auto projRect = getProjectionRect(worldRect);
+void RenderSystemBase::renderFilledRect4F(const Rect4F& worldRect, float r, float g, float b) {
+    auto projRect = getProjectionRect(worldRect);
     if(!isProjectedRectVisible(projRect)) {
         return;
     }
@@ -138,7 +138,7 @@ void RenderSystemBase::renderFilledBox(const Rect4F& worldRect, float r, float g
     glEnd();
 }
 
-void RenderSystemBase::renderTranslucentFilledBox(const Rect4F& worldRect, float r, float g, float b, float fillingAlpha) {
+void RenderSystemBase::renderTranslucentFilledRect4F(const Rect4F& worldRect, float r, float g, float b, float fillingAlpha) {
     auto projRect = getProjectionRect(worldRect);
     if(!isProjectedRectVisible(projRect)) {
         return;
@@ -174,6 +174,120 @@ void RenderSystemBase::renderTranslucentFilledBox(const Rect4F& worldRect, float
 
     // Disable vertex arrays after drawing
     glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+void RenderSystemBase::renderFilledCuboid5F(const Cuboid5F& worldCuboid, float r, float g, float b) {
+    renderFilledCuboid6F(Cuboid6F(worldCuboid), r, g, b);
+}
+
+void RenderSystemBase::renderFilledCuboid6F(const Cuboid6F& worldCuboid, float r, float g, float b) {
+    /* Form 2 sides: 
+    front - flatten cube shifted in Y by depth and z,
+    bottom - width remains the same, height is depth, align bottom to bottom, shift by z
+    */
+
+    /* Front */
+    const auto frontRect = Rect4F{
+        worldCuboid.x(),
+        worldCuboid.y() - worldCuboid.depth() - worldCuboid.z(),
+        worldCuboid.width(),
+        worldCuboid.height()
+    };
+    const auto frontBrightness = Settings::Rendering::Brightness::FRONT;
+    renderFilledRect4F(frontRect, 
+        r * frontBrightness, 
+        g * frontBrightness, 
+        b * frontBrightness
+    );
+
+    /* Bottom */
+    const auto bottomRect = Rect4F{
+        worldCuboid.x(),
+        worldCuboid.bottom() - worldCuboid.depth() - worldCuboid.z(),
+        worldCuboid.width(),
+        worldCuboid.depth()
+    };
+    const auto bottomBrightness = Settings::Rendering::Brightness::BOTTOM;
+    renderFilledRect4F(bottomRect, 
+        r * bottomBrightness, 
+        g * bottomBrightness, 
+        b * bottomBrightness
+    );
+}
+
+void RenderSystemBase::renderTranslucentFilledCuboid5F(const Cuboid5F& worldCuboid, float r, float g, float b, float fillingAlpha) {
+    renderTranslucentFilledCuboid6F(Cuboid6F(worldCuboid), r, g, b, fillingAlpha);
+}
+
+void RenderSystemBase::renderTranslucentFilledCuboid6F(const Cuboid6F& worldCuboid, float r, float g, float b, float fillingAlpha) {
+    /* Form 4 sides: 
+    back - flatten cube shifted in Y by z,
+    top - width remains the same, height is depth, align top to top, shift by z,
+    front - flatten cube shifted in Y by depth and z,
+    bottom - width remains the same, height is depth, align bottom to bottom, shift by z
+    */
+
+    if(worldCuboid.depth() > 0.0F) {
+        /* Back */
+        const auto backRect = Rect4F{
+            worldCuboid.x(),
+            worldCuboid.y() - worldCuboid.z(),
+            worldCuboid.width(),
+            worldCuboid.height()
+        };
+        const auto backBrightness = Settings::Rendering::Brightness::BACK;
+        renderTranslucentFilledRect4F(backRect, 
+            r * backBrightness, 
+            g * backBrightness, 
+            b * backBrightness,
+            fillingAlpha
+        );
+
+        /* Top */
+        const auto topRect = Rect4F{
+            worldCuboid.x(),
+            worldCuboid.y() - worldCuboid.depth() - worldCuboid.z(),
+            worldCuboid.width(),
+            worldCuboid.depth()
+        };
+        const auto topBrightness = Settings::Rendering::Brightness::TOP;
+        renderTranslucentFilledRect4F(topRect, 
+            r * topBrightness, 
+            g * topBrightness, 
+            b * topBrightness,
+            fillingAlpha
+        );
+    }
+
+    /* Front */
+    const auto frontRect = Rect4F{
+        worldCuboid.x(),
+        worldCuboid.y() - worldCuboid.depth() - worldCuboid.z(),
+        worldCuboid.width(),
+        worldCuboid.height()
+    };
+    const auto frontBrightness = Settings::Rendering::Brightness::FRONT;
+    renderTranslucentFilledRect4F(frontRect, 
+        r * frontBrightness, 
+        g * frontBrightness, 
+        b * frontBrightness,
+        fillingAlpha
+    );
+
+    /* Bottom */
+    const auto bottomRect = Rect4F{
+        worldCuboid.x(),
+        worldCuboid.bottom() - worldCuboid.depth() - worldCuboid.z(),
+        worldCuboid.width(),
+        worldCuboid.depth()
+    };
+    const auto bottomBrightness = Settings::Rendering::Brightness::BOTTOM;
+    renderTranslucentFilledRect4F(bottomRect, 
+        r * bottomBrightness, 
+        g * bottomBrightness, 
+        b * bottomBrightness,
+        fillingAlpha
+    );
 }
 
 

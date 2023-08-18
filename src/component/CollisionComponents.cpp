@@ -4,90 +4,52 @@
 #include "Entity.h"
 #include "World.h"
 
-std::vector<Rect4F> CollisionComponent::getElevationSpaceCollisionRects() const {
-    Vect2F parentElevationSpacePosition = parent->getCuboidElevationSpace().topLeft.getXY();
-    std::vector<Rect4F> elevationSpaceCollisionRects;
-    for (auto& rect : collisionRects) {
-        elevationSpaceCollisionRects.push_back(rect.getTranslated(parentElevationSpacePosition));
+/* CollisionComponent */
+
+std::vector<Cuboid6F> CollisionComponent::getElevationSpaceCollisionCuboids() const {
+    const auto& parentElevationSpacePosition = parent->getCuboidElevationSpace().topLeft;
+    std::vector<Cuboid6F> elevationSpaceCollisionCuboids;
+    for (const auto& cuboid : collisionCuboids) {
+        elevationSpaceCollisionCuboids.push_back(cuboid.getTranslated(parentElevationSpacePosition));
     }
-    return elevationSpaceCollisionRects;
+    return elevationSpaceCollisionCuboids;
 }
 
-std::vector<Rect6F> CollisionComponent::getWorldSpaceCollisionRects() const {
-    std::vector<Rect6F> worldSpaceCollisionRects;
-    for (auto& esRect : getElevationSpaceCollisionRects()) {
-        auto worldSpaceRect = Rect6F(
-            esRect.topLeft.x,
-            esRect.topLeft.y,
-            parent->getContainingElevationOrThrow()->getWorldSpaceZ(),
-            esRect.size.w,
-            esRect.size.h,
-            0.0F
-        );
-        worldSpaceCollisionRects.push_back(worldSpaceRect);
+std::vector<Cuboid6F> CollisionComponent::getWorldSpaceCollisionCuboids() const {
+    const auto& parentWorldSpacePosition = parent->getCuboidWorldSpace().topLeft;
+    std::vector<Cuboid6F> worldSpaceCollisionCuboids;
+    for (const auto& cuboid : collisionCuboids) {
+        worldSpaceCollisionCuboids.push_back(cuboid.getTranslated(parentWorldSpacePosition));
     }
-    return worldSpaceCollisionRects;
+    return worldSpaceCollisionCuboids;
 }
 
-void CollisionDetectorComponent::onCollision(std::vector<Rect4F> collidingRectsElevationSpace) {
-    // std::cout << "[!] Collision of " << getWorldSpaceBoundingRect() << "detected with:";
-    // for (auto& rect : collidingRects) {
-    //     std::cout << rect << ", " << std::endl;
-    // }
-    
-    /**
-     * React to collision:
-     * - stop moving towards each collidingRect,
-     * - align to each collidingRect,
-     */
-    for (auto& rect : collidingRectsElevationSpace) {
+/* CollisionDetectorComponent */
 
-        /* Align horizontally */
-        if(movementCmp->direction.x > 0) {
-            movementCmp->direction.x = 0;
-            parent->getCuboidElevationSpace().topLeft.x = rect.left() - boundingRect.size.w;
-            //todo offset to fit bounding box
-        } 
-        
-        else if(movementCmp->direction.x < 0) {
-            movementCmp->direction.x = 0;
-            parent->getCuboidElevationSpace().topLeft.x = rect.right();
-            //todo offset to fit bounding box
-        }
+CollisionResult CollisionDetectorComponent::checkCollision(CollisionComponent& other) const {
+    std::vector<Cuboid6F> collisionCuboidsElevationSpaceResult;
+    /* Filter out check with self */
+    if (other.getParentEntity()->getId() == parent->getId()) {
+        return CollisionResult::NONE();
+    }
 
-        /* Align vertically */
-        if(movementCmp->direction.y > 0) {
-            movementCmp->direction.y = 0;
-            parent->getCuboidElevationSpace().topLeft.y = rect.top() - (boundingRect.size.h + boundingRect.topLeft.y);
-        } 
-        
-        else if(movementCmp->direction.y < 0) {
-            movementCmp->direction.y = 0; 
-            parent->getCuboidElevationSpace().topLeft.y = rect.bottom();
-            float diffY = boundingRect.top();
-            parent->getCuboidElevationSpace().topLeft.y -= diffY;
+    const auto otherCollisionElevationSpaceCuboids = other.getElevationSpaceCollisionCuboids();
+    const auto thisBoundingElevationSpaceCuboids = getElevationSpaceBoundingCuboid();
+    for (const auto& otherCuboidElevationSpace : otherCollisionElevationSpaceCuboids) {
+        if (thisBoundingElevationSpaceCuboids.checkIntersection(otherCuboidElevationSpace)) {
+            collisionCuboidsElevationSpaceResult.push_back(otherCuboidElevationSpace);
         }
     }
+
+    return CollisionResult{other.getParentEntity(), collisionCuboidsElevationSpaceResult};
 }
 
-Rect4F CollisionDetectorComponent::getElevationSpaceBoundingRect() const {
-    Vect2F parentElevationSpacePosition = parent->getCuboidElevationSpace().topLeft.getXY();
-    return Rect4F(
-        boundingRect.topLeft.x + parentElevationSpacePosition.x,
-        boundingRect.topLeft.y + parentElevationSpacePosition.y,
-        boundingRect.size.w,
-        boundingRect.size.h
-    );
+Cuboid6F CollisionDetectorComponent::getElevationSpaceBoundingCuboid() const {
+    const auto& parentElevationSpacePosition = parent->getCuboidElevationSpace().topLeft;
+    return boundingCuboid.getTranslated(parentElevationSpacePosition);
 }
 
-Rect6F CollisionDetectorComponent::getWorldSpaceBoundingRect() const {
-    auto elevationSpaceBoundingRect = getElevationSpaceBoundingRect();
-    return Rect6F(
-        elevationSpaceBoundingRect.topLeft.x,
-        elevationSpaceBoundingRect.topLeft.y,
-        parent->getContainingElevationOrThrow()->getWorldSpaceZ(),
-        elevationSpaceBoundingRect.size.w,
-        elevationSpaceBoundingRect.size.h,
-        0.0F
-    );
+Cuboid6F CollisionDetectorComponent::getWorldSpaceBoundingCuboid() const {
+    const auto& parentWorldSpacePosition = parent->getCuboidWorldSpace().topLeft;
+    return boundingCuboid.getTranslated(parentWorldSpacePosition);
 }

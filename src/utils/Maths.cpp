@@ -68,27 +68,16 @@ Rect4F Rect4F::getScaled(const float xScale, const float yScale) const {
 
 /* Rect 5F */
     
-bool Rect5F::checkIntersection(const Rect6F* other) const {
+bool Cuboid5F::checkIntersection(const Cuboid6F* other) const {
     return !(left() >= other->right() || right() <= other->left() || top() >= other->bottom() || bottom() <= other->top() || front() <= other->back());
 }
 
-Rect5F Rect5F::fromSides(float left, float right, float top, float bottom, float front) {
-    return Rect5F{left, top, right-left, bottom-top, front};
+Cuboid5F Cuboid5F::fromSides(float left, float right, float top, float bottom, float front) {
+    return Cuboid5F{left, top, right-left, bottom-top, front};
 }
 
-/* Rect6F */
+/* Cuboid6F */
 
-Rect6F Rect6F::getTranslated(Vect3F translation) const {
-    return {
-        topLeft.x + translation.x,
-        topLeft.y + translation.y,
-        topLeft.z + translation.z,
-        size.w,
-        size.h,
-        size.d
-    };
-}
-
-Rect6F Rect6F::fromSides(float left, float right, float top, float bottom, float back, float front) {
-    return Rect6F{left, top, back, right-left, bottom-top, front-back};
+Cuboid6F Cuboid6F::fromSides(float left, float right, float top, float bottom, float back, float front) {
+    return Cuboid6F{left, top, back, right-left, bottom-top, front-back};
 }

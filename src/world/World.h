@@ -28,6 +28,8 @@ public:
         return static_cast<float>(elevation);
     }
 
+    Cuboid6F elevationToWorldSpace(const Cuboid6F& elevationSpaceCuboid) const;
+
     /* Counts */
     inline int getTotalEntitiesCount() const {
         return static_cast<int>(floorEntities.size() + clutterEntities.size() 

@@ -8,6 +8,8 @@
 
 class Entity;
 class CollisionComponent;
+class CollisionDetectorComponent;
+class MovementComponent;
 class CollisionsSystem : public SystemBase {
 public:
     int system_id;
@@ -17,28 +19,41 @@ public:
         std::vector<CollisionComponent*>::iterator collisionCmpsEnd,
         Entity *entity, float dt);
 
-    inline std::vector<Rect4F>::iterator getCollidingRectsBegin() {
-        return collidingRects.begin();
+private:
+    void onCollision(
+        CollisionDetectorComponent* collisionDetectorCmp,
+        Entity* collidedEntity, 
+        std::vector<Cuboid6F>::const_iterator elevationSpaceCuboidsBegin, 
+        std::vector<Cuboid6F>::const_iterator elevationSpaceCuboidsEnd);
+
+    void CollisionsSystem::stopMovingComponent(MovementComponent* movementCmp,
+        const Cuboid6F& boundingCuboidElevationSpace,
+        std::vector<Cuboid6F>::const_iterator elevationSpaceCuboidsBegin, 
+        std::vector<Cuboid6F>::const_iterator elevationSpaceCuboidsEnd);
+
+public:    
+    inline std::vector<Cuboid6F>::iterator getCollidingCuboidsWorldSpaceBegin() {
+        return collidingCuboidsWorldSpace.begin();
     }
 
-    inline std::vector<Rect4F>::iterator getCollidingRectsEnd() {
-        return collidingRects.end();
+    inline std::vector<Cuboid6F>::iterator getCollidingCuboidsWorldSpaceEnd() {
+        return collidingCuboidsWorldSpace.end();
     }
 
-    inline std::vector<Rect4F>::const_iterator getCollidingRectsBegin() const {
-        return collidingRects.begin();
+    inline std::vector<Cuboid6F>::const_iterator getCollidingCuboidsWorldSpaceBegin() const {
+        return collidingCuboidsWorldSpace.begin();
     }
 
-    inline std::vector<Rect4F>::const_iterator getCollidingRectsEnd() const {
-        return collidingRects.end();
+    inline std::vector<Cuboid6F>::const_iterator getCollidingCuboidsWorldSpaceEnd() const {
+        return collidingCuboidsWorldSpace.end();
     }
 
-    int getCollidingRectsCount() const {
-        return static_cast<int>(collidingRects.size());
+    int getCollidingCuboidsCount() const {
+        return static_cast<int>(collidingCuboidsWorldSpace.size());
     }
-
 
 private:
-    std::vector<Rect4F> collidingRects;
+/* */
+    std::vector<Cuboid6F> collidingCuboidsWorldSpace;
 };
 

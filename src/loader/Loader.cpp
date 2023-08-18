@@ -108,7 +108,7 @@ bool Loader::loadPlayer(World& world) {
     }
 
     /* Collision detector */
-    auto collisionDetectorCmpOption = player->addCollisionDetectorComponent(Rect4F(0.0F, 0.15F, 1.0F, 0.85F));
+    auto collisionDetectorCmpOption = player->addCollisionDetectorComponent(Cuboid6F(0.0F, 0.15F, 0.0F, 1.0F, 0.85F, 1.0F));
     if(!collisionDetectorCmpOption.has_value()) {
         std::cerr << "Error adding collision detector component to player" << std::endl;
         return false;
@@ -449,14 +449,16 @@ bool Loader::getTilesDataFromTilesetNode(const pugi::xml_node& mapNode, TilesetD
                 }
 
                 /* Store in TilesetData */
-                auto collisionRect = Rect4F(
+                auto collisionCuboid = Cuboid6F(
                     static_cast<float>(x) / tileData->containingTilesetData->containingMapData->tileWidthBase,
                     static_cast<float>(y) / tileData->containingTilesetData->containingMapData->tileHeightBase,
+                    0.0F,
                     static_cast<float>(width) / tileData->containingTilesetData->containingMapData->tileWidthBase,
-                    static_cast<float>(height) / tileData->containingTilesetData->containingMapData->tileHeightBase
+                    static_cast<float>(height) / tileData->containingTilesetData->containingMapData->tileHeightBase,
+                    1.0F
                 );
 
-                tileData->collisionRects.push_back(collisionRect);
+                tileData->collisionCuboids.push_back(collisionCuboid);
             }
         }
     }
@@ -652,11 +654,12 @@ bool Loader::fillElevationWithEntities(World& world, Elevation* elevation, Entit
             animationCmp->setActive(true);
         }
 
-        /* Check if has collision rects */
+        /* Check if has collision cuboids */
         if(tileData->hasCollisionRects()) {
             auto collisionCmp = tileEntity->addCollisionComponent();
-            for(const auto& collisionRect : tileData->collisionRects) {
-                collisionCmp->appendCollidionRect(collisionRect);
+            for(auto collisionCuboidIt = tileData->collisionCuboids.begin(); collisionCuboidIt != tileData->collisionCuboids.end(); ++collisionCuboidIt) {
+                const auto& collisionCuboid = *collisionCuboidIt;
+                collisionCmp->appendCollisionCuboid(collisionCuboid);
             }
         }
 

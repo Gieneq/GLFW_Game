@@ -54,4 +54,13 @@ namespace Settings {
             }
         };
     };
+
+    struct Rendering {
+        struct Brightness {
+            static constexpr float FRONT = 1.0F;
+            static constexpr float BOTTOM = 0.8F;
+            static constexpr float BACK = 0.4F;
+            static constexpr float TOP = 0.2F;
+        };
+    };
 }

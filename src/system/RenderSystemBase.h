@@ -23,9 +23,13 @@ public:
     // Rect4F getProjectionRect(const Rect3F& worldRect) const;
     bool isProjectedRectVisible(const Rect4F& projectionRect) const;
 
-    void renderTexturedBox(const Rect4F& worldRect, TextureData* textureData, int tilesetIndex);
-    void renderFilledBox(const Rect4F& worldRect, float r, float g, float b);
-    void renderTranslucentFilledBox(const Rect4F& worldRect, float r, float g, float b, float fillingAlpha);
+    void renderTexturedRect4F(const Rect4F& worldRect, TextureData* textureData, int tilesetIndex);
+    void renderFilledRect4F(const Rect4F& worldRect, float r, float g, float b);
+    void renderTranslucentFilledRect4F(const Rect4F& worldRect, float r, float g, float b, float fillingAlpha);
+    void renderFilledCuboid5F(const Cuboid5F& worldCuboid, float r, float g, float b);
+    void renderFilledCuboid6F(const Cuboid6F& worldCuboid, float r, float g, float b);
+    void renderTranslucentFilledCuboid5F(const Cuboid5F& worldCuboid, float r, float g, float b, float fillingAlpha);
+    void renderTranslucentFilledCuboid6F(const Cuboid6F& worldCuboid, float r, float g, float b, float fillingAlpha);
 
     Rect4F getRenderBoxWorldSpace() const {
         return renderBoxWorldSpace;

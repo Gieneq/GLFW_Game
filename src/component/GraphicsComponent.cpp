@@ -9,9 +9,9 @@ Rect4F ColorComponent::getRectElevationSpace() const {
     };
 }
 
-Rect6F ColorComponent::getCubiodWorldSpace() const {
+Cuboid6F ColorComponent::getCubiodWorldSpace() const {
     auto rectElevationSpace = getRectElevationSpace();
-    return Rect6F{
+    return Cuboid6F{
         rectElevationSpace.topLeft.x,
         rectElevationSpace.topLeft.y,
         parent->getContainingElevationOrThrow()->getWorldSpaceZ(),
@@ -30,9 +30,9 @@ Rect4F TextureComponent::getRectElevationSpace() const {
     };
 }
 
-Rect6F TextureComponent::getCubiodWorldSpace() const {
+Cuboid6F TextureComponent::getCubiodWorldSpace() const {
     auto rectElevationSpace = getRectElevationSpace();
-    return Rect6F{
+    return Cuboid6F{
         rectElevationSpace.topLeft.x,
         rectElevationSpace.topLeft.y,
         parent->getContainingElevationOrThrow()->getWorldSpaceZ(),

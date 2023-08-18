@@ -18,7 +18,7 @@ public:
     }
 
     bool hasCollisionRects() const {
-        return !collisionRects.empty();
+        return !collisionCuboids.empty();
     }
 
     int getTileLID() const {
@@ -29,22 +29,54 @@ public:
         return animationInterval;
     }
 
-    const std::vector<int>& getAnimationFramesLIDs() const {
-        return animationFramesLIDs;
+    inline int getAnimationFramesCount() const {
+        return static_cast<int>(animationFramesLIDs.size());
+    }
+
+    inline int getCollisionRectsCount() const {
+        return static_cast<int>(collisionCuboids.size());
+    }
+
+    std::vector<int>::iterator animationFramesBegin() {
+        return animationFramesLIDs.begin();
+    }
+
+    std::vector<int>::iterator animationFramesEnd() {
+        return animationFramesLIDs.end();
+    }
+
+    std::vector<int>::const_iterator animationFramesBegin() const {
+        return animationFramesLIDs.begin();
+    }
+
+    std::vector<int>::const_iterator animationFramesEnd() const {
+        return animationFramesLIDs.end();
+    }
+
+    std::vector<Cuboid6F>::iterator collisionRectsBegin() {
+        return collisionCuboids.begin();
+    }
+
+    std::vector<Cuboid6F>::iterator collisionRectsEnd() {
+        return collisionCuboids.end();
+    }
+
+    std::vector<Cuboid6F>::const_iterator collisionRectsBegin() const {
+        return collisionCuboids.begin();
+    }
+
+    std::vector<Cuboid6F>::const_iterator collisionRectsEnd() const {
+        return collisionCuboids.end();
     }
 
     std::vector<TileData*> getAnimationFramesTileDatas();
-
-    const std::vector<Rect4F>& getCollisionRects() const {
-        return collisionRects;
-    }
 
     TilesetData* getContainingTilesetData() const {
         return containingTilesetData;
     }
 
     friend std::ostream& operator<<(std::ostream& os, const TileData& tileData) {
-        os << "[" << tileData.tileLID << "]" << ", AnimationsCount: " << tileData.animationFramesLIDs.size() << ", collisionRectsCount: " << tileData.collisionRects.size() << std::endl;
+        os << "[" << tileData.tileLID << "]" << ", AnimationsCount: " << tileData.getAnimationFramesCount() << ", collisionRectsCount: " << tileData.getCollisionRectsCount() << std::endl;
         return os;
     }
 
@@ -55,7 +87,7 @@ private:
     TilesetData* containingTilesetData{nullptr};
     int animationInterval{1000};
     std::vector<int> animationFramesLIDs;
-    std::vector<Rect4F> collisionRects;
+    std::vector<Cuboid6F> collisionCuboids;
 
     friend class TilesetData;
     friend class Loader;

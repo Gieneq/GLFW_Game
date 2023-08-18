@@ -1,6 +1,24 @@
 #pragma once
 #include <iostream>
 
+/********************************************
+ *     Naming convention for Cuboid6F       *
+ *                                          *
+ * --------------------------------> x      *
+ *  |              TOP                      *
+ *  |     --------------------              *
+ *  |    |  FRONT             |             *
+ *  |    |      |-            |             *
+ *  | L  |       \            | R           *
+ *  |    |        \           |             *
+ *  |    |         \          |             *
+ *  |    |            BACK    |             *
+ *  |     --------------------              *
+ *  |           BOTTOM                      *
+ * \ /                                      *
+ *  y                             (z) UP    *
+ *                                          *
+ *******************************************/
 
 struct Vect2F {
     Vect2F() = default;
@@ -122,9 +140,20 @@ struct Rect4F {
     Rect4F getScaled(const float xScale, const float yScale) const;
 
     inline float& x() { return topLeft.x; }
+
     inline float& y() { return topLeft.y; }
+
     inline float& w() { return size.w; }
+
     inline float& h() { return size.h; }
+
+    inline float width() const {
+        return size.w;
+    }
+
+    inline float height() const {
+        return size.h;
+    }
 
     inline void alignToLeftOf(const Rect4F& other) {
         topLeft.x = other.left() - size.w;
@@ -160,25 +189,25 @@ struct Rect4F {
 /**
  * 2D rectangle with depth
 */
-class Rect6F;
-class Rect5F {
+class Cuboid6F;
+class Cuboid5F {
 public:
-    Rect5F() : topLeft{}, size{} {}
-    Rect5F(float x, float y, float w, float h, float d) : topLeft{x, y}, size{w, h, d} {}
+    Cuboid5F() : topLeft{}, size{} {}
+    Cuboid5F(float x, float y, float w, float h, float d) : topLeft{x, y}, size{w, h, d} {}
 
-    inline void alignToLeftOf(const Rect5F& other) {
+    inline void alignToLeftOf(const Cuboid5F& other) {
         topLeft.x = other.left() - size.w;
     }
 
-    inline void alignToRightOf(const Rect5F& other) {
+    inline void alignToRightOf(const Cuboid5F& other) {
         topLeft.x = other.right();
     }
 
-    inline void alignToTopOf(const Rect5F& other) {
+    inline void alignToTopOf(const Cuboid5F& other) {
         topLeft.y = other.top() - size.h;
     }
 
-    inline void alignToBottomOf(const Rect5F& other) {
+    inline void alignToBottomOf(const Cuboid5F& other) {
         topLeft.y = other.bottom();
     }
 
@@ -204,9 +233,9 @@ public:
         return size.d;
     }
 
-    static Rect5F fromSides(float left, float right, float top, float bottom, float front);
+    static Cuboid5F fromSides(float left, float right, float top, float bottom, float front);
 
-    Rect5F getTranslated(Vect2F translation) const;
+    Cuboid5F getTranslated(Vect2F translation) const;
 
     inline float& x() { return topLeft.x; }
 
@@ -218,22 +247,38 @@ public:
 
     inline float& d() { return size.d; }
 
+    inline float width() const {
+        return size.w;
+    }
+
+    inline float height() const {
+        return size.h;
+    }
+
+    inline float depth() const {
+        return size.d;
+    }
+
     inline Rect4F getFlatten() const {
         return Rect4F{topLeft.x, topLeft.y, size.w, size.h};
+    }
+    
+    inline Cuboid5F getTranslated(const Vect2F& translation) const  {
+        return Cuboid5F{topLeft.x + translation.x, topLeft.y + translation.y, size.w, size.h, size.d};
     }
 
     inline Size2F getWH() const {
         return Size2F{size.w, size.h};
     }
 
-    inline bool checkIntersection(const Rect5F& other) const {
+    inline bool checkIntersection(const Cuboid5F& other) const {
         /* Keep in mind direction of X and Y. In this case depth won't change anything */
         return !(left() >= other.right() || right() <= other.left() || top() >= other.bottom() || bottom() <= other.top());
     }
         
-    bool checkIntersection(const Rect6F* other) const;
+    bool checkIntersection(const Cuboid6F* other) const;
     
-    friend std::ostream& operator<<(std::ostream& os, const Rect5F& rect) {
+    friend std::ostream& operator<<(std::ostream& os, const Cuboid5F& rect) {
         os << "[" << rect.topLeft.x << ", " << rect.topLeft.y << ", " << rect.size.w << ", " << rect.size.h << ", " << rect.size.d << "]";
         return os;
     }
@@ -243,10 +288,11 @@ public:
     Size3F size;
 };
 
-class Rect6F {
+class Cuboid6F {
 public:
-    Rect6F() : topLeft{}, size{} {}
-    Rect6F(float x, float y, float z, float w, float h, float d) : topLeft{x, y, z}, size{w, h, d} {}
+    Cuboid6F() : topLeft{}, size{} {}
+    Cuboid6F(float x, float y, float z, float w, float h, float d) : topLeft{x, y, z}, size{w, h, d} {}
+    Cuboid6F(const Cuboid5F& other) : topLeft{other.topLeft.x, other.topLeft.y, 0.0F}, size{other.size.w, other.size.h, other.size.d} {}
 
     inline float left() const {
         return topLeft.x;
@@ -274,15 +320,19 @@ public:
         return topLeft.z;
     }
     
-    Rect6F getTranslated(Vect3F translation) const;
-
-    static Rect6F fromSides(float left, float right, float top, float bottom, float back, float front);
+    static Cuboid6F fromSides(float left, float right, float top, float bottom, float back, float front);
 
     inline float& x() { return topLeft.x; }
 
+    inline float x() const { return topLeft.x; }
+
     inline float& y() { return topLeft.y; }
 
+    inline float y() const { return topLeft.y; }
+
     inline float& z() { return topLeft.z; }
+
+    inline float z() const { return topLeft.z; }
 
     inline float& w() { return size.w; }
 
@@ -290,12 +340,28 @@ public:
 
     inline float& d() { return size.d; }
 
+    inline float width() const {
+        return size.w;
+    }
+
+    inline float height() const {
+        return size.h;
+    }
+
+    inline float depth() const {
+        return size.d;
+    }
+
     inline Rect4F getFlatten() const {
         return Rect4F{topLeft.x, topLeft.y, size.w, size.h};
     }
 
-    inline Rect5F getFlattenWithDepth() const {
-        return Rect5F{topLeft.x, topLeft.y, size.w, size.h, size.d};
+    inline Cuboid5F getFlattenWithDepth() const {
+        return Cuboid5F{topLeft.x, topLeft.y, size.w, size.h, size.d};
+    }
+
+    inline Cuboid6F getTranslated(const Vect3F& translation) const {
+        return Cuboid6F{topLeft.x + translation.x, topLeft.y + translation.y, topLeft.z + translation.z, size.w, size.h, size.d};
     }
 
     inline Vect2F getXY() const {
@@ -306,39 +372,39 @@ public:
         return Size2F{size.w, size.h};
     }
 
-    inline void alignToLeftOf(const Rect6F& other) {
+    inline void alignToLeftOf(const Cuboid6F& other) {
         topLeft.x = other.left() - size.w;
     }
 
-    inline void alignToRightOf(const Rect6F& other) {
+    inline void alignToRightOf(const Cuboid6F& other) {
         topLeft.x = other.right();
     }
 
-    inline void alignToTopOf(const Rect6F& other) {
+    inline void alignToTopOf(const Cuboid6F& other) {
         topLeft.y = other.top() - size.h;
     }
 
-    inline void alignToBottomOf(const Rect6F& other) {
+    inline void alignToBottomOf(const Cuboid6F& other) {
         topLeft.y = other.bottom();
     }
 
-    inline void alignToFrontOf(const Rect6F& other) {
+    inline void alignToFrontOf(const Cuboid6F& other) {
         topLeft.z = other.front();
     }
 
-    inline void alignToBackOf(const Rect6F& other) {
+    inline void alignToBackOf(const Cuboid6F& other) {
         topLeft.z = other.back() - size.d;
     }
 
-    inline bool checkIntersection(const Rect6F& other) const {
+    inline bool checkIntersection(const Cuboid6F& other) const {
         return !(left() >= other.right() || right() <= other.left() || top() >= other.bottom() || bottom() <= other.top() || front() <= other.back() || back() >= other.front());
     }
 
-    inline bool checkIntersection(const Rect5F& other) const {
+    inline bool checkIntersection(const Cuboid5F& other) const {
         return !(left() >= other.right() || right() <= other.left() || top() >= other.bottom() || bottom() <= other.top() || back() >= other.front());
     }
 
-    friend std::ostream& operator<<(std::ostream& os, const Rect6F& rect) {
+    friend std::ostream& operator<<(std::ostream& os, const Cuboid6F& rect) {
         os << "[" << rect.topLeft.x << ", " << rect.topLeft.y << ", " << rect.topLeft.z << ", " << rect.size.w << ", " << rect.size.h << ", " << rect.size.d << "]";
         return os;
     }

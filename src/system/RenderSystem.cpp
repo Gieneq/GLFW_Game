@@ -144,7 +144,7 @@ void RenderSystem::renderEntityData(const EntityBatchData& entityData) {
         auto textureDataOption = Loader::getLoader().getTextureDataByID(textureCmp->getTextureID());
         if(!textureDataOption.has_value()) {
             /* Corrupted */
-            renderFilledBox(textureCmp->getRectElevationSpace(), 1.0F, 0.0F, 0.0F);
+            renderFilledRect4F(textureCmp->getRectElevationSpace(), 1.0F, 0.0F, 0.0F);
         }
         else {
             Rect4F textureRect = textureCmp->getRectElevationSpace();
@@ -154,7 +154,7 @@ void RenderSystem::renderEntityData(const EntityBatchData& entityData) {
                 std::cout << textureRect <<  ", ei: " << elevationIndex << ", cuboid: " << entity->getCuboidWorldSpace() << std::endl;
             }
             textureRect.topLeft.y -= elevationIndex;
-            renderTexturedBox(textureRect, textureDataOption.value(), textureCmp->getTilesetIndex());
+            renderTexturedRect4F(textureRect, textureDataOption.value(), textureCmp->getTilesetIndex());
         }
     }
 
@@ -163,7 +163,7 @@ void RenderSystem::renderEntityData(const EntityBatchData& entityData) {
     if(colorCmpOption.has_value()) {
         auto colorCmp = colorCmpOption.value();
         //todo colorCmp->a
-        renderFilledBox(colorCmp->getRectElevationSpace(), colorCmp->r, colorCmp->g, colorCmp->b);
+        renderFilledRect4F(colorCmp->getRectElevationSpace(), colorCmp->r, colorCmp->g, colorCmp->b);
     }
 }
 
@@ -173,16 +173,16 @@ void RenderSystem::renderCollisionBoxes(int elevationIndex,
         std::vector<CollisionComponent*>::const_iterator collisionCmpsEnd) {
     for(auto collisionCmpIt = collisionCmpsBegin; collisionCmpIt != collisionCmpsEnd; collisionCmpIt++) {
         auto collisionCmp = *collisionCmpIt;
-        for (auto box : collisionCmp->getElevationSpaceCollisionRects()) {
-            box.topLeft.y -= elevationIndex;
-            renderTranslucentFilledBox(box, 1.0F, 0.0F, 0.0F, 0.5F);
+        const auto collisionCuboids = collisionCmp->getWorldSpaceCollisionCuboids();
+        for (const auto& collCuboid : collisionCuboids) {
+            renderTranslucentFilledCuboid6F(collCuboid, 0.0F, 0.0F, 1.0F, 0.2F);
         }
     }
 }
 
 
 void RenderSystem::fillScreen(float r, float g, float b, float a) {
-    renderTranslucentFilledBox(renderBoxWorldSpace, r, g, b, a);
+    renderTranslucentFilledRect4F(renderBoxWorldSpace, r, g, b, a);
 }
 
 

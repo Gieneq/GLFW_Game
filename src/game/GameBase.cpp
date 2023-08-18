@@ -177,14 +177,12 @@ void GameBase::render() {
     /* Debug shapes */
     if(debugView) {
         render_system.renderCollisionBoxes(containingFloor->getIndex(), containingFloor->collisionComponentsRegisterBegin(), containingFloor->collisionComponentsRegisterEnd());
-        auto playerBoundingRect = world.player.collisionDetectorComponent->getElevationSpaceBoundingRect();
-        playerBoundingRect.topLeft.y -= containingFloor->getWorldSpaceZ();
-        render_system.renderTranslucentFilledBox(playerBoundingRect, 0.1F, 0.2F, 1.0F, 0.5F);
+        const auto playerBoundingWorldSpace = world.player.collisionDetectorComponent->getWorldSpaceBoundingCuboid();
+        render_system.renderTranslucentFilledCuboid6F(playerBoundingWorldSpace, 1.0F, 0.0F, 0.0F, 0.3F);
 
-        for(auto collisionRectIt = collisionsSystem.getCollidingRectsBegin(), end = collisionsSystem.getCollidingRectsEnd(); collisionRectIt != end; ++collisionRectIt) {
-            auto collisionRect = *collisionRectIt;
-            collisionRect.topLeft.y -= containingFloor->getWorldSpaceZ();
-            render_system.renderTranslucentFilledBox(collisionRect, 0.0F, 1.0F, 1.0F, 0.2F);
+        for(auto collisionCuboidWorldSpaceIt = collisionsSystem.getCollidingCuboidsWorldSpaceBegin(); collisionCuboidWorldSpaceIt != collisionsSystem.getCollidingCuboidsWorldSpaceEnd(); ++collisionCuboidWorldSpaceIt) {
+            const auto& collisionCuboidWorldSpace = *collisionCuboidWorldSpaceIt;
+            render_system.renderTranslucentFilledCuboid6F(collisionCuboidWorldSpace, 0.0F, 1.0F, 1.0F, 0.5F);
         }
     }
 
