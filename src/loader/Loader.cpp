@@ -73,8 +73,8 @@ bool Loader::loadPlayer(World& world) {
     }
 
     /* Set starting position */
-    player->getCuboidElevationSpace().topLeft.x = 13.5485F;
-    player->getCuboidElevationSpace().topLeft.y = 18.5593F;
+    player->getCuboidElevationSpace().topLeft.x = 90.6339F; //13.5485F;
+    player->getCuboidElevationSpace().topLeft.y = 98.3096F; //18.5593F;
     player->getCuboidElevationSpace().topLeft.z = 0.0F; // can differ is standing on stair or small elevation
 
     /* Try adding texture to player */
@@ -601,6 +601,17 @@ bool Loader::fillElevationWithEntities(World& world, Elevation* elevation, Entit
             continue;
         }
 
+        
+        /* Set location in elevation space */
+        tileX = static_cast<float>(tileIndex % mapData.getTotalWidth());
+        tileY = static_cast<float>(tileIndex / mapData.getTotalWidth());
+
+        /* Test block */
+        if(!(tileX > 80 && tileX < 102 && tileY > 80 && tileY < 102)) {
+            ++tileIndex;
+            continue;
+        }
+
         /* Retrive TilesetData corresponding to GID */
         auto tilesetDataOption = mapData.getTilesetDataCorrespondingToGID(tileGID);
         if(!tilesetDataOption.has_value()) {
@@ -621,9 +632,7 @@ bool Loader::fillElevationWithEntities(World& world, Elevation* elevation, Entit
             return false;
         }
 
-        /* Set location in elevation space */
-        tileX = static_cast<float>(tileIndex % mapData.getTotalWidth());
-        tileY = static_cast<float>(tileIndex / mapData.getTotalWidth());
+
 
         /* Position */
         tileEntity->getCuboidElevationSpace().topLeft = Vect3F(

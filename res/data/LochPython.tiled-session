@@ -5,10 +5,10 @@
     },
     "activeFile": "maps/testmap.tmx",
     "expandedProjectPaths": [
+        ".",
         "entities",
         "maps",
-        "tilesets",
-        "."
+        "tilesets"
     ],
     "file.lastUsedOpenFilter": "Wszystkie pliki (*)",
     "fileStates": {
@@ -18,16 +18,16 @@
         },
         "maps/testmap.tmx": {
             "expandedGroupLayers": [
-                5,
                 7,
                 3,
+                5,
                 2
             ],
-            "scale": 3,
+            "scale": 0.33,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 327.16666666666663,
-                "y": 296.5
+                "x": 4190.909090909091,
+                "y": 946.969696969697
             }
         },
         "tilesets/details.tsx": {

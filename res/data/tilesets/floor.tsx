@@ -9,6 +9,14 @@
    <frame tileid="3" duration="1000"/>
   </animation>
  </tile>
+ <tile id="11">
+  <properties>
+   <property name="depth" type="int" value="2"/>
+  </properties>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="20" height="18"/>
+  </objectgroup>
+ </tile>
  <tile id="15">
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0" width="20" height="20"/>
@@ -23,6 +31,14 @@
  <tile id="25">
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0" width="20" height="20"/>
+  </objectgroup>
+ </tile>
+ <tile id="26">
+  <properties>
+   <property name="depth" type="int" value="1"/>
+  </properties>
+  <objectgroup draworder="index" id="2">
+   <object id="3" x="0" y="4" width="20" height="11"/>
   </objectgroup>
  </tile>
  <tile id="29" type="Static"/>

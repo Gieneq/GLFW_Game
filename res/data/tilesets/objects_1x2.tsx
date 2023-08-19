@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.9" tiledversion="1.9.2" name="objects_1x2" tilewidth="20" tileheight="40" tilecount="105" columns="15">
+<tileset version="1.10" tiledversion="1.10.0" name="objects_1x2" tilewidth="20" tileheight="40" tilecount="105" columns="15">
  <image source="objects_1x2.png" width="300" height="300"/>
  <tile id="0">
   <objectgroup draworder="index" id="2">
@@ -70,5 +70,23 @@
    <frame tileid="32" duration="1000"/>
    <frame tileid="33" duration="1000"/>
   </animation>
+ </tile>
+ <tile id="34">
+  <properties>
+   <property name="stairs_max" type="int" value="12"/>
+   <property name="stairs_min" type="int" value="0"/>
+  </properties>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="20" height="40"/>
+  </objectgroup>
+ </tile>
+ <tile id="35">
+  <properties>
+   <property name="stairs_max" type="int" value="20"/>
+   <property name="stairs_min" type="int" value="12"/>
+  </properties>
+  <objectgroup draworder="index" id="3">
+   <object id="2" x="0" y="0" width="20" height="20"/>
+  </objectgroup>
  </tile>
 </tileset>

@@ -47,12 +47,7 @@
    <property name="depth" type="int" value="7"/>
   </properties>
   <objectgroup draworder="index" id="2">
-   <object id="1" x="0" y="4" width="20" height="15">
-    <properties>
-     <property name="depth" type="int" value="7"/>
-     <property name="stand" type="bool" value="true"/>
-    </properties>
-   </object>
+   <object id="1" x="0" y="4" width="20" height="15"/>
   </objectgroup>
  </tile>
  <tile id="10">
@@ -99,6 +94,7 @@
  <tile id="30">
   <properties>
    <property name="active" type="bool" value="true"/>
+   <property name="depth" type="int" value="2"/>
    <property name="light_color" type="color" value="#ffe6c896"/>
    <property name="light_strength" type="int" value="8"/>
    <property name="light_x" type="int" value="10"/>
@@ -108,7 +104,7 @@
    <property name="particles_y" type="int" value="18"/>
   </properties>
   <objectgroup draworder="index" id="2">
-   <object id="1" x="1" y="6" width="18" height="13"/>
+   <object id="2" x="0" y="4" width="20" height="16"/>
   </objectgroup>
   <animation>
    <frame tileid="30" duration="100"/>
@@ -120,6 +116,7 @@
  <tile id="34">
   <properties>
    <property name="active" type="bool" value="false"/>
+   <property name="depth" type="int" value="2"/>
    <property name="light_color" type="color" value="#ffe6c896"/>
    <property name="light_strength" type="int" value="0"/>
    <property name="light_x" type="int" value="10"/>
@@ -128,5 +125,8 @@
    <property name="particles_x" type="int" value="10"/>
    <property name="particles_y" type="int" value="18"/>
   </properties>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="4" width="20" height="16"/>
+  </objectgroup>
  </tile>
 </tileset>
