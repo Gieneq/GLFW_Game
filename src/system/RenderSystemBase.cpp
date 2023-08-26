@@ -86,6 +86,12 @@ void RenderSystemBase::renderTexturedRect4F(const Rect4F& worldRect, TextureData
     float v1 = static_cast<float>((v_idx + 0) * textureData->getTileHeight()) / static_cast<float>(textureData->getImageHeight());
     float v2 = static_cast<float>((v_idx + 1) * textureData->getTileHeight()) / static_cast<float>(textureData->getImageHeight());
 
+    /* Remove bleeding effect */
+    u1 += 0.5F / static_cast<float>(textureData->getImageWidth());
+    u2 -= 0.5F / static_cast<float>(textureData->getImageWidth());
+    v1 += 0.5F / static_cast<float>(textureData->getImageHeight());
+    v2 -= 0.5F / static_cast<float>(textureData->getImageHeight());
+
     glBegin(GL_QUADS);
     glTexCoord2f(u1, v1);
     glVertex2f(projRect.left(), projRect.bottom());

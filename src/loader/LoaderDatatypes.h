@@ -89,7 +89,7 @@ private:
     std::vector<int> animationFramesLIDs;
     std::vector<Cuboid6F> collisionCuboids;
     bool walkable{false};
-    int depthPx{20};
+    // int depthPx{20};
 
     friend class TilesetData;
     friend class Loader;
@@ -115,6 +115,10 @@ public:
 
     inline int getTileHeight() const {
         return tileHeight;
+    }
+
+    inline int getTilesDataCount() const {
+        return static_cast<int>(tileDatas.size());
     }
 
     float getTileRelativeWidthtScale() const;
@@ -193,6 +197,18 @@ public:
             os << tilesetData << std::endl;
         }
         return os;
+    }
+
+    inline int getTilesetsCount() const {
+        return static_cast<int>(tilesetDatas.size());
+    }
+
+    inline int getAllTileDatasCount() const {
+        int count = 0;
+        for(const auto& tilesetData : tilesetDatas) {
+            count += tilesetData.getTilesDataCount();
+        }
+        return count;
     }
 
 private:

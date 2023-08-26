@@ -157,7 +157,7 @@ void RenderSystem::renderCollisionBoxes(int elevationIndex,
         auto collisionCmp = *collisionCmpIt;
         const auto collisionCuboids = collisionCmp->getWorldSpaceCollisionCuboids();
         for (const auto& collCuboid : collisionCuboids) {
-            renderTranslucentFilledCuboid6F(collCuboid, 0.0F, 0.0F, 1.0F, 0.2F);
+            renderTranslucentFilledCuboid6F(collCuboid, 0.0F, 0.0F, 1.0F, 0.1F);
         }
     }
 }

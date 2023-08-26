@@ -5,10 +5,10 @@
     },
     "activeFile": "maps/testmap.tmx",
     "expandedProjectPaths": [
-        ".",
-        "entities",
+        "tilesets",
         "maps",
-        "tilesets"
+        ".",
+        "entities"
     ],
     "file.lastUsedOpenFilter": "Wszystkie pliki (*)",
     "fileStates": {
@@ -16,18 +16,34 @@
             "scaleInDock": 1,
             "scaleInEditor": 1
         },
-        "maps/testmap.tmx": {
-            "expandedGroupLayers": [
-                7,
-                3,
-                5,
-                2
-            ],
-            "scale": 0.33,
+        "maps/junkyworld.tmx": {
+            "scale": 1.5421666666666665,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 4190.909090909091,
-                "y": 946.969696969697
+                "x": 186.10180482005842,
+                "y": 200.04322922295472
+            }
+        },
+        "maps/testmap — kopia.tmx": {
+            "scale": 4,
+            "selectedLayer": 3,
+            "viewCenter": {
+                "x": 1849,
+                "y": 1859.625
+            }
+        },
+        "maps/testmap.tmx": {
+            "expandedGroupLayers": [
+                5,
+                3,
+                2,
+                7
+            ],
+            "scale": 3,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 1862.3333333333333,
+                "y": 2010.833333333333
             }
         },
         "tilesets/details.tsx": {
@@ -48,7 +64,7 @@
         },
         "tilesets/objects_2x2.tsx": {
             "scaleInDock": 1,
-            "scaleInEditor": 1.5
+            "scaleInEditor": 2
         },
         "tilesets/particles.tsx": {
             "scaleInDock": 1,
@@ -66,11 +82,15 @@
         "tilesets/details.tsx",
         "tilesets/floor.tsx",
         "tilesets/objects_1x2.tsx",
-        "tilesets/objects_2x2.tsx"
+        "tilesets/objects_2x2.tsx",
+        "maps/junkyworld.tmx",
+        "maps/testmap — kopia.tmx"
     ],
     "project": "LochPython.tiled-project",
     "property.type": "int",
     "recentFiles": [
+        "maps/testmap — kopia.tmx",
+        "maps/junkyworld.tmx",
         "tilesets/objects_2x2.tsx",
         "tilesets/objects_1x2.tsx",
         "tilesets/floor.tsx",

@@ -39,6 +39,9 @@ public:
     bool loadWorld(World& world);
     bool loadPlayer(World& world);
 
+    inline int getLoadedTilesetsCount() const { return mapData.getTilesetsCount(); }
+    inline int getLoadedTilesDataCount() const { return mapData.getAllTileDatasCount(); }
+
 private:
     /* Map Loading specific */
     bool loadMapDataFromTMXFile(World& world, const std::string& mapName);
@@ -51,6 +54,16 @@ private:
 
     bool getTilesDataFromTilesetNode(const pugi::xml_node& mapNode, TilesetData* tilesetData);
 
+    /* TileData parsers */
+    std::optional<int> getTileIdFromTileNode(const pugi::xml_node& tileNode);
+
+    std::optional<bool> retriveTileDataAnimationFromTileNode(const pugi::xml_node& tileNode, TileData* tileData);
+
+    std::optional<bool> retriveTileDataStairsFromTileNode(const pugi::xml_node& tileNode, TileData* tileData);
+
+    std::optional<bool> retriveTileDataCollisionFromTileNode(const pugi::xml_node& tileNode, TileData* tileData);
+
+    /* Other */
     bool buildWorldFromMapData(World& world);
 
     bool fillElevationWithEntities(World& world, Elevation* elevation, EntityType entityType, const std::vector<int> layerDataIndices);

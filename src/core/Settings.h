@@ -20,6 +20,7 @@ namespace Settings {
 
     struct Map {
         static constexpr int TILE_SIZE{20};
+        static constexpr int TILE_DEPTH{20};
         static constexpr int WIDTH{32};
         static constexpr int HEIGHT{16};
         static constexpr int ORIGIN_X{0};
@@ -32,8 +33,8 @@ namespace Settings {
     };
 
     struct Resources {
-        static constexpr char* ASSETS_PATH  = "../res/assets/";
-        static constexpr char* DATA_PATH  = "../res/data/";
+        static constexpr char* ASSETS_PATH  = "../../res/assets/";
+        static constexpr char* DATA_PATH  = "../../res/data/";
         static constexpr char* MAPS_DIR  = "maps/";
     };
 
@@ -67,6 +68,7 @@ namespace Settings {
     struct Systems {
         struct Collisions {
             static constexpr float MAX_WALKABLE_DEPTH{0.5F};
+            static constexpr int STAIRS_STEPS_COUNT{2};
         };
     };
 }

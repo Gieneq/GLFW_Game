@@ -12,10 +12,10 @@ protected:
     LoaderBase() = default;
     ~LoaderBase() = default;
 public:
-    static LoaderBase& getInstance() {
-        static LoaderBase loader;
-        return loader;
-    }
+    // static LoaderBase& getInstance() {
+    //     static LoaderBase loader;
+    //     return loader;
+    // }
     
     friend std::ostream& operator<<(std::ostream& os, const LoaderBase& loader) {
         os << "LoaderBase: " << loader.textureDatas.size() << " textures:" << std::endl;

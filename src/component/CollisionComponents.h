@@ -3,31 +3,9 @@
 #include "Component.h"
 #include "Maths.h"
 #include <vector>
+#include "CollisionResult.h"
 
-class CollisionResult {
-public:
-    CollisionResult(Entity* collidedEntity, const Cuboid6F& collidingCuboidElevationSpace) : collidedEntity{collidedEntity}, collidingCuboidElevationSpace{collidingCuboidElevationSpace} {}
-    operator bool() const {
-        return (collidedEntity != nullptr);
-    }
-
-    Entity* getCollidedEntity() const {
-        return collidedEntity;
-    }
-
-    const Cuboid6F& getCollidingCuboidElevationSpace() const {
-        return collidingCuboidElevationSpace;
-    }
-
-    static CollisionResult NONE() {
-        return CollisionResult{nullptr, {}};
-    }
-
-private:
-    Entity* collidedEntity{nullptr};
-    Cuboid6F collidingCuboidElevationSpace;
-};
-
+class CollisionDetectorComponent;
 class Loader;
 class CollisionComponent : public Component {
 public:
@@ -60,9 +38,9 @@ public:
     CollisionDetectorComponent(Entity* e, MovementComponent* movmnt, const Cuboid6F& bnd) : Component(e), movementCmp{movmnt}, boundingCuboid{bnd} {}
     virtual ~CollisionDetectorComponent() = default;
 
-    void onCollision(Entity* collidedEntity, const Cuboid6F& collidedCuboidElevationSpace) {};
+    void onCollision(const CollisionResult& result) {};
 
-    CollisionResult checkCollision(CollisionComponent& other) const;
+    CollisionResult checkCollision(CollisionComponent& other);
 
     MovementComponent* movementCmp{nullptr};
     Cuboid6F getElevationSpaceBoundingCuboid() const;

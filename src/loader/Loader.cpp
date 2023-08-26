@@ -363,132 +363,311 @@ std::optional<TilesetData*> Loader::loadTilesetDataFromTSXFile(int firstGid, std
     return tilesetData;
 }
 
-
+#define CAN_HAS_COLLISON 1
 bool Loader::getTilesDataFromTilesetNode(const pugi::xml_node& mapNode, TilesetData* tilesetData) {
 
     /* Iterate over tiles nodes */
     for(auto tileNode : mapNode.children("tile")) {
         /* Get tile attributes */
-        auto tileIdAttrib = tileNode.attribute("id");
-
-        /* Check if tile has required attibutes */
-        if(!tileIdAttrib) {
-            std::cerr << "Error loading tileset file: no tile id" << std::endl;
-            return false;
-        }
-
-        /* Get attibutes values */
-        int tileId = tileNode.attribute("id").as_int(-1);
-
-        /* Validate retrived values */
-        if((tileId < 0) && !tilesetData->validateLID(tileId)) {
+       
+        /* Get ID */
+        const auto tileIdOption = getTileIdFromTileNode(tileNode);
+        if(!tileIdOption.has_value()) {
             std::cerr << "Error loading tileset file: invalid tile id" << std::endl;
             return false;
         }
+        const int tileId = tileIdOption.value();
         
         auto tileData = tilesetData->appendTileData(tileId);
 
-        /* Get tile animation node */
-        auto animationNode = tileNode.child("animation");
-        if(animationNode) {
-            /* Iterate over animation frames */
-            for(auto frameNode : animationNode.children("frame")) {
-                /* Get frame attributes */
-                auto tileIdAttrib = frameNode.attribute("tileid");
-                auto durationAttrib = frameNode.attribute("duration");
-
-                /* Check if frame has required attibutes */
-                if(!tileIdAttrib || !durationAttrib) {
-                    std::cerr << "Error loading tileset file: no frame tileid or duration" << std::endl;
-                    return false;
-                }
-
-                /* Get attibutes values */
-                int tileId = frameNode.attribute("tileid").as_int(-1);
-                int duration = frameNode.attribute("duration").as_int(-1);
-
-                /* Validate retrived values */
-                if(((tileId < 0) && !tilesetData->validateLID(tileId)) || duration < 0) {
-                    std::cerr << "Error loading tileset file: invalid frame tileid or duration" << std::endl;
-                    return false;
-                }
-
-                /* Store in TilesetData */
-                tileData->animationInterval = duration; // all frames has the same duration
-                tileData->animationFramesLIDs.push_back(tileId);
+        /* Retrive and apply animation if any */
+        auto animationOption = retriveTileDataAnimationFromTileNode(tileNode, tileData);
+        if(animationOption.has_value()) {
+            if(animationOption.value() == false) {
+                std::cerr << "Error loading tileset file: invalid tile animation" << std::endl;
+                return false;
             }
         }
 
-        /* Get tile objectgroup node */
-        auto collisionsRectsNode = tileNode.child("objectgroup");
-        if(collisionsRectsNode) {
-            /* Iterate over collision rects */
-            for(auto collisionRectNode : collisionsRectsNode.children("object")) {
-                /* Get object attributes */
-                auto xAttrib = collisionRectNode.attribute("x");
-                auto yAttrib = collisionRectNode.attribute("y");
-                auto widthAttrib = collisionRectNode.attribute("width");
-                auto heightAttrib = collisionRectNode.attribute("height");
 
-                /* Check if object has required attibutes */
-                if(!xAttrib || !yAttrib || !widthAttrib || !heightAttrib) {
-                    std::cerr << "Error loading tileset file: no object x, y, width or height" << std::endl;
-                    return false;
-                }
-
-                /* Get attibutes values */
-                int x = xAttrib.as_int(-1);
-                int y = yAttrib.as_int(-1);
-                int width = widthAttrib.as_int(-1);
-                int height = heightAttrib.as_int(-1);
-
-                /* Validate retrived values */
-                if(x < 0 || y < 0 || width < 0 || height < 0) {
-                    std::cerr << "Error loading tileset file: invalid object x, y, width or height" << std::endl;
-                    return false;
-                }
-
-                /* Store in TilesetData */
-                auto collisionCuboid = Cuboid6F(
-                    static_cast<float>(x) / tileData->containingTilesetData->containingMapData->tileWidthBase,
-                    static_cast<float>(y) / tileData->containingTilesetData->containingMapData->tileHeightBase,
-                    0.0F,
-                    static_cast<float>(width) / tileData->containingTilesetData->containingMapData->tileWidthBase,
-                    static_cast<float>(height) / tileData->containingTilesetData->containingMapData->tileHeightBase,
-                    1.0F
-                );
-
-                tileData->collisionCuboids.push_back(collisionCuboid);
-            }
-
-            /* Find additional properties - depth */
-            auto propertiesNode = tileNode.child("properties");
-            if(propertiesNode) {
-                /* Has some properties */
-
-                /* Find property with arribute name depth */
-                auto propertyNode = propertiesNode.child("property");
-
-                if(propertyNode) {
-                    auto nameAttrib = propertyNode.attribute("name");
-                    auto valueAttrib = propertyNode.attribute("value");
-
-                    if(nameAttrib && valueAttrib) {
-                        std::string name = nameAttrib.as_string("");
-                        if(name == "depth") {
-                            tileData->walkable = true;
-                            int value = valueAttrib.as_int(-1);
-                            tileData->depthPx = value;
-                        }
-                    }
-                }    
+        /* Retrive stairs properties */
+        auto stairsOption = retriveTileDataStairsFromTileNode(tileNode, tileData);
+        if(stairsOption.has_value()) {
+            if(stairsOption.value() == false) {
+                std::cerr << "Error loading tileset file: invalid stairs property" << std::endl;
+                return false;
             }
         }
+
+        /* Stairs removes any collision options */
+#if CAN_HAS_COLLISON == 1
+        bool canHaseCollision = !stairsOption.has_value();
+#else
+        bool canHaseCollision = false;
+#endif
+        if(canHaseCollision) {
+            /* Retrive and apply collision if any */
+            auto collisionOption = retriveTileDataCollisionFromTileNode(tileNode, tileData);
+            if(collisionOption.has_value()) {
+                if(collisionOption.value() == false) {
+                    std::cerr << "Error loading tileset file: invalid tile collision" << std::endl;
+                    return false;
+                }
+            }
+        }
+
     }
 
     return true;
 }
 
+std::optional<int> Loader::getTileIdFromTileNode(const pugi::xml_node& tileNode) {
+    /* Get tile attributes */
+    auto tileIdAttrib = tileNode.attribute("id");
+
+    /* Check if tile has required attibutes */
+    if(!tileIdAttrib) {
+        std::cerr << "Error loading tileset file: no tile id" << std::endl;
+        return std::nullopt;
+    }
+
+    /* Get attibutes values */
+    int tileId = tileNode.attribute("id").as_int(-1);
+
+    /* Validate retrived values */
+    if(tileId < 0) {
+        std::cerr << "Error loading tileset file: invalid tile id" << std::endl;
+        return std::nullopt;
+    }
+
+    return tileId;
+}
+
+std::optional<bool> Loader::retriveTileDataAnimationFromTileNode(const pugi::xml_node& tileNode, TileData* tileData) {
+        /* Get tile animation node */
+        auto animationNode = tileNode.child("animation");
+
+        if(!animationNode) {
+            /* No animation - nothing to return */
+            return std::nullopt;
+        }
+
+        TilesetData* tilesetData = tileData->containingTilesetData;
+
+        /* Iterate over animation frames */
+        for(auto frameNode : animationNode.children("frame")) {
+            /* Get frame attributes */
+            auto tileIdAttrib = frameNode.attribute("tileid");
+            auto durationAttrib = frameNode.attribute("duration");
+
+            /* Check if frame has required attibutes */
+            if(!tileIdAttrib || !durationAttrib) {
+                std::cerr << "Error loading tileset file: no frame tileid or duration" << std::endl;
+                return std::make_optional(false);
+            }
+
+            /* Get attibutes values */
+            int tileId = frameNode.attribute("tileid").as_int(-1);
+            int duration = frameNode.attribute("duration").as_int(-1);
+
+            /* Validate retrived values */
+            if(((tileId < 0) && !tilesetData->validateLID(tileId)) || duration < 0) {
+                std::cerr << "Error loading tileset file: invalid frame tileid or duration" << std::endl;
+                return std::make_optional(false);
+            }
+
+            /* Store in TilesetData */
+            tileData->animationInterval = duration; // all frames has the same duration
+            tileData->animationFramesLIDs.push_back(tileId);
+        }
+    return std::make_optional(true);
+}
+
+
+std::optional<bool> Loader::retriveTileDataStairsFromTileNode(const pugi::xml_node& tileNode, TileData* tileData) {
+    auto propertiesNode = tileNode.child("properties");
+
+    if(!propertiesNode) {
+        /* No properties - nothing to return */
+        return std::nullopt;
+    }
+
+    /* 
+     * Stairs related properties: 
+     *  - stairs_min
+     *  - stairs_max
+     */
+
+    /* Get stairs properties */
+    int stairsMin = -1;
+    int stairsMax = -1;
+    std::string stairsHeading = "up"; //todo
+
+    for(auto propertyNode : propertiesNode.children("property")) {
+        auto propertyName = propertyNode.attribute("name");
+        auto propertyValue = propertyNode.attribute("value");
+        //todo add heaing
+
+        if(!propertyName || !propertyValue) {
+            std::cerr << "Error loading tileset file: no property name or value" << std::endl;
+            return std::make_optional(false);
+        }
+
+        std::string name = propertyName.as_string("");
+        if(name == "stairs_min") {
+            stairsMin = propertyValue.as_int(-1);
+        }
+        else if(name == "stairs_max") {
+            stairsMax = propertyValue.as_int(-1);
+        }
+
+        //todo add heaing parsing
+    }
+
+    /* Check if has any stairs related properties */
+    if(stairsMin < 0 || stairsMax < 0 || stairsHeading.empty()) {
+        return std::nullopt;
+    }
+
+    /* Yup - it is stairs tile */
+
+    /* Ensure stairsMax stairsMin */
+    if(stairsMax < stairsMin) {
+        std::swap(stairsMax, stairsMin);
+    }
+
+    /* Validate heading : to lowercase, compare to up, down, left, right */
+    std::string stairsHeadingLower = stairsHeading;
+    std::transform(stairsHeadingLower.begin(), stairsHeadingLower.end(), stairsHeadingLower.begin(), ::tolower);
+    if(stairsHeadingLower != "up" && stairsHeadingLower != "down" && stairsHeadingLower != "left" && stairsHeadingLower != "right") {
+        std::cerr << "Error loading tileset file: invalid stairs heading" << std::endl;
+        return std::make_optional(false);
+    }
+
+
+
+    /**
+     * Store in TilesetData
+     * With known sumber of steps generate collision cuboid with
+     * height changing from min to max.
+     */
+
+    const auto stepsCount = Settings::Systems::Collisions::STAIRS_STEPS_COUNT;
+    const auto heightDifference = static_cast<float>(stairsMax - stairsMin) / 20.0F;
+    const auto startingHeight = static_cast<float>(stairsMin) / 20.0F;
+    const auto stepDiff = heightDifference / static_cast<float>(stepsCount);
+    // const auto stepHeight = 7.0F / 20.0F;
+    const auto stairsWidth = 1.0F;
+    const auto stairsHeight = 1.8F / stepsCount;
+
+    for(int i = 0; i < stepsCount; ++i) {
+        const float proportion = static_cast<float>(i) / static_cast<float>(stepsCount);
+        const float invProportion = 1.0F - proportion;
+
+        auto collisionCuboid = Cuboid6F(
+            0.0F,
+            0.0F + i * stairsHeight,
+            0.0F,
+            stairsWidth,
+            stairsHeight,
+            startingHeight + (stepsCount-i) * stepDiff
+        );
+
+        // #error
+        //partialy working
+        // todo:
+        /**
+         * 1. depthPx seems not usable
+         * 2. find topmost collision if multiple collision boxes found
+         * but! pas only one to collisionTDetectorComponent
+        */
+    //    #error
+
+        tileData->collisionCuboids.push_back(collisionCuboid);
+        tileData->walkable = true;
+        // tileData->depthPx = 7;
+    }
+
+    return std::make_optional(true);
+}
+
+std::optional<bool> Loader::retriveTileDataCollisionFromTileNode(const pugi::xml_node& tileNode, TileData* tileData) {
+    /* Get tile objectgroup node */
+    auto collisionsRectsNode = tileNode.child("objectgroup");
+    if(!collisionsRectsNode) {
+        /* No collision rects - nothing to return */
+        return std::nullopt;
+    }
+    
+    /* Iterate over collision rects */
+    for(auto collisionRectNode : collisionsRectsNode.children("object")) {
+        /* Get object attributes */
+        auto xAttrib = collisionRectNode.attribute("x");
+        auto yAttrib = collisionRectNode.attribute("y");
+        auto widthAttrib = collisionRectNode.attribute("width");
+        auto heightAttrib = collisionRectNode.attribute("height");
+
+        /* Check if object has required attibutes */
+        if(!xAttrib || !yAttrib || !widthAttrib || !heightAttrib) {
+            std::cerr << "Error loading tileset file: no object x, y, width or height" << std::endl;
+            return std::make_optional(false);
+        }
+
+        /* Get attibutes values */
+        int x = xAttrib.as_int(-1);
+        int y = yAttrib.as_int(-1);
+        int width = widthAttrib.as_int(-1);
+        int height = heightAttrib.as_int(-1);
+
+        /* Validate retrived values */
+        if(x < 0 || y < 0 || width < 0 || height < 0) {
+            std::cerr << "Error loading tileset file: invalid object x, y, width or height" << std::endl;
+            return std::make_optional(false);
+        }
+
+        /* Store in TilesetData */
+        auto collisionCuboid = Cuboid6F(
+            static_cast<float>(x) / tileData->containingTilesetData->containingMapData->tileWidthBase,
+            static_cast<float>(y) / tileData->containingTilesetData->containingMapData->tileHeightBase,
+            0.0F,
+            static_cast<float>(width) / tileData->containingTilesetData->containingMapData->tileWidthBase,
+            static_cast<float>(height) / tileData->containingTilesetData->containingMapData->tileHeightBase,
+            1.0F //will be modified by optional depth property
+        );
+
+        tileData->collisionCuboids.push_back(collisionCuboid);
+    }
+
+    /* Find additional properties - depth */
+    auto propertiesNode = tileNode.child("properties");
+    if(propertiesNode) {
+        /* Has some properties */
+
+        /* Find property with arribute name depth */
+        auto propertyNode = propertiesNode.child("property");
+
+        if(propertyNode) {
+            auto nameAttrib = propertyNode.attribute("name");
+            auto valueAttrib = propertyNode.attribute("value");
+
+            if(nameAttrib && valueAttrib) {
+                std::string name = nameAttrib.as_string("");
+                if(name == "depth") {
+                    tileData->walkable = true;
+                    int value = valueAttrib.as_int(-1);
+                    // tileData->depthPx = value;
+
+                    /* Apply to all collision cuboids depths */
+                    for(auto& collisionCuboid : tileData->collisionCuboids) {
+                        collisionCuboid.size.d = static_cast<float>(value) / static_cast<float>(Settings::Map::TILE_DEPTH);
+                    }
+                }
+            }
+        }    
+    }
+
+    return std::make_optional(true);
+}
 
 bool Loader::buildWorldFromMapData(World& world) {
     /* Get absolute path to the map */
@@ -693,11 +872,10 @@ bool Loader::fillElevationWithEntities(World& world, Elevation* elevation, Entit
 
             for(auto collisionCuboidIt = tileData->collisionCuboids.begin(); collisionCuboidIt != tileData->collisionCuboids.end(); ++collisionCuboidIt) {
                 auto collisionCuboid = *collisionCuboidIt;
-                collisionCuboid.size.d = static_cast<float>(tileData->depthPx) / static_cast<float>(mapData.getBaseTileHeight());
+                //hacky
+                // collisionCuboid.size.d = static_cast<float>(tileData->depthPx) / static_cast<float>(mapData.getBaseTileHeight());
                 collisionCmp->appendCollisionCuboid(collisionCuboid);
             }
-
-
         }
 
         /* Append new tile to world */

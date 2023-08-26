@@ -79,6 +79,8 @@ bool GameBase::onKeyReleased(int key) {
         std::cout << "|  - components movement: " << playersElevation->getMovementComponentsCount() << std::endl;
         std::cout << "|  - components collision: " << playersElevation->getCollisionComponentsCount() << std::endl;
         std::cout << "| WorldClipRect: " << render_system.getRenderBoxWorldSpace() << std::endl;
+        std::cout << "| Loaded tilesets count: " << Loader::getLoader().getLoadedTilesetsCount() << std::endl;
+        std::cout << "| Loaded tile datas count: " << Loader::getLoader().getLoadedTilesDataCount() << std::endl;
         
         std::cout << "| Elevations data: " << std::endl;
         for(auto elevation : world) {
@@ -180,8 +182,8 @@ void GameBase::render() {
         const auto playerBoundingWorldSpace = world.player.collisionDetectorComponent->getWorldSpaceBoundingCuboid();
         render_system.renderTranslucentFilledCuboid6F(playerBoundingWorldSpace, 1.0F, 0.0F, 0.0F, 0.3F);
 
-        for(auto collisionCuboidWorldSpaceIt = collisionsSystem.getCollidingCuboidsWorldSpaceBegin(); collisionCuboidWorldSpaceIt != collisionsSystem.getCollidingCuboidsWorldSpaceEnd(); ++collisionCuboidWorldSpaceIt) {
-            const auto& collisionCuboidWorldSpace = *collisionCuboidWorldSpaceIt;
+        const auto collidedCuboidsWorldSpace = collisionsSystem.getCollisionResultsCuboidsWorldSpace();
+        for(const auto& collisionCuboidWorldSpace :  collidedCuboidsWorldSpace) {
             render_system.renderTranslucentFilledCuboid6F(collisionCuboidWorldSpace, 0.0F, 1.0F, 1.0F, 0.5F);
         }
     }

@@ -26,21 +26,26 @@ std::vector<Cuboid6F> CollisionComponent::getWorldSpaceCollisionCuboids() const 
 
 /* CollisionDetectorComponent */
 
-CollisionResult CollisionDetectorComponent::checkCollision(CollisionComponent& other) const {
+CollisionResult CollisionDetectorComponent::checkCollision(CollisionComponent& other) {
     /* Filter out check with self */
     if (other.getParentEntity()->getId() == parent->getId()) {
         return CollisionResult::NONE();
     }
 
+    auto result = CollisionResult(this, &other);
+
     const auto otherCollisionElevationSpaceCuboids = other.getElevationSpaceCollisionCuboids();
     const auto thisBoundingElevationSpaceCuboids = getElevationSpaceBoundingCuboid();
+
     for (const auto& otherCuboidElevationSpace : otherCollisionElevationSpaceCuboids) {
         if (thisBoundingElevationSpaceCuboids.checkIntersection(otherCuboidElevationSpace)) {
-            return CollisionResult{other.getParentEntity(), otherCuboidElevationSpace};
+            // return CollisionResult{this, &other, other.getParentEntity(), otherCuboidElevationSpace};
+            // #error
+            result.addCollidedCuboid(otherCuboidElevationSpace);
         }
     }
     
-    return CollisionResult::NONE();
+    return result;
 }
 
 Cuboid6F CollisionDetectorComponent::getElevationSpaceBoundingCuboid() const {
