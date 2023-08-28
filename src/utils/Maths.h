@@ -171,9 +171,25 @@ struct Rect4F {
         topLeft.y = other.bottom();
     }
 
+    inline bool hasPointInside(const Vect2F& point) const {
+        return point.x >= left() && point.x <= right() && point.y >= top() && point.y <= bottom();
+    }
+
     inline bool checkIntersection(const Rect4F& other) const {
         /* Keep in mind direction of X and Y */
         return !(left() >= other.right() || right() <= other.left() || top() >= other.bottom() || bottom() <= other.top());
+    }
+
+    inline Vect2F topRight() const {
+        return Vect2F{right(), top()};
+    }
+
+    inline Vect2F bottomLeft() const {
+        return Vect2F{left(), bottom()};
+    }
+
+    inline Vect2F bottomRight() const {
+        return Vect2F{right(), bottom()};
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Rect4F& rect) {

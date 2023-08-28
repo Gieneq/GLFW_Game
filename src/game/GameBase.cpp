@@ -154,8 +154,10 @@ void GameBase::update(float dt) {
      *   - clearing all every loop is not the best option
     */
         
-    collisionsSystem.update(containingFloor->collisionComponentsRegisterBegin(), containingFloor->collisionComponentsRegisterEnd(), &world.player, dt);
+    // collisionsSystem.update(containingFloor->collisionComponentsRegisterBegin(), containingFloor->collisionComponentsRegisterEnd(), &world.player, dt);
     
+    collisionsSystem.processDetector(&world.player);
+
     camera.update(dt);
 }
 
@@ -182,9 +184,9 @@ void GameBase::render() {
         const auto playerBoundingWorldSpace = world.player.collisionDetectorComponent->getWorldSpaceBoundingCuboid();
         render_system.renderTranslucentFilledCuboid6F(playerBoundingWorldSpace, 1.0F, 0.0F, 0.0F, 0.3F);
 
-        const auto collidedCuboidsWorldSpace = collisionsSystem.getCollisionResultsCuboidsWorldSpace();
-        for(const auto& collisionCuboidWorldSpace :  collidedCuboidsWorldSpace) {
-            render_system.renderTranslucentFilledCuboid6F(collisionCuboidWorldSpace, 0.0F, 1.0F, 1.0F, 0.5F);
+        const auto debugCuboidsWorldSpace = collisionsSystem.getDebugResultsCuboidsWorldSpace();
+        for(const auto& debugCuboidWorldSpace :  debugCuboidsWorldSpace) {
+            render_system.renderTranslucentFilledCuboid6F(debugCuboidWorldSpace, 0.0F, 1.0F, 1.0F, 0.5F);
         }
     }
 

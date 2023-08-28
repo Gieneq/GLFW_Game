@@ -4,6 +4,48 @@
 #include "MovementComponent.h"
 #include <algorithm>
 
+/* Tiles Pair/Quad */
+
+TilesPair TilesQuad::getFrontTilesRelativeToDirection(Vect2F direction) const {
+    if(direction.x > 0) {
+        return TilesPair(topRightGlobal, bottomRightGlobal);
+    } 
+    else if(direction.x < 0) {
+        return TilesPair(bottomLeftGlobal, topLeftGlobal);
+    } 
+    else if(direction.y < 0) {
+        return TilesPair(topLeftGlobal, topRightGlobal);
+    } 
+    else if(direction.y > 0) {
+        return TilesPair(bottomRightGlobal, bottomLeftGlobal);
+    }
+    /* No direction same as direction (0, 1)*/
+    return TilesPair(bottomRightGlobal, bottomLeftGlobal);
+}
+
+Rect4F TilesPair::getBoundingRect() const {
+    if(!hasAny()) {
+        return Rect4F{0,0,0,0};
+    }
+
+    Entity* first = left != nullptr ? left : right;
+    /* First is for sure not null */
+    
+    Entity* second = left != nullptr ? right : left;
+    if(!second) {
+        second = first;
+    }
+    /* If second was null, now they are the same for easier calc */
+
+    float leftValue = std::min(first->getCuboidElevationSpace().left(), second->getCuboidElevationSpace().left());
+    float rightValue = std::max(first->getCuboidElevationSpace().right(), second->getCuboidElevationSpace().right());
+    float topValue = std::min(first->getCuboidElevationSpace().top(), second->getCuboidElevationSpace().top());
+    float bottomValue = std::max(first->getCuboidElevationSpace().bottom(), second->getCuboidElevationSpace().bottom());
+
+    return Rect4F{leftValue, topValue, rightValue - leftValue, bottomValue - topValue};
+}
+
+
 /* Elevation class */
 
 Cuboid6F Elevation::elevationToWorldSpace(const Cuboid6F& elevationSpaceCuboid) const {
@@ -181,6 +223,27 @@ bool Elevation::deleteEntityIfExists(Entity* entity) {
 }
 
 
+/* Other */
+
+Entity* Elevation::getFloorEntityByXY(const Vect2F& entityPosition) {
+    for(auto entity : floorEntities) {
+        if(entity->getCuboidElevationSpace().getFlatten().hasPointInside(entityPosition)) {
+            return entity;
+        }
+    }
+    return nullptr;
+}
+
+TilesQuad Elevation::getFloorNearbyTilesQuad(const Rect4F& entityRect) {
+    TilesQuad tilesQuad{
+        getFloorEntityByXY(entityRect.topLeft),
+        getFloorEntityByXY(entityRect.topRight()),
+        getFloorEntityByXY(entityRect.bottomLeft()),
+        getFloorEntityByXY(entityRect.bottomRight())
+    };
+
+    return tilesQuad;
+}
 
 
 
