@@ -18,10 +18,15 @@ public:
         return direction;
     }
 
+    inline const Vect3F& getHeading() const {
+        return heading;
+    }
+
     float speed{1.0F};
 
 private:
     Vect3F direction{0.0F, 0.0F, 0.0F};
+    Vect3F heading{0.0F, 1.0F, 0.0F};
     Vect3F getTranslation(float dt) const;
 
     friend class CollisionDetectorComponent;

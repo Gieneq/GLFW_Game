@@ -285,8 +285,21 @@ std::vector<Entity*> Elevation::getAnyCollidingEntities(const Rect4F& rectElevat
 
     /* Combine results */
     std::vector<Entity*> result;
-    std::copy(firstVertexCollidingEntities.begin(), firstVertexCollidingEntities.end(), std::back_inserter(result));
-    std::copy(secondVertexCollidingEntities.begin(), secondVertexCollidingEntities.end(), std::back_inserter(result));
+    // std::copy(firstVertexCollidingEntities.begin(), firstVertexCollidingEntities.end(), std::back_inserter(result));
+    // std::copy(secondVertexCollidingEntities.begin(), secondVertexCollidingEntities.end(), std::back_inserter(result));
+
+    /* Pass only unique */
+    for(Entity* e : firstVertexCollidingEntities) {
+        if(std::find(result.begin(), result.end(), e) == result.end()) {
+            result.push_back(e);
+        }
+    }
+
+    for(Entity* e : secondVertexCollidingEntities) {
+        if(std::find(result.begin(), result.end(), e) == result.end()) {
+            result.push_back(e);
+        }
+    }
 
     return result;
 }

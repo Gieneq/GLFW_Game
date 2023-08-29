@@ -8,13 +8,14 @@ void MovementComponent::setDirection(float x, float y, float z) {
     /* If nonzero normalize */
     if(direction.x != 0.0F || direction.y != 0.0F || direction.z != 0.0F) {
         direction.normalize();
+
+        /* Save nonzero direction */
+        heading = direction;
     }
 }
 
 void MovementComponent::stop() {
-    direction.x = 0.0F;
-    direction.y = 0.0F;
-    direction.z = 0.0F;
+    setDirectionUnsafe(0.0F, 0.0F, 0.0F);
 }
 
 void MovementComponent::setDirectionUnsafe(float x, float y, float z) {

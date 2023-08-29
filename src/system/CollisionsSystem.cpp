@@ -64,13 +64,46 @@ void CollisionsSystem::processDetector(Entity* detectorEntity) {
          * If there is no lower elevation or no obstacles, or
          * not walkable obstacles - align to edge.
         */
-        if(true) {
+  
+  
+        /* Can eject out of elevation boundary only if has 2 missing tiles */
+        bool shouldAlign = standingOnTilesQuad.getFrontTilesRelativeToDirection(movementCmp->getHeading().getXY()).hasAny();
+        if(!shouldAlign) {
+            auto layerIndex = detectorEntity->getContainingElevationOrThrow()->getIndex();   
+            try {
+                auto lowerElevation = detectorEntity->getContainingElevationOrThrow()->getContainingWorld()[layerIndex - 1];
+                auto lowerElevationFoundEntities = lowerElevation.getAnyCollidingEntities(detectorCmp->getElevationSpaceBoundingCuboid().getFlatten(), 
+                    movementCmp->getHeading().getXY());
+                // std::cout << " lowerElevationFoundEntities: " << lowerElevationFoundEntities.size() << std::endl;
+
+                std::vector<CollisionComponent*> lowerElevationFoundCollisionCmps;
+                for(auto entity : lowerElevationFoundEntities) {
+                    auto collisionCmp = entity->getComponent<CollisionComponent>();
+                    if(collisionCmp) {
+                        lowerElevationFoundCollisionCmps.push_back(collisionCmp);
+                        debugEntites.push_back(entity);
+                    }
+                }
+
+                std::cout << " lowerElevationFoundCollisionCmps: " << lowerElevationFoundCollisionCmps.size() << std::endl;
+                //todo - selects too much in     getAnyCollidingEntities
+                //todo - use them
+
+
+            } catch(const std::exception&) {
+                /* No lower elevation */
+                std::cout << "Seems there is no lower level" << std::endl;
+                shouldAlign = true;
+            }
+        }
+
+        if(shouldAlign) {
             /* Align to edge */
             alignEntityCuboidToTilesQuad(detectorEntity, &standingOnTilesQuad, movementCmp->getDirection().getXY());
         }
         else {
-            /* Proceed */
-            //todo
+            /* Eject out of elevation */
+            // std::cout << "Eject out of elevation. Todo soon..." << std::endl;        
         }
     }
 
