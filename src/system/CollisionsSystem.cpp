@@ -128,22 +128,24 @@ void CollisionsSystem::processDetector(Entity* detectorEntity) {
 void CollisionsSystem::onCollisionAlignToEdge(Cuboid6F& detectorElevationSpace, const Cuboid6F boundignBoxElevationSpace, const Cuboid6F& obstacleElevationSpace, Vect2F direction) {
     /* Align in X */
     if(direction.x > 0.0F) {
-        detectorElevationSpace.alignToLeftOf(obstacleElevationSpace);
+        detectorElevationSpace.x() = obstacleElevationSpace.x() - boundignBoxElevationSpace.width() 
+            - (boundignBoxElevationSpace.x() - detectorElevationSpace.x());
     }
 
     else if(direction.x < 0.0F) {
-        detectorElevationSpace.alignToRightOf(obstacleElevationSpace);
+        detectorElevationSpace.x() = obstacleElevationSpace.x() + obstacleElevationSpace.width() 
+            - (boundignBoxElevationSpace.x() - detectorElevationSpace.x());
     }
 
     /* Align in Y */
     if(direction.y > 0.0F) {
-        detectorElevationSpace.alignToTopOf(obstacleElevationSpace);
-        detectorElevationSpace.y() -= boundignBoxElevationSpace.y() - detectorElevationSpace.y();
+        detectorElevationSpace.y() = obstacleElevationSpace.y() - boundignBoxElevationSpace.height() 
+            - (boundignBoxElevationSpace.y() - detectorElevationSpace.y());
     }
 
     else if(direction.y < 0.0F) {
-        detectorElevationSpace.alignToBottomOf(obstacleElevationSpace);
-        // detectorElevationSpace.y() += boundignBoxElevationSpace.y() - detectorElevationSpace.y();
+        detectorElevationSpace.y() = obstacleElevationSpace.y() + obstacleElevationSpace.height() 
+            - (boundignBoxElevationSpace.y() - detectorElevationSpace.y());
     }
 }
 

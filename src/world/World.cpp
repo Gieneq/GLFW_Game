@@ -245,7 +245,51 @@ TilesQuad Elevation::getFloorNearbyTilesQuad(const Rect4F& entityRect) {
     return tilesQuad;
 }
 
+std::vector<Entity*> Elevation::getAnyCollidingEntities(Vect2F pointElevationSpace) {
+    std::vector<Entity*> result;
 
+    std::copy_if(allEntitiesRegister.begin(), allEntitiesRegister.end(), std::back_inserter(result), 
+        [pointElevationSpace](Entity* e) {
+            return e->getCuboidElevationSpace().getFlatten().hasPointInside(pointElevationSpace);
+        });
+
+    return result;
+}
+
+std::vector<Entity*> Elevation::getAnyCollidingEntities(const Rect4F& rectElevationSpace, Vect2F direction) {
+    /* Find 2 vertices pointer by direction */
+    Vect2F firstVertex;
+    Vect2F secondVertex;
+    if(direction.x > 0) {
+        firstVertex = rectElevationSpace.topRight();
+        secondVertex = rectElevationSpace.bottomRight();
+    } 
+    else if(direction.x < 0) {
+        firstVertex = rectElevationSpace.bottomLeft();
+        secondVertex = rectElevationSpace.topLeft;
+    } 
+    else if(direction.y < 0) {
+        firstVertex = rectElevationSpace.topLeft;
+        secondVertex = rectElevationSpace.topRight();
+    } 
+    else if(direction.y > 0) {
+        firstVertex = rectElevationSpace.bottomRight();
+        secondVertex = rectElevationSpace.bottomLeft();
+    }
+
+    /* Find entities colliding with first vertex */
+    auto firstVertexCollidingEntities = getAnyCollidingEntities(firstVertex);
+
+    /* Find entities colliding with second vertex */
+    auto secondVertexCollidingEntities = getAnyCollidingEntities(secondVertex);
+
+    /* Combine results */
+    std::vector<Entity*> result;
+    std::copy(firstVertexCollidingEntities.begin(), firstVertexCollidingEntities.end(), std::back_inserter(result));
+    std::copy(secondVertexCollidingEntities.begin(), secondVertexCollidingEntities.end(), std::back_inserter(result));
+
+    return result;
+}
 
 
 
@@ -393,5 +437,14 @@ void World::deleteEntityOrThrow(Entity* e) {
 
     if(!deletionResult) {
         throw std::invalid_argument("World::deleteEntityOrThrow: Entity not found in its elevation");
+    }
+}
+
+
+std::vector<Entity*> World::getAnyCollidingEntities(Vect2F pointElevationSpace, int elevationIndex) {
+    try {
+        return (*this)[elevationIndex].getAnyCollidingEntities(pointElevationSpace);
+    } catch(std::out_of_range&) {
+        return std::vector<Entity*>();
     }
 }
