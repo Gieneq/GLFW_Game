@@ -5,6 +5,7 @@
 #include "World.h"
 #include "Settings.h"
 #include <algorithm>
+#include <array>
 
 void CollisionsSystem::init() {
 
@@ -65,30 +66,93 @@ void CollisionsSystem::processDetector(Entity* detectorEntity) {
          * not walkable obstacles - align to edge.
         */
   
-  
         /* Can eject out of elevation boundary only if has 2 missing tiles */
         bool shouldAlign = standingOnTilesQuad.getFrontTilesRelativeToDirection(movementCmp->getHeading().getXY()).hasAny();
         if(!shouldAlign) {
+
+            /* Yes can eject - both tiles are missing */
+            /* Lower elevation required */
             auto layerIndex = detectorEntity->getContainingElevationOrThrow()->getIndex();   
             try {
                 auto lowerElevation = detectorEntity->getContainingElevationOrThrow()->getContainingWorld()[layerIndex - 1];
                 auto lowerElevationFoundEntities = lowerElevation.getAnyCollidingEntities(detectorCmp->getElevationSpaceBoundingCuboid().getFlatten(), 
                     movementCmp->getHeading().getXY());
-                // std::cout << " lowerElevationFoundEntities: " << lowerElevationFoundEntities.size() << std::endl;
-
+                
+                /* Has some lower elevation with some entities */
+                /* Find entities with collisoin component, and ability to be stand on */
                 std::vector<CollisionComponent*> lowerElevationFoundCollisionCmps;
                 for(auto entity : lowerElevationFoundEntities) {
                     auto collisionCmp = entity->getComponent<CollisionComponent>();
-                    if(collisionCmp) {
+                    if(collisionCmp && collisionCmp->canWalkOn()) {
                         lowerElevationFoundCollisionCmps.push_back(collisionCmp);
-                        debugEntites.push_back(entity);
                     }
                 }
 
-                std::cout << " lowerElevationFoundCollisionCmps: " << lowerElevationFoundCollisionCmps.size() << std::endl;
-                //todo - selects too much in     getAnyCollidingEntities
-                //todo - use them
+                /* If there is no entities immediately align */
+                if(lowerElevationFoundCollisionCmps.size() == 0) {
+                    shouldAlign = true;
+                } 
+                else {
+                    /* Find truely colliding entities */
+                    std::vector<CollisionComponent*> lowerElevationCollidingCmps;
+                    const auto detectorBoundingCast = detectorCmp->getElevationSpaceBoundingCuboid().getFlatten();
+                    for(auto collisionCmp : lowerElevationFoundCollisionCmps) {
+                        const auto collisionCuboidsWS = collisionCmp->getWorldSpaceCollisionCuboids();
+                        for(const auto& collisionCuboid : collisionCuboidsWS) {
+                            if(collisionCuboid.getFlatten().checkIntersection(detectorBoundingCast)) {
+                                /* Found truely intersecting obstacle, but...*/
+                                /* it needs to be high enough to be stand on */
+                                /* High enoug => difference not too big */
+                                auto heightDiff = std::abs(detectorCmp->getWorldSpaceBoundingCuboid().back() - collisionCuboid.front());
+                                if(heightDiff > Settings::Systems::Collisions::MAX_WALKABLE_DEPTH) {
+                                    /* It is not high enough to be stand on */
+                                    continue;
+                                }
+                                lowerElevationCollidingCmps.push_back(collisionCmp);
+                                debugEntites.push_back(collisionCmp->getParentEntity());
+                                break;
+                            }
+                        }
+                    }
 
+                    if(lowerElevationCollidingCmps.size() == 0) {
+                        shouldAlign = true;
+                    }
+                    else {
+                        /* There is truely valid entity to be stand on, but...*/
+                        /**
+                         * Make sure both corners of detector bounding cuboid
+                         * or actually cast to rect will interset with
+                         * found obstacles. In most cases 2 objects will be neede.
+                        */
+
+                        /* Find 2 points of detectors bounding rect */
+                        auto points = detectorBoundingCast.getDirectedPoints(movementCmp->getHeading().getXY());
+
+                        for(const auto& point : points) {
+                            bool pointIsInside = false;
+                            for(auto collisionCmp : lowerElevationFoundCollisionCmps) {
+                                const auto collisionCuboidsWS = collisionCmp->getWorldSpaceCollisionCuboids();
+                                for(const auto& collisionCuboid : collisionCuboidsWS) {
+                                    if(collisionCuboid.getFlatten().hasPointInside(point)) {
+                                        pointIsInside = true;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if(!pointIsInside) {
+                                /* Meh, it was close! Point is not inside */
+                                shouldAlign = true;
+                                break;
+                            }
+                        }
+
+                        if(!shouldAlign) {
+                            std::cout << "Can freely eject until it drop to lower level" << std::endl;
+                        }
+                    }
+                }
 
             } catch(const std::exception&) {
                 /* No lower elevation */
@@ -105,6 +169,10 @@ void CollisionsSystem::processDetector(Entity* detectorEntity) {
             /* Eject out of elevation */
             // std::cout << "Eject out of elevation. Todo soon..." << std::endl;        
         }
+    }
+    else {
+        /* No missing tiles but check if some of them are not walkable like water. */
+        //todo
     }
 
     /**

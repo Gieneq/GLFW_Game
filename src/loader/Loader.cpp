@@ -73,8 +73,9 @@ bool Loader::loadPlayer(World& world) {
     }
 
     /* Set starting position */
-    player->getCuboidElevationSpace().topLeft.x = 90.6339F; //13.5485F;
-    player->getCuboidElevationSpace().topLeft.y = 98.3096F; //18.5593F;
+    player->getCuboidElevationSpace().topLeft.x = 82.4601F; //90.6339F; //13.5485F;
+    player->getCuboidElevationSpace().topLeft.y = 85.2446F; //98.3096F; //18.5593F;
+    const int playerElevationIndex = 1;
     player->getCuboidElevationSpace().topLeft.z = 0.0F; // can differ is standing on stair or small elevation
 
     /* Try adding texture to player */
@@ -113,6 +114,8 @@ bool Loader::loadPlayer(World& world) {
         std::cerr << "Error adding collision detector component to player" << std::endl;
         return false;
     }
+
+    world.moveDynamicEntityToElevationOrThrow(player, playerElevationIndex);
 
     return true;
 }

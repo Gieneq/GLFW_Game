@@ -65,6 +65,23 @@ Rect4F Rect4F::getScaled(const float xScale, const float yScale) const {
     };
 }
 
+std::array<Vect2F, 2> Rect4F::getDirectedPoints(const Vect2F& direction) const {
+
+    if(direction.x > 0) {
+        return std::array<Vect2F, 2>{topRight(), bottomRight()};
+    }
+    else if(direction.x < 0) {
+        return std::array<Vect2F, 2>{topLeft, bottomLeft()};
+    }
+    else if(direction.y > 0) {
+        return std::array<Vect2F, 2>{bottomRight(), bottomLeft()};
+    }
+    else if(direction.y < 0) {
+        return std::array<Vect2F, 2>{topLeft, topRight()};
+    }
+
+    throw std::runtime_error("Direction is zero");
+}
 
 /* Rect 5F */
     

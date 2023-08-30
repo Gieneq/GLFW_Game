@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <array>
 
 /********************************************
  *     Naming convention for Cuboid6F       *
@@ -134,6 +135,8 @@ struct Rect4F {
     inline float bottom() const {
         return topLeft.y + size.h;
     }
+
+    std::array<Vect2F, 2> getDirectedPoints(const Vect2F& direction) const;
 
     Rect4F getTranslated(Vect2F translation) const;
 
