@@ -36,7 +36,7 @@ Rect4F RenderSystemBase::getProjectionRect(const Rect4F& worldRect) const {
     // auto projRect = Rect4F{eyeRect.top_left.x, -eyeRect.top_left.y - eyeRect.size.h, eyeRect.size.w, eyeRect.size.h}
     //.get_scaled(Size2F{1.0F/aspect_ratio, 1.0F});
     auto eyeRect = worldRect.getTranslated(camera->position.getXY().getNegated()).getScaled(camera->zoom.w, camera->zoom.h);
-    auto projRect = Rect4F{eyeRect.topLeft.x, -eyeRect.topLeft.y - eyeRect.size.h, eyeRect.size.w, eyeRect.size.h}
+    auto projRect = Rect4F{eyeRect.x(), -eyeRect.y() - eyeRect.h(), eyeRect.w(), eyeRect.h()}
         .getScaled(1.0F/aspect_ratio, 1.0F);
     return projRect;
 }
@@ -182,10 +182,6 @@ void RenderSystemBase::renderTranslucentFilledRect4F(const Rect4F& worldRect, fl
     glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void RenderSystemBase::renderFilledCuboid5F(const Cuboid5F& worldCuboid, float r, float g, float b) {
-    renderFilledCuboid6F(Cuboid6F(worldCuboid), r, g, b);
-}
-
 void RenderSystemBase::renderFilledCuboid6F(const Cuboid6F& worldCuboid, float r, float g, float b) {
     /* Form 2 sides: 
     front - flatten cube shifted in Y by depth and z,
@@ -221,9 +217,6 @@ void RenderSystemBase::renderFilledCuboid6F(const Cuboid6F& worldCuboid, float r
     );
 }
 
-void RenderSystemBase::renderTranslucentFilledCuboid5F(const Cuboid5F& worldCuboid, float r, float g, float b, float fillingAlpha) {
-    renderTranslucentFilledCuboid6F(Cuboid6F(worldCuboid), r, g, b, fillingAlpha);
-}
 
 void RenderSystemBase::renderTranslucentFilledCuboid6F(const Cuboid6F& worldCuboid, float r, float g, float b, float fillingAlpha) {
     /* Form 4 sides: 

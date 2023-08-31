@@ -7,32 +7,101 @@ Vect2F Vect2F::getNegated() const {
     return Vect2F{-x, -y};
 }
 
+void Vect2F::negate() {
+    x = -x;
+    y = -y;
+}
+
+void Vect2F::translate(const Vect2F& translation) {
+    this->translate(translation.x, translation.y);
+}
+
+void Vect2F::translate(const float x, const float y) {
+    this->x += x;
+    this->y += y;
+}
 
 Vect2F Vect2F::getTranslated(const Vect2F& translation) const {
     return Vect2F{x + translation.x, y + translation.y};
 }
 
-
-Vect2F Vect3F::getXY() const {
-    return Vect2F{x, y};
+void Vect2F::normalize() {
+    float length = this->length();
+    x /= length;
+    y /= length;
 }
+
+Vect2F Vect2F::getNormalized() const {
+    float length = this->length();
+    return Vect2F{x / length, y / length};
+}
+
+void Vect2F::scale(const float xScale, const float yScale) {
+    x *= xScale;
+    y *= yScale;
+}
+
+Vect2F Vect2F::getScaled(const float xScale, const float yScale) const {
+    return Vect2F{x * xScale, y * yScale};
+}
+
 
 /* Vect3F */
 
+void Vect3F::negate() {
+    x = -x;
+    y = -y;
+    z = -z;
+}
+
 Vect3F Vect3F::getNegated() const {
     return Vect3F{-x, -y, -z};
+}
+
+void Vect3F::translate(const Vect3F& translation) {
+    this->translate(translation.x, translation.y, translation.z);
+}
+
+void Vect3F::translate(const float x, const float y, const float z) {
+    this->x += x;
+    this->y += y;
+    this->z += z;
 }
 
 Vect3F Vect3F::getTranslated(const Vect3F& translation) const {
     return Vect3F{x + translation.x, y + translation.y, z + translation.z};
 }
 
+Vect3F Vect3F::getTranslated(const float x, const float y, const float z) const {
+    return Vect3F{x + this->x, y + this->y, z + this->z};
+}
+
 void Vect3F::normalize() {
-    float length = sqrt(x*x + y*y + z*z);
+    float length = this->length();
     x /= length;
     y /= length;
     z /= length;
 }
+
+Vect3F Vect3F::getNormalized() const {
+    float length = this->length();
+    return Vect3F{x / length, y / length, z / length};
+}
+
+void Vect3F::scale(const float xScale, const float yScale, const float zScale) {
+    x *= xScale;
+    y *= yScale;
+    z *= zScale;
+}
+
+Vect3F Vect3F::getScaled(const float xScale, const float yScale, const float zScale) const {
+    return Vect3F{x * xScale, y * yScale, z * zScale};
+}
+
+Vect2F Vect3F::getXY() const {
+    return Vect2F{x, y};
+}
+
 
 /* Size2F */
 
@@ -48,8 +117,8 @@ Rect4F Rect4F::fromSides(float left, float right, float top, float bottom) {
 
 Rect4F Rect4F::getTranslated(Vect2F translation) const {
     return {
-        topLeft.x + translation.x,
-        topLeft.y + translation.y,
+        topLeftCorner.x + translation.x,
+        topLeftCorner.y + translation.y,
         size.w,
         size.h
     };
@@ -58,39 +127,29 @@ Rect4F Rect4F::getTranslated(Vect2F translation) const {
 
 Rect4F Rect4F::getScaled(const float xScale, const float yScale) const {
     return {
-        topLeft.x * xScale,
-        topLeft.y * yScale,
+        topLeftCorner.x * xScale,
+        topLeftCorner.y * yScale,
         size.w * xScale,
         size.h * yScale
     };
 }
 
-std::array<Vect2F, 2> Rect4F::getDirectedPoints(const Vect2F& direction) const {
+std::array<Vect2F, 2> Rect4F::getPointsInDirection(const Vect2F& direction) const {
 
     if(direction.x > 0) {
         return std::array<Vect2F, 2>{topRight(), bottomRight()};
     }
     else if(direction.x < 0) {
-        return std::array<Vect2F, 2>{topLeft, bottomLeft()};
+        return std::array<Vect2F, 2>{topLeft(), bottomLeft()};
     }
     else if(direction.y > 0) {
         return std::array<Vect2F, 2>{bottomRight(), bottomLeft()};
     }
     else if(direction.y < 0) {
-        return std::array<Vect2F, 2>{topLeft, topRight()};
+        return std::array<Vect2F, 2>{topLeft(), topRight()};
     }
 
     throw std::runtime_error("Direction is zero");
-}
-
-/* Rect 5F */
-    
-bool Cuboid5F::checkIntersection(const Cuboid6F* other) const {
-    return !(left() >= other->right() || right() <= other->left() || top() >= other->bottom() || bottom() <= other->top() || front() <= other->back());
-}
-
-Cuboid5F Cuboid5F::fromSides(float left, float right, float top, float bottom, float front) {
-    return Cuboid5F{left, top, right-left, bottom-top, front};
 }
 
 /* Cuboid6F */

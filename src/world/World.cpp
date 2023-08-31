@@ -236,7 +236,7 @@ Entity* Elevation::getFloorEntityByXY(const Vect2F& entityPosition) {
 
 TilesQuad Elevation::getFloorNearbyTilesQuad(const Rect4F& entityRect) {
     TilesQuad tilesQuad{
-        getFloorEntityByXY(entityRect.topLeft),
+        getFloorEntityByXY(entityRect.topLeft()),
         getFloorEntityByXY(entityRect.topRight()),
         getFloorEntityByXY(entityRect.bottomLeft()),
         getFloorEntityByXY(entityRect.bottomRight())
@@ -245,7 +245,7 @@ TilesQuad Elevation::getFloorNearbyTilesQuad(const Rect4F& entityRect) {
     return tilesQuad;
 }
 
-std::vector<Entity*> Elevation::getAnyCollidingEntities(Vect2F pointElevationSpace) {
+std::vector<Entity*> Elevation::getAnyIntersectingEntities(Vect2F pointElevationSpace) {
     std::vector<Entity*> result;
 
     std::copy_if(allEntitiesRegister.begin(), allEntitiesRegister.end(), std::back_inserter(result), 
@@ -256,7 +256,7 @@ std::vector<Entity*> Elevation::getAnyCollidingEntities(Vect2F pointElevationSpa
     return result;
 }
 
-std::vector<Entity*> Elevation::getAnyCollidingEntities(const Rect4F& rectElevationSpace, Vect2F direction) {
+std::vector<Entity*> Elevation::getAnyIntersectingEntities(const Rect4F& rectElevationSpace, Vect2F direction) {
     /* Find 2 vertices pointer by direction */
     Vect2F firstVertex;
     Vect2F secondVertex;
@@ -266,10 +266,10 @@ std::vector<Entity*> Elevation::getAnyCollidingEntities(const Rect4F& rectElevat
     } 
     else if(direction.x < 0) {
         firstVertex = rectElevationSpace.bottomLeft();
-        secondVertex = rectElevationSpace.topLeft;
+        secondVertex = rectElevationSpace.topLeft();
     } 
     else if(direction.y < 0) {
-        firstVertex = rectElevationSpace.topLeft;
+        firstVertex = rectElevationSpace.topLeft();
         secondVertex = rectElevationSpace.topRight();
     } 
     else if(direction.y > 0) {
@@ -277,11 +277,13 @@ std::vector<Entity*> Elevation::getAnyCollidingEntities(const Rect4F& rectElevat
         secondVertex = rectElevationSpace.bottomLeft();
     }
 
+    //todo refactor
+
     /* Find entities colliding with first vertex */
-    auto firstVertexCollidingEntities = getAnyCollidingEntities(firstVertex);
+    auto firstVertexCollidingEntities = getAnyIntersectingEntities(firstVertex);
 
     /* Find entities colliding with second vertex */
-    auto secondVertexCollidingEntities = getAnyCollidingEntities(secondVertex);
+    auto secondVertexCollidingEntities = getAnyIntersectingEntities(secondVertex);
 
     /* Combine results */
     std::vector<Entity*> result;
@@ -454,9 +456,9 @@ void World::deleteEntityOrThrow(Entity* e) {
 }
 
 
-std::vector<Entity*> World::getAnyCollidingEntities(Vect2F pointElevationSpace, int elevationIndex) {
+std::vector<Entity*> World::getAnyIntersectingEntities(Vect2F pointElevationSpace, int elevationIndex) {
     try {
-        return (*this)[elevationIndex].getAnyCollidingEntities(pointElevationSpace);
+        return (*this)[elevationIndex].getAnyIntersectingEntities(pointElevationSpace);
     } catch(std::out_of_range&) {
         return std::vector<Entity*>();
     }

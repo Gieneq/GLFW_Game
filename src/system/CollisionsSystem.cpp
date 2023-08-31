@@ -75,7 +75,7 @@ void CollisionsSystem::processDetector(Entity* detectorEntity) {
             auto layerIndex = detectorEntity->getContainingElevationOrThrow()->getIndex();   
             try {
                 auto lowerElevation = detectorEntity->getContainingElevationOrThrow()->getContainingWorld()[layerIndex - 1];
-                auto lowerElevationFoundEntities = lowerElevation.getAnyCollidingEntities(detectorCmp->getElevationSpaceBoundingCuboid().getFlatten(), 
+                auto lowerElevationFoundEntities = lowerElevation.getAnyIntersectingEntities(detectorCmp->getElevationSpaceBoundingCuboid().getFlatten(), 
                     movementCmp->getHeading().getXY());
                 
                 /* Has some lower elevation with some entities */
@@ -127,7 +127,7 @@ void CollisionsSystem::processDetector(Entity* detectorEntity) {
                         */
 
                         /* Find 2 points of detectors bounding rect */
-                        auto points = detectorBoundingCast.getDirectedPoints(movementCmp->getHeading().getXY());
+                        auto points = detectorBoundingCast.getPointsInDirection(movementCmp->getHeading().getXY());
 
                         for(const auto& point : points) {
                             bool pointIsInside = false;

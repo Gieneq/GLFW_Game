@@ -11,6 +11,7 @@ message(STATUS "   -> ${LIB_DEPENDENCIES}")
 
 add_library(entity 
   Entity.cpp
+  EntitiesList.cpp
   Player.cpp
 )
 

@@ -73,10 +73,10 @@ bool Loader::loadPlayer(World& world) {
     }
 
     /* Set starting position */
-    player->getCuboidElevationSpace().topLeft.x = 82.4601F; //90.6339F; //13.5485F;
-    player->getCuboidElevationSpace().topLeft.y = 85.2446F; //98.3096F; //18.5593F;
-    const int playerElevationIndex = 1;
-    player->getCuboidElevationSpace().topLeft.z = 0.0F; // can differ is standing on stair or small elevation
+    player->getCuboidElevationSpace().topLeft.x = Settings::Player::INITIAL_X;
+    player->getCuboidElevationSpace().topLeft.y = Settings::Player::INITIAL_Y;
+    const int playerElevationIndex = Settings::Player::INITIAL_ELEVATION_IDX;
+    player->getCuboidElevationSpace().topLeft.z = Settings::Player::INITIAL_Z;
 
     /* Try adding texture to player */
     auto playersTextureIDOption = Loader::getLoader().getTextureDataByName("some_tiles");

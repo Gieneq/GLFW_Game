@@ -27,10 +27,10 @@ void RenderSystem::batchStart() {
     
     /* Cleare render box in world space from camera position */
     // todo move to camera
-    renderBoxWorldSpace.size.w = 2.0F / (1.0F * camera->zoom.w * (1.0F / aspect_ratio));
-    renderBoxWorldSpace.size.h = 2.0F / (1.0F * camera->zoom.h);
-    renderBoxWorldSpace.topLeft.x = camera->position.x - renderBoxWorldSpace.size.w / 2.0F;
-    renderBoxWorldSpace.topLeft.y = camera->position.y - renderBoxWorldSpace.size.h / 2.0F;
+    renderBoxWorldSpace.w() = 2.0F / (1.0F * camera->zoom.w * (1.0F / aspect_ratio));
+    renderBoxWorldSpace.h() = 2.0F / (1.0F * camera->zoom.h);
+    renderBoxWorldSpace.x() = camera->position.x - renderBoxWorldSpace.w() / 2.0F;
+    renderBoxWorldSpace.y() = camera->position.y - renderBoxWorldSpace.h() / 2.0F;
     //todo probably 3D
 }
 

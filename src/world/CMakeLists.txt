@@ -8,6 +8,7 @@ list(APPEND LIB_DEPENDENCIES
 message(STATUS "   -> ${LIB_DEPENDENCIES}")
 
 add_library(world 
+  Coordinates.cpp
   World.cpp
 )
 

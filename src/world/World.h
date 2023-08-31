@@ -299,9 +299,9 @@ public:
 
     TilesQuad getFloorNearbyTilesQuad(const Rect4F& entityRect);
 
-    std::vector<Entity*> getAnyCollidingEntities(Vect2F pointElevationSpace);
+    std::vector<Entity*> getAnyIntersectingEntities(Vect2F pointElevationSpace);
 
-    std::vector<Entity*> getAnyCollidingEntities(const Rect4F& rectElevationSpace, Vect2F direction);
+    std::vector<Entity*> getAnyIntersectingEntities(const Rect4F& rectElevationSpace, Vect2F direction);
 
 private:
     int elevation{0};
@@ -396,7 +396,7 @@ public:
     /* Deletion */
     void deleteEntityOrThrow(Entity* e);
     
-    std::vector<Entity*> getAnyCollidingEntities(Vect2F pointElevationSpace, int elevationIndex);
+    std::vector<Entity*> getAnyIntersectingEntities(Vect2F pointElevationSpace, int elevationIndex);
     
     Player player;
 

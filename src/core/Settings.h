@@ -5,8 +5,8 @@
 namespace Settings {
     struct Window {
         static constexpr char* TITLE = "Some title";
-        static constexpr int WIDTH{800}; // (1400 - record) (800 - photo)
-        static constexpr int HEIGHT{600}; // (900  - record) (600 - photo)
+        static constexpr int WIDTH{400}; // (1400 - record) (800 - photo)
+        static constexpr int HEIGHT{300}; // (900  - record) (600 - photo)
         static constexpr float ASPECT_RATIO{static_cast<float>(WIDTH) / static_cast<float>(HEIGHT)};
         static constexpr bool ENABLE_VSYNC{true};
 
@@ -40,6 +40,10 @@ namespace Settings {
 
     struct Player {
         static constexpr float INITIAL_SPEED = 4.5F;
+        static constexpr float INITIAL_X = 84.4601F;
+        static constexpr float INITIAL_Y = 86.2446F;
+        static constexpr int INITIAL_ELEVATION_IDX = 1;
+        static constexpr float INITIAL_Z = 0.0F;
     };
     
     struct General {

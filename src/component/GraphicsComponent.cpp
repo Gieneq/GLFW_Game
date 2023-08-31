@@ -19,11 +19,11 @@ Cuboid6F ColorComponent::getCuboidElevationSpace() const {
     const auto parentEleveationSpacePosition = parent->getCuboidElevationSpace().topLeft;
 
     return Cuboid6F{
-        rectRelative.topLeft.x + parentEleveationSpacePosition.x,
-        rectRelative.topLeft.y + parentEleveationSpacePosition.y,
+        rectRelative.x() + parentEleveationSpacePosition.x,
+        rectRelative.y() + parentEleveationSpacePosition.y,
         0.0F + parentEleveationSpacePosition.z,
-        rectRelative.size.w,
-        rectRelative.size.h,
+        rectRelative.w(),
+        rectRelative.h(),
         0.0F
     };  
 }
@@ -32,11 +32,11 @@ Cuboid6F ColorComponent::getCuboidWorldSpace() const {
     const auto parentWorldSpacePosition = parent->getCuboidWorldSpace().topLeft;
 
     return Cuboid6F{
-        rectRelative.topLeft.x + parentWorldSpacePosition.x,
-        rectRelative.topLeft.y + parentWorldSpacePosition.y,
+        rectRelative.x() + parentWorldSpacePosition.x,
+        rectRelative.y() + parentWorldSpacePosition.y,
         0.0F + parentWorldSpacePosition.z,
-        rectRelative.size.w,
-        rectRelative.size.h,
+        rectRelative.w(),
+        rectRelative.h(),
         0.0F
     };  
 }
@@ -59,11 +59,11 @@ Cuboid6F TextureComponent::getCuboidElevationSpace() const {
     const auto parentEleveationSpacePosition = parent->getCuboidElevationSpace().topLeft;
 
     return Cuboid6F{
-        rectRelative.topLeft.x + parentEleveationSpacePosition.x,
-        rectRelative.topLeft.y + parentEleveationSpacePosition.y,
+        rectRelative.x() + parentEleveationSpacePosition.x,
+        rectRelative.y() + parentEleveationSpacePosition.y,
         0.0F + parentEleveationSpacePosition.z,
-        rectRelative.size.w,
-        rectRelative.size.h,
+        rectRelative.w(),
+        rectRelative.h(),
         0.0F
     };  
 }
@@ -72,11 +72,11 @@ Cuboid6F TextureComponent::getCuboidWorldSpace() const {
     const auto parentWorldSpacePosition = parent->getCuboidWorldSpace().topLeft;
 
     return Cuboid6F{
-        rectRelative.topLeft.x + parentWorldSpacePosition.x,
-        rectRelative.topLeft.y + parentWorldSpacePosition.y,
+        rectRelative.x() + parentWorldSpacePosition.x,
+        rectRelative.y() + parentWorldSpacePosition.y,
         0.0F + parentWorldSpacePosition.z,
-        rectRelative.size.w,
-        rectRelative.size.h,
+        rectRelative.w(),
+        rectRelative.h(),
         0.0F
     };  
 }

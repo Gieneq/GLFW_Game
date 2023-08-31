@@ -19,16 +19,54 @@
  * \ /                                      *
  *  y                             (z) UP    *
  *                                          *
+ ********************************************
+ *                                          *
+ *   ORIGIN: top, left, bottom              *
+ *                                          *
+ ********************************************
+ *         Intersection conditions          *
+ *                                          *
+ * inclusive [left, right) exclusive        *
+ * inclusive [top, bottom) exclusive        *
+ * inclusive [back, front) exclusive        *
+ *                                          *
  *******************************************/
 
-struct Vect2F {
+class Vect2F {
+public:
     Vect2F() = default;
 
     Vect2F(float x, float y) : x{x}, y{y} {}
 
+    void negate();
+
     Vect2F getNegated() const;
 
+    void translate(const Vect2F& translation);
+
+    void translate(const float x, const float y);
+
     Vect2F getTranslated(const Vect2F& translation) const;
+
+    void normalize();
+
+    Vect2F getNormalized() const;
+
+    void scale(const float xScale, const float yScale);
+
+    Vect2F getScaled(const float xScale, const float yScale) const;
+
+    inline float length() const {
+        return sqrt(x*x + y*y);
+    }
+
+    inline float lengthSquared() const {
+        return x*x + y*y;
+    }
+
+    inline float dot(const Vect2F& other) const {
+        return x*other.x + y*other.y;
+    }
 
     friend std::ostream& operator<<(std::ostream& os, const Vect2F& vect) {
         os << "[" << vect.x << ", " << vect.y << "]";
@@ -40,18 +78,49 @@ struct Vect2F {
     float y{0.0F};
 };
 
-struct Vect3F {
+class Vect3F {
+public:
     Vect3F() = default;
 
     Vect3F(float x, float y, float z) : x{x}, y{y}, z{z} {}
 
     Vect3F(const Vect2F& xy, float z) : x{xy.x}, y{xy.y}, z{z} {}
 
+    void negate();
+
     Vect3F getNegated() const;
+
+    void translate(const Vect3F& translation);
+
+    void translate(const float x, const float y, const float z);
 
     Vect3F getTranslated(const Vect3F& translation) const;
 
+    Vect3F getTranslated(const float x, const float y, const float z) const;
+
     void normalize();
+
+    Vect3F getNormalized() const;
+
+    void scale(const float xScale, const float yScale, const float zScale);
+
+    Vect3F getScaled(const float xScale, const float yScale, const float zScale) const;
+
+    inline float length() const {
+        return sqrt(x*x + y*y + z*z);
+    }
+
+    inline float lengthSquared() const {
+        return x*x + y*y + z*z;
+    }
+
+    inline float dot(const Vect3F& other) const {
+        return x*other.x + y*other.y + z*other.z;
+    }
+
+    inline Vect3F cross(const Vect3F& other) const {
+        return Vect3F{y*other.z - z*other.y, z*other.x - x*other.z, x*other.y - y*other.x};
+    }
 
     Vect2F getXY() const;
 
@@ -67,12 +136,11 @@ struct Vect3F {
     float z{0.0F};
 };
 
-struct Size2F {
+class Size2F {
+public:
     Size2F() = default;
 
     Size2F(float w, float h) : w{w}, h{h} {}
-
-    Size2F getExpanded(const float x, const float y) const;
 
     inline Vect2F toVect2F() const {
         return Vect2F{w, h};
@@ -88,7 +156,8 @@ struct Size2F {
     float h{0.0F};
 };
 
-struct Size3F {
+class Size3F {
+public:
     Size3F() = default;
 
     Size3F(float w, float h, float d) : w{w}, h{h}, d{d} {}
@@ -111,76 +180,69 @@ struct Size3F {
     float d{0.0F};
 };
 
-struct Rect4F {
-    Rect4F() : topLeft{}, size{} {}
+class Rect4F {
+public:
+    Rect4F() : topLeftCorner{}, size{} {}
 
-    Rect4F(Vect2F tl, Size2F s) : topLeft{tl}, size{s} {}
+    Rect4F(Vect2F tl, Size2F s) : topLeftCorner{tl}, size{s} {}
 
-    Rect4F(float x, float y, float w, float h) : topLeft{x, y}, size{w, h} {}
+    Rect4F(float x, float y, float w, float h) : topLeftCorner{x, y}, size{w, h} {}
 
     static Rect4F fromSides(float left, float right, float top, float bottom);
 
     inline float left() const {
-        return topLeft.x;
+        return topLeftCorner.x;
     }
 
     inline float right() const {
-        return topLeft.x + size.w;
+        return topLeftCorner.x + size.w;
     }
 
     inline float top() const {
-        return topLeft.y;
+        return topLeftCorner.y;
     }
 
     inline float bottom() const {
-        return topLeft.y + size.h;
+        return topLeftCorner.y + size.h;
     }
 
-    std::array<Vect2F, 2> getDirectedPoints(const Vect2F& direction) const;
+    std::array<Vect2F, 2> getPointsInDirection(const Vect2F& direction) const;
 
     Rect4F getTranslated(Vect2F translation) const;
 
     Rect4F getScaled(const float xScale, const float yScale) const;
 
-    inline float& x() { return topLeft.x; }
+    inline float& x() { return topLeftCorner.x; }
 
-    inline float& y() { return topLeft.y; }
+    inline float& y() { return topLeftCorner.y; }
 
     inline float& w() { return size.w; }
 
     inline float& h() { return size.h; }
+    
+    inline const float& x() const { return topLeftCorner.x; }
 
-    inline float width() const {
-        return size.w;
-    }
+    inline const float& y() const { return topLeftCorner.y; }
 
-    inline float height() const {
-        return size.h;
-    }
+    inline const float& w() const { return size.w; }
 
-    inline void alignToLeftOf(const Rect4F& other) {
-        topLeft.x = other.left() - size.w;
-    }
+    inline const float& h() const { return size.h; }
 
-    inline void alignToRightOf(const Rect4F& other) {
-        topLeft.x = other.right();
-    }
+    inline float width() const { return size.w; }
 
-    inline void alignToTopOf(const Rect4F& other) {
-        topLeft.y = other.top() - size.h;
-    }
-
-    inline void alignToBottomOf(const Rect4F& other) {
-        topLeft.y = other.bottom();
-    }
+    inline float height() const { return size.h; }
 
     inline bool hasPointInside(const Vect2F& point) const {
-        return point.x >= left() && point.x <= right() && point.y >= top() && point.y <= bottom();
+        return point.x >= left() && point.x < right() && point.y >= top() && point.y < bottom();
     }
 
     inline bool checkIntersection(const Rect4F& other) const {
-        /* Keep in mind direction of X and Y */
-        return !(left() >= other.right() || right() <= other.left() || top() >= other.bottom() || bottom() <= other.top());
+        /* other left and top are inclusive */
+        return !(left() >= other.right() || right() < other.left() || top() >= other.bottom() || bottom() < other.top());
+    }
+
+    inline Vect2F topLeft() const {
+        return Vect2F{right(), top()};
     }
 
     inline Vect2F topRight() const {
@@ -196,122 +258,22 @@ struct Rect4F {
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Rect4F& rect) {
-        os << "[" << rect.topLeft.x << ", " << rect.topLeft.y << ", " << rect.size.w << ", " << rect.size.h << "]";
+        os << "[" << rect.topLeftCorner.x << ", " << rect.topLeftCorner.y << ", " << rect.size.w << ", " << rect.size.h << "]";
         return os;
     }
 
-    Vect2F topLeft;
+private:
+    Vect2F topLeftCorner;
 
     Size2F size;
 };
 
-/**
- * 2D rectangle with depth
-*/
-class Cuboid6F;
-class Cuboid5F {
-public:
-    Cuboid5F() : topLeft{}, size{} {}
-    Cuboid5F(float x, float y, float w, float h, float d) : topLeft{x, y}, size{w, h, d} {}
-
-    inline void alignToLeftOf(const Cuboid5F& other) {
-        topLeft.x = other.left() - size.w;
-    }
-
-    inline void alignToRightOf(const Cuboid5F& other) {
-        topLeft.x = other.right();
-    }
-
-    inline void alignToTopOf(const Cuboid5F& other) {
-        topLeft.y = other.top() - size.h;
-    }
-
-    inline void alignToBottomOf(const Cuboid5F& other) {
-        topLeft.y = other.bottom();
-    }
-
-    inline float left() const {
-        return topLeft.x;
-    }
-
-    inline float right() const {
-        return topLeft.x + size.w;
-    }
-
-    inline float top() const {
-        return topLeft.y;
-    }
-
-    inline float bottom() const {
-        return topLeft.y + size.h;
-    }
-
-    /* Front is in distance from topLeft. In this 
-    * case topLeft.z is 0 so front is equal to depth */
-    inline float front() const {
-        return size.d;
-    }
-
-    static Cuboid5F fromSides(float left, float right, float top, float bottom, float front);
-
-    Cuboid5F getTranslated(Vect2F translation) const;
-
-    inline float& x() { return topLeft.x; }
-
-    inline float& y() { return topLeft.y; }
-
-    inline float& w() { return size.w; }
-
-    inline float& h() { return size.h; }
-
-    inline float& d() { return size.d; }
-
-    inline float width() const {
-        return size.w;
-    }
-
-    inline float height() const {
-        return size.h;
-    }
-
-    inline float depth() const {
-        return size.d;
-    }
-
-    inline Rect4F getFlatten() const {
-        return Rect4F{topLeft.x, topLeft.y, size.w, size.h};
-    }
-    
-    inline Cuboid5F getTranslated(const Vect2F& translation) const  {
-        return Cuboid5F{topLeft.x + translation.x, topLeft.y + translation.y, size.w, size.h, size.d};
-    }
-
-    inline Size2F getWH() const {
-        return Size2F{size.w, size.h};
-    }
-
-    inline bool checkIntersection(const Cuboid5F& other) const {
-        /* Keep in mind direction of X and Y. In this case depth won't change anything */
-        return !(left() >= other.right() || right() <= other.left() || top() >= other.bottom() || bottom() <= other.top());
-    }
-        
-    bool checkIntersection(const Cuboid6F* other) const;
-    
-    friend std::ostream& operator<<(std::ostream& os, const Cuboid5F& rect) {
-        os << "[" << rect.topLeft.x << ", " << rect.topLeft.y << ", " << rect.size.w << ", " << rect.size.h << ", " << rect.size.d << "]";
-        return os;
-    }
-
-    Vect2F topLeft;
-
-    Size3F size;
-};
 
 class Cuboid6F {
 public:
     Cuboid6F() : topLeft{}, size{} {}
-    Cuboid6F(float x, float y, float z, float w, float h, float d) : topLeft{x, y, z}, size{w, h, d} {}
-    Cuboid6F(const Cuboid5F& other) : topLeft{other.topLeft.x, other.topLeft.y, 0.0F}, size{other.size.w, other.size.h, other.size.d} {}
+    Cuboid6F(float x, float y, float z, float w, float h, float d) : 
+        topLeft{x, y, z}, size{w, h, d} {}
 
     inline float left() const {
         return topLeft.x;
@@ -375,10 +337,6 @@ public:
         return Rect4F{topLeft.x, topLeft.y, size.w, size.h};
     }
 
-    inline Cuboid5F getFlattenWithDepth() const {
-        return Cuboid5F{topLeft.x, topLeft.y, size.w, size.h, size.d};
-    }
-
     inline Cuboid6F getTranslated(const Vect3F& translation) const {
         return Cuboid6F{topLeft.x + translation.x, topLeft.y + translation.y, topLeft.z + translation.z, size.w, size.h, size.d};
     }
@@ -391,40 +349,11 @@ public:
         return Size2F{size.w, size.h};
     }
 
-    inline void alignToLeftOf(const Cuboid6F& other) {
-        topLeft.x = other.left() - size.w;
-    }
-
-    inline void alignToRightOf(const Cuboid6F& other) {
-        topLeft.x = other.right();
-    }
-
-    inline void alignToTopOf(const Cuboid6F& other) {
-        topLeft.y = other.top() - size.h;
-    }
-
-    inline void alignToBottomOf(const Cuboid6F& other) {
-        topLeft.y = other.bottom();
-    }
-
-    inline void alignToFrontOf(const Cuboid6F& other) {
-        topLeft.z = other.front();
-    }
-
-    inline void alignToBackOf(const Cuboid6F& other) {
-        topLeft.z = other.back() - size.d;
-    }
-
     inline bool checkIntersection(const Cuboid6F& other) const {
-        return !(left() >= other.right() || right() <= other.left() || top() >= other.bottom() || bottom() <= other.top() 
-            || front() < other.back() || back() > other.front());
-        /* Be careful - in z condition is slightly different */
-    }
-
-    inline bool checkIntersection(const Cuboid5F& other) const {
-        return !(left() >= other.right() || right() <= other.left() || top() >= other.bottom() || bottom() <= other.top() 
-            || back() > other.front());
-        /* Be careful - in z condition is slightly different */
+        /* other lef, top and back are inclusive */
+        /* todo ????Be careful - in z condition is slightly different */
+        return !(left() >= other.right() || right() < other.left() || top() >= other.bottom() || bottom() < other.top() 
+            || back() >= other.front() || front() < other.back());
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Cuboid6F& rect) {
