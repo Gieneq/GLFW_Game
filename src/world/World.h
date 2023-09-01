@@ -9,6 +9,7 @@ class LocationComponent;
 class MovementComponent;
 class CollisionComponent;
 class World;
+class ElevationDepth;
 
 class TilesPair {
 public:
@@ -61,7 +62,17 @@ private:
     Entity* bottomRightGlobal;
 };
 
-class Elevation {
+class ElevationDepth {
+public:
+    virtual ~ElevationDepth() = default;
+    virtual float z() const = 0;
+    virtual int getIndex() const = 0;
+protected:
+    virtual void setIndex(const int index) = 0;
+};
+
+class Elevation : public ElevationDepth {
+    ~Elevation() = default;
     Elevation(int elevation, World& containingWorld) : elevation(elevation), containingWorld(containingWorld) {}
 
 public:
@@ -69,15 +80,19 @@ public:
         return containingWorld;
     }
 
-    inline const World& getContainingWorldConst() const {
+    inline const World& getContainingWorld() const {
         return containingWorld;
     }
 
-    inline int getIndex() const {
+    virtual int getIndex() const {
         return elevation;
     }
 
-    inline float getWorldSpaceZ() const {
+    virtual void setIndex(const int index) {
+        this->elevation = index;
+    }
+
+    virtual float z() const {
         return static_cast<float>(elevation);
     }
 
@@ -339,6 +354,7 @@ private:
 class World {
 public:
     // todo dispose entities in destructor
+    ~World() = default;
     World() = default;
 
     Elevation* createElevationOrThrow();

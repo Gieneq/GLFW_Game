@@ -2,7 +2,7 @@
 
 #include "Settings.h"
 #include "lodepng.h"
-#include "IO.h"
+#include "IOPath.h"
 
 
 bool LoaderBase::hasTextureDataWithID(TextureID textureID) {
@@ -59,13 +59,13 @@ std::optional<TextureID> LoaderBase::storeInGPUMemory(std::vector<unsigned char>
 }
 
 std::optional<TextureID> LoaderBase::loadTextureFromAssets(const std::string& relativePath, int tileWidth, int tileHeight, int rows, int columns, const std::string& name) {
-    std::string absPath = IO::get_absolute_path(Settings::Resources::ASSETS_PATH + relativePath);
+    std::string absPath = IOPath::get_absolute_path(Settings::Resources::ASSETS_PATH + relativePath);
     return loadTextureFromAbsolutePath(absPath, tileWidth, tileHeight, rows, columns, name);
 }
 
 std::optional<TextureID> LoaderBase::loadTextureFromAbsolutePath(const std::string& abs_path, int tileWidth, int tileHeight, int rows, int columns, const std::string& name) {
     /* Check if image with given path is already loaded. */
-    const std::string absolute_path = IO::get_absolute_path(abs_path);
+    const std::string absolute_path = IOPath::get_absolute_path(abs_path);
     for(const auto& textureData : textureDatas) {
         if(textureData.absolute_path == absolute_path) {
             /* It is considered as error */
@@ -146,21 +146,21 @@ std::optional<TextureID> LoaderBase::loadTextureFromAbsolutePath(const std::stri
 
 std::string LoaderBase::getTilesetAbsolutePath(const std::string& mapPath, const std::string& tilesetRelativePath) {
     /* TilesetRelativePath is in relation to map containing this dir */
-    std::string mapDir = IO::get_containing_dir(mapPath);
-    std::string absoluteTilesetPath = IO::get_absolute_path(mapDir + "\\" + tilesetRelativePath);
+    std::string mapDir = IOPath::get_containing_dir(mapPath);
+    std::string absoluteTilesetPath = IOPath::get_absolute_path(mapDir + "\\" + tilesetRelativePath);
     return absoluteTilesetPath;
 }
 
 std::string LoaderBase::getTilesetImageAbsolutePath(const std::string& tilesetAbsolutePath, const std::string& imageName) {
     /* absoluteTilesetImagePath is in the same dir as  tilesetAbsolutePath */
-    std::string tilesetDir = IO::get_containing_dir(tilesetAbsolutePath);
-    std::string absoluteTilesetImagePath = IO::get_absolute_path(tilesetDir + "\\" + imageName);
+    std::string tilesetDir = IOPath::get_containing_dir(tilesetAbsolutePath);
+    std::string absoluteTilesetImagePath = IOPath::get_absolute_path(tilesetDir + "\\" + imageName);
     return absoluteTilesetImagePath;
 }
 
 std::string LoaderBase::getMapAbsolutePath(const std::string& mapName) {
     std::string mapDir = std::string(Settings::Resources::DATA_PATH)
         + std::string(Settings::Resources::MAPS_DIR);
-    std::string absoluteMapPath = IO::get_absolute_path(mapDir + mapName);
+    std::string absoluteMapPath = IOPath::get_absolute_path(mapDir + mapName);
     return absoluteMapPath;
 }

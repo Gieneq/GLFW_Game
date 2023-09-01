@@ -74,7 +74,7 @@ void CollisionsSystem::processDetector(Entity* detectorEntity) {
             /* Lower elevation required */
             auto layerIndex = detectorEntity->getContainingElevationOrThrow()->getIndex();   
             try {
-                auto lowerElevation = detectorEntity->getContainingElevationOrThrow()->getContainingWorld()[layerIndex - 1];
+                auto& lowerElevation = detectorEntity->getContainingElevationOrThrow()->getContainingWorld()[layerIndex - 1];
                 auto lowerElevationFoundEntities = lowerElevation.getAnyIntersectingEntities(detectorCmp->getElevationSpaceBoundingCuboid().getFlatten(), 
                     movementCmp->getHeading().getXY());
                 

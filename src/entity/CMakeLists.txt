@@ -4,7 +4,6 @@ list(APPEND LIB_DEPENDENCIES
   maths
   component
   world
-  loader
 )
 
 message(STATUS "   -> ${LIB_DEPENDENCIES}")

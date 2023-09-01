@@ -3,6 +3,6 @@
 
 WorldCuboid ElevationCuboid::toWorldSpace() const {
     auto tmpCuboid = cuboid;
-    tmpCuboid.z() += elevation->getWorldSpaceZ();
+    tmpCuboid.z() += elevationDepth->z();
     return WorldCuboid{tmpCuboid};
 }

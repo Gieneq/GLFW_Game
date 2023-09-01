@@ -49,7 +49,7 @@ Rect4F TilesPair::getBoundingRect() const {
 /* Elevation class */
 
 Cuboid6F Elevation::elevationToWorldSpace(const Cuboid6F& elevationSpaceCuboid) const {
-    return elevationSpaceCuboid.getTranslated(Vect3F{0, 0, getWorldSpaceZ()});
+    return elevationSpaceCuboid.getTranslated(Vect3F{0, 0, this->z()});
 }
 
 void Elevation::addEntitisComponentsToRegisters(Entity* entity) {

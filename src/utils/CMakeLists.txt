@@ -7,7 +7,7 @@ list(APPEND LIB_DEPENDENCIES
 message(STATUS "   -> ${LIB_DEPENDENCIES}")
 
 add_library(utils 
-  IO.cpp
+  IOPath.cpp
 )
 
 target_link_libraries(utils PUBLIC ${LIB_DEPENDENCIES})

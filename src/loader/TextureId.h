@@ -1,6 +1,6 @@
 #pragma once 
 #include "GLCommon.h"
-#include <iostream>
+// #include <iostream>
 
 class TextureData;
 class TextureID {

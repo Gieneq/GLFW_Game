@@ -320,9 +320,15 @@ public:
 
     inline float& w() { return size.w; }
 
+    inline float w() const { return size.w; }
+
     inline float& h() { return size.h; }
 
+    inline float h() const { return size.h; }
+
     inline float& d() { return size.d; }
+
+    inline float d() const { return size.d; }
 
     inline float width() const {
         return size.w;

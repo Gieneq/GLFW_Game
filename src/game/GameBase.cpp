@@ -66,7 +66,7 @@ bool GameBase::onKeyReleased(int key) {
         auto playersElevation = player->getContainingElevationOrThrow();
 
         std::cout << " _______________________________________________________________" << std::endl;
-        std::cout << "| Player location world space: " << player->getCuboidWorldSpace().topLeft << ", worldSpaceZ: " << playersElevation->getWorldSpaceZ() << std::endl;
+        std::cout << "| Player location world space: " << player->getCuboidWorldSpace().topLeft << ", worldSpaceZ: " << playersElevation->z() << std::endl;
         std::cout << "| Player CuboidWorldSpace: " << player->getCuboidWorldSpace() << " flatten to: " << player->getCuboidWorldSpace().getFlatten() << std::endl;
         std::cout << "| Player CuboidElevationSpace: " << player->getCuboidElevationSpace() << " flatten to: " << player->getCuboidElevationSpace().getFlatten() << std::endl;
         std::cout << "| Last loop rendered entities: " << render_system.getLastLoopEntitesCount() << std::endl;
@@ -84,7 +84,7 @@ bool GameBase::onKeyReleased(int key) {
         
         std::cout << "| Elevations data: " << std::endl;
         for(auto elevation : world) {
-            std::cout << "|  - elevation index: " << elevation->getIndex() << ", worldSpaceZ: " << elevation->getWorldSpaceZ() << std::endl;
+            std::cout << "|  - elevation index: " << elevation->getIndex() << ", worldSpaceZ: " << elevation->z() << std::endl;
         }
         
         std::cout << std::endl;
@@ -170,7 +170,7 @@ void GameBase::render() {
         //todo probably can be const
         if(elevation->getIndex() == world.player.getContainingElevationOrThrow()->getIndex()) {
             const float minOpacity = 0.2F;
-            const float opacity = minOpacity +  (1.0F - minOpacity) * elevation->getWorldSpaceZ() / static_cast<float>(world.getElevationsCount());
+            const float opacity = minOpacity +  (1.0F - minOpacity) * elevation->z() / static_cast<float>(world.getElevationsCount());
             render_system.fillScreen(0.0F, 0.0F, 0.0F, opacity);
         }
         render_system.batchAppendElevation(elevation);

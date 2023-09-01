@@ -1,12 +1,11 @@
 #pragma once
-#include <iostream>
 #include "Maths.h"
 
 /**
  * Semantic types for easier distinguishing between different coordinate systems.
 */
 
-class Elevation;
+class ElevationDepth;
 class ElevationCuboid;
 
 class WorldCuboid {
@@ -27,8 +26,8 @@ private:
 
 class ElevationCuboid {
 public:
-    ElevationCuboid(Elevation* elevation, const Cuboid6F& cuboid) : elevation{elevation}, cuboid{cuboid} {}
-    ElevationCuboid(Elevation* elevation, float x, float y, float z, float w, float h, float d) : elevation{elevation}, cuboid{x, y, z, w, h, d} {}
+    ElevationCuboid(ElevationDepth* ed, const Cuboid6F& cuboid) : elevationDepth{ed}, cuboid{cuboid} {}
+    ElevationCuboid(ElevationDepth* ed, float x, float y, float z, float w, float h, float d) : elevationDepth{ed}, cuboid{x, y, z, w, h, d} {}
     
     WorldCuboid toWorldSpace() const;
 
@@ -41,7 +40,7 @@ public:
     }
 
 private:
-    Elevation* elevation;
+    ElevationDepth* elevationDepth;
     Cuboid6F cuboid;
 };
 

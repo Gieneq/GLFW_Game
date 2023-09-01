@@ -15,12 +15,15 @@ enable_testing()
 
 add_executable(GWorld_test
 MathsTest.cpp
+CoordinatesTest.cpp
 )
 
 target_link_libraries(
     GWorld_test
     GTest::gtest_main
+    GTest::gmock_main
     maths
+    world
 )
 
 include(GoogleTest)
