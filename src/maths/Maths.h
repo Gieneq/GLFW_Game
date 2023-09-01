@@ -237,8 +237,11 @@ public:
     }
 
     inline bool checkIntersection(const Rect4F& other) const {
-        /* other left and top are inclusive */
-        return !(left() >= other.right() || right() < other.left() || top() >= other.bottom() || bottom() < other.top());
+        return !(left() >= other.right() || right() <= other.left() || top() >= other.bottom() || bottom() <= other.top());
+    }
+
+    static bool checkIntersection(const Rect4F& rect1, const Rect4F& rect2) {
+        return rect1.checkIntersection(rect2);
     }
 
     inline Vect2F topLeft() const {
@@ -350,10 +353,13 @@ public:
     }
 
     inline bool checkIntersection(const Cuboid6F& other) const {
-        /* other lef, top and back are inclusive */
-        /* todo ????Be careful - in z condition is slightly different */
-        return !(left() >= other.right() || right() < other.left() || top() >= other.bottom() || bottom() < other.top() 
-            || back() >= other.front() || front() < other.back());
+        /* Be careful - z used to be treated differently. Now it is all the same. */
+        return !(left() >= other.right() || right() <= other.left() || top() >= other.bottom() || bottom() <= other.top() 
+            || back() >= other.front() || front() <= other.back());
+    }
+
+    static bool checkIntersection(const Cuboid6F& rect1, const Cuboid6F& rect2) {
+        return rect1.checkIntersection(rect2);
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Cuboid6F& rect) {

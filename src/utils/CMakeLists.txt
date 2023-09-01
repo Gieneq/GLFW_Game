@@ -8,7 +8,6 @@ message(STATUS "   -> ${LIB_DEPENDENCIES}")
 
 add_library(utils 
   IO.cpp
-  Maths.cpp
 )
 
 target_link_libraries(utils PUBLIC ${LIB_DEPENDENCIES})

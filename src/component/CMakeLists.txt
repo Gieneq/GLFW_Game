@@ -1,7 +1,7 @@
 message(STATUS " * Building component")
 
 list(APPEND LIB_DEPENDENCIES 
-  utils
+  maths
   loader
   core
   world

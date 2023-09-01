@@ -43,4 +43,7 @@ add_subdirectory(libs)
 # Add source
 add_subdirectory(src)
 
+# Include the testing module for CTest
+# include(CTest)
 
+add_subdirectory(test)

@@ -1,7 +1,7 @@
 message(STATUS " * Building entity")
 
 list(APPEND LIB_DEPENDENCIES 
-  utils
+  maths
   component
   world
   loader

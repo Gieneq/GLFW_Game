@@ -1,6 +1,7 @@
 message(STATUS " * Building loader")
 
 list(APPEND LIB_DEPENDENCIES 
+  maths
   utils
   lodepng
   pugixml

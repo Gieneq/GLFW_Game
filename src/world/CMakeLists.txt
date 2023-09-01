@@ -1,7 +1,7 @@
 message(STATUS " * Building world")
 
 list(APPEND LIB_DEPENDENCIES 
-  utils
+  maths
   entity
 )
 

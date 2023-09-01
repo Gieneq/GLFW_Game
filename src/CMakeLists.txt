@@ -1,8 +1,7 @@
 message(STATUS "Building src")
 
-
-
 add_subdirectory(utils)
+add_subdirectory(maths)
 add_subdirectory(component)
 add_subdirectory(entity)
 add_subdirectory(core)
@@ -15,6 +14,7 @@ list(APPEND DEP_LIBS
     lodepng
     pugixml
     utils
+    maths
     component
     entity
     core
@@ -24,40 +24,13 @@ list(APPEND DEP_LIBS
     loader
 )
 
-# set(GLAD_GL "${GLFW_SOURCE_DIR}/deps/glad/gl.h"
-#             "${GLFW_SOURCE_DIR}/deps/glad/glad.h"
-#             "${GLFW_SOURCE_DIR}/deps/glad.c")
-# set(GLAD_VULKAN "${GLFW_SOURCE_DIR}/deps/glad/vulkan.h"
-#                 "${GLFW_SOURCE_DIR}/deps/glad_vulkan.c")
-#https://learnopengl.com/Getting-started/Creating-a-window
-#https://glad.dav1d.de/
-# include_directories(glfw/deps/glad)
-# include_directories(glfw/KHR)
-# set(GLAD_GL "${GLFW_SOURCE_DIR}/deps/glad/gl.h"
-#             "${GLFW_SOURCE_DIR}/deps/glad/glad.h"
-#             "${GLFW_SOURCE_DIR}/deps/glad_gl.c")
-# set(GETOPT "${GLFW_SOURCE_DIR}/deps/getopt.h"
-#            "${GLFW_SOURCE_DIR}/deps/getopt.c")
-# set(TINYCTHREAD "${GLFW_SOURCE_DIR}/deps/tinycthread.h"
-#                 "${GLFW_SOURCE_DIR}/deps/tinycthread.c")
-
-
-# include_directories("${GLFW_SOURCE_DIR}/deps_generated")
-# add_executable( GWorld ${GETOPT} ${GLAD_GL} )
 add_executable(GWorld
     main.cpp
-    # ${GETOPT} 
-    # ${GLAD_GL}
-    # "${GLFW_SOURCE_DIR}/deps_generated/glad.c"
 )
 
-# target_link_libraries(GWorld PUBLIC ${DEP_LIBS})
-# target_link_libraries( GWorld ${OPENGL_LIBRARIES} glfw )
 target_link_libraries(GWorld PUBLIC ${DEP_LIBS} ${OPENGL_LIBRARIES} glfw)
 
 target_include_directories(GWorld PUBLIC
                            "${PROJECT_BINARY_DIR}"
-                        #    "${GLFW_SOURCE_DIR}/deps"
-                        #    "${GLFW_SOURCE_DIR}/deps_generated"
                            )
                            

@@ -1,7 +1,7 @@
 message(STATUS " * Building game")
 
 list(APPEND LIB_DEPENDENCIES 
-  utils
+  maths
   core
   system
 )

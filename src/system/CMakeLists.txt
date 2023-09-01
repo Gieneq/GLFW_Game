@@ -1,7 +1,7 @@
 message(STATUS " * Building system")
 
 list(APPEND LIB_DEPENDENCIES 
-  utils
+  maths
   core
   game
   component

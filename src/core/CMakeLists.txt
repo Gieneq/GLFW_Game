@@ -1,7 +1,7 @@
 message(STATUS " * Building core")
 
 list(APPEND LIB_DEPENDENCIES 
-  utils
+maths
   loader
 )
 
