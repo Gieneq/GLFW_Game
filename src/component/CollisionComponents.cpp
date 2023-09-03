@@ -6,33 +6,25 @@
 
 /* CollisionComponent */
 
-std::vector<Cuboid6F> CollisionComponent::getElevationSpaceCollisionCuboids() const {
-    const auto& parentElevationSpacePosition = parent->getCuboidElevationSpace().topLeft;
-    std::vector<Cuboid6F> elevationSpaceCollisionCuboids;
-    for (const auto& cuboid : collisionCuboids) {
-        elevationSpaceCollisionCuboids.push_back(cuboid.getTranslated(parentElevationSpacePosition));
-    }
-    return elevationSpaceCollisionCuboids;
+std::vector<ElevationCuboid> CollisionComponent::getElevationCollisionCuboids() const {
+    return ElevationCuboid::transformLocalCuboids(parent->getCuboid(), collisionCuboids.begin(), collisionCuboids.end());
 }
 
-std::vector<Cuboid6F> CollisionComponent::getWorldSpaceCollisionCuboids() const {
-    const auto& parentWorldSpacePosition = parent->getCuboidWorldSpace().topLeft;
-    std::vector<Cuboid6F> worldSpaceCollisionCuboids;
-    for (const auto& cuboid : collisionCuboids) {
-        worldSpaceCollisionCuboids.push_back(cuboid.getTranslated(parentWorldSpacePosition));
-    }
-    return worldSpaceCollisionCuboids;
+std::vector<WorldCuboid> CollisionComponent::getWorldCollisionCuboids() const {
+    return WorldCuboid::transformLocalCuboids(parent->getCuboid(), collisionCuboids.begin(), collisionCuboids.end());
 }
 
 /* CollisionDetectorComponent */
 
-CollisionResult CollisionDetectorComponent::checkCollision(CollisionComponent& other) {
+CollisionResults checkCollision(const CollisonCmpsVector::const_iterator& begin, const CollisonCmpsVector::const_iterator& end) const {
     /* Filter out check with self */
     if (other.getParentEntity()->getId() == parent->getId()) {
         return CollisionResult::NONE();
     }
 
     auto result = CollisionResult(this, &other);
+
+    const auto collisionElevationCuboids = other.get
 
     const auto otherCollisionElevationSpaceCuboids = other.getElevationSpaceCollisionCuboids();
     const auto thisBoundingElevationSpaceCuboids = getElevationSpaceBoundingCuboid();
@@ -48,12 +40,6 @@ CollisionResult CollisionDetectorComponent::checkCollision(CollisionComponent& o
     return result;
 }
 
-Cuboid6F CollisionDetectorComponent::getElevationSpaceBoundingCuboid() const {
-    const auto& parentElevationSpacePosition = parent->getCuboidElevationSpace().topLeft;
-    return boundingCuboid.getTranslated(parentElevationSpacePosition);
-}
-
-Cuboid6F CollisionDetectorComponent::getWorldSpaceBoundingCuboid() const {
-    const auto& parentWorldSpacePosition = parent->getCuboidWorldSpace().topLeft;
-    return boundingCuboid.getTranslated(parentWorldSpacePosition);
+ElevationCuboid CollisionDetectorComponent::getElevationBoundingCuboid() const {
+    return ElevationCuboid::transformLocalCuboid(parent->getCuboid(), boundingCuboid);
 }

@@ -37,10 +37,10 @@ Rect4F TilesPair::getBoundingRect() const {
     }
     /* If second was null, now they are the same for easier calc */
 
-    float leftValue = std::min(first->getCuboidElevationSpace().left(), second->getCuboidElevationSpace().left());
-    float rightValue = std::max(first->getCuboidElevationSpace().right(), second->getCuboidElevationSpace().right());
-    float topValue = std::min(first->getCuboidElevationSpace().top(), second->getCuboidElevationSpace().top());
-    float bottomValue = std::max(first->getCuboidElevationSpace().bottom(), second->getCuboidElevationSpace().bottom());
+    float leftValue = std::min(first->getCuboid().value().left(), second->getCuboid().value().left());
+    float rightValue = std::max(first->getCuboid().value().right(), second->getCuboid().value().right());
+    float topValue = std::min(first->getCuboid().value().top(), second->getCuboid().value().top());
+    float bottomValue = std::max(first->getCuboid().value().bottom(), second->getCuboid().value().bottom());
 
     return Rect4F{leftValue, topValue, rightValue - leftValue, bottomValue - topValue};
 }
@@ -227,7 +227,7 @@ bool Elevation::deleteEntityIfExists(Entity* entity) {
 
 Entity* Elevation::getFloorEntityByXY(const Vect2F& entityPosition) {
     for(auto entity : floorEntities) {
-        if(entity->getCuboidElevationSpace().getFlatten().hasPointInside(entityPosition)) {
+        if(entity->getCuboid().value().getFlatten().hasPointInside(entityPosition)) {
             return entity;
         }
     }
@@ -250,7 +250,7 @@ std::vector<Entity*> Elevation::getAnyIntersectingEntities(Vect2F pointElevation
 
     std::copy_if(allEntitiesRegister.begin(), allEntitiesRegister.end(), std::back_inserter(result), 
         [pointElevationSpace](Entity* e) {
-            return e->getCuboidElevationSpace().getFlatten().hasPointInside(pointElevationSpace);
+            return e->getCuboid().value().getFlatten().hasPointInside(pointElevationSpace);
         });
 
     return result;

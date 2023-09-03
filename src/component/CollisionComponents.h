@@ -2,6 +2,7 @@
 #include <iostream>
 #include "Component.h"
 #include "Maths.h"
+#include "Coordinates.h"
 #include <vector>
 #include "CollisionResult.h"
 
@@ -12,9 +13,8 @@ public:
     CollisionComponent(Entity* e) : Component(e) {}
     virtual ~CollisionComponent() = default;
 
-
-    std::vector<Cuboid6F> getElevationSpaceCollisionCuboids() const;
-    std::vector<Cuboid6F> getWorldSpaceCollisionCuboids() const;
+    std::vector<ElevationCuboid> getElevationCollisionCuboids() const;
+    std::vector<WorldCuboid> getWorldCollisionCuboids() const;
 
     inline bool canWalkOn() const {
         return allowWalkOn;
@@ -35,16 +35,16 @@ private:
 class MovementComponent;
 class CollisionDetectorComponent : public Component {
 public:
+    using CollisonCmpsVector = std::vector<CollisionComponent*>;
     CollisionDetectorComponent(Entity* e, MovementComponent* movmnt, const Cuboid6F& bnd) : Component(e), movementCmp{movmnt}, boundingCuboid{bnd} {}
     virtual ~CollisionDetectorComponent() = default;
 
-    void onCollision(const CollisionResult& result) {};
+    void onCollision(const CollisionResults& results) {};
 
-    CollisionResult checkCollision(CollisionComponent& other);
+    CollisionResults checkCollision(const CollisonCmpsVector::const_iterator& begin, const CollisonCmpsVector::const_iterator& end) const;
 
     MovementComponent* movementCmp{nullptr};
-    Cuboid6F getElevationSpaceBoundingCuboid() const;
-    Cuboid6F getWorldSpaceBoundingCuboid() const;
+    ElevationCuboid getElevationBoundingCuboid() const;
 
 private:
     Cuboid6F boundingCuboid{0.0F, 0.15F, 0.0F, 1.0F, 0.85F, 1.0F};

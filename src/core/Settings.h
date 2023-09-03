@@ -5,8 +5,8 @@
 namespace Settings {
     struct Window {
         static constexpr char* TITLE = "Some title";
-        static constexpr int WIDTH{400}; // (1400 - record) (800 - photo)
-        static constexpr int HEIGHT{300}; // (900  - record) (600 - photo)
+        static constexpr int WIDTH{1200}; // (1400 - record) (800 - photo)
+        static constexpr int HEIGHT{800}; // (900  - record) (600 - photo)
         static constexpr float ASPECT_RATIO{static_cast<float>(WIDTH) / static_cast<float>(HEIGHT)};
         static constexpr bool ENABLE_VSYNC{true};
 

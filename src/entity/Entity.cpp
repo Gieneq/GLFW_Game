@@ -130,14 +130,7 @@ std::optional<TextureComponent*> Entity::getTextureComponent() const {
     return textureComponent;
 }
 
-
-Cuboid6F Entity::getCuboidWorldSpace() const {
-    return Cuboid6F(
-        cuboidElevationSpace.topLeft.x + 0.0F,
-        cuboidElevationSpace.topLeft.y +  0.0F,
-        cuboidElevationSpace.topLeft.z + getContainingElevationOrThrow()->z(),
-        cuboidElevationSpace.size.w,
-        cuboidElevationSpace.size.h,
-        cuboidElevationSpace.size.d
-    );
+void Entity::setElevation(Elevation* elevation) {
+    this->containingElevation = elevation;
+    this->cuboid.setElevationDepth(elevation);
 }

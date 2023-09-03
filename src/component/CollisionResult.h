@@ -2,58 +2,104 @@
 #include <iostream>
 #include "Component.h"
 #include "Maths.h"
+#include "Coordinates.h"
 #include <vector>
+#include <tuple>
 
 class CollisionDetectorComponent;
 class CollisionComponent;
 
-class CollisionResult {
+
+/**
+ * Collision result for collision check with all valid objects.
+ * All colliding components with their filtered cuboids in elevation space
+ * are transfered.
+*/
+enum class CollisionAbility {
+    WALKABLE,
+};
+
+constexpr collisionAbilityToInt(CollisionAbility ability) {
+    switch (ability) {
+        case CollisionAbility::WALKABLE:
+            return 0;
+        default:
+            return -1;
+    }
+}
+
+class CollisionResults {
 public:
-    CollisionResult(CollisionDetectorComponent* collisionDetectorCmp, CollisionComponent* collidedComponent) : 
-        collisionDetectorCmp{collisionDetectorCmp}, collidedComponent{collidedComponent} {}
+    using ResultsVector = std::vector<std::tuple<CollisionComponent*, std::vector<ElevationCuboid>>>;
+
+    CollisionResults(CollisionDetectorComponent* collisionDetectorCmp, const ResultsVector::const_iterator& begin, 
+        const ResultsVector::const_iterator& end) : 
+        collisionDetectorCmp{collisionDetectorCmp}, collisionResults{begin, end} {}
 
     operator bool() const {
         return size() > 0;
     }
 
-    CollisionComponent* getCollidedComponent() const {
-        return collidedComponent;
+    inline std::vector<CollisionComponent*> getCollidedComponents() const {
+        std::vector<CollisionComponent*> collidedComponents;
+        for (const auto& result : collisionResults) {
+            collidedComponents.push_back(std::get<0>(result));
+        }
+        return collidedComponents;
+    }
+
+    inline std::vector<ElevationCuboid> getCollidedCuboids() const {
+        std::vector<ElevationCuboid> collidedCuboids;
+        for (const auto& result : collisionResults) {
+            collidedCuboids.insert(collidedCuboids.end(), std::get<1>(result).begin(), std::get<1>(result).end());
+        }
+        return collidedCuboids;
     }
 
     CollisionDetectorComponent* getCollisionDetectorComponent() const {
         return collisionDetectorCmp;
     }
 
-    std::vector<Cuboid6F>::iterator begin() {
-        return collidedCuboidsElevationSpace.begin();
+    ResultsVector::const_iterator begin() const {
+        return collisionResults.begin();
     }
 
-    std::vector<Cuboid6F>::iterator end() {
-        return collidedCuboidsElevationSpace.end();
-    }
-
-    std::vector<Cuboid6F>::const_iterator begin() const {
-        return collidedCuboidsElevationSpace.begin();
-    }
-
-    std::vector<Cuboid6F>::const_iterator end() const {
-        return collidedCuboidsElevationSpace.end();
+    ResultsVector::const_iterator end() const {
+        return collisionResults.end();
     }
 
     size_t size() const {
-        return collidedCuboidsElevationSpace.size();
+        return collisionResults.size();
     }
 
-    inline int getCollidedCuboidsCount() const {
-        return static_cast<int>(collidedCuboidsElevationSpace.size());
+    inline int getCollidedComponentsCount() const {
+        return static_cast<int>(collisionResults.size());
     }
 
-    static CollisionResult NONE() {
-        return CollisionResult{nullptr, nullptr};
+    static CollisionResults NONE() {
+        return CollisionResults{nullptr, {}, {}};
     }
 
-    void addCollidedCuboid(const Cuboid6F& cuboid) {
-        collidedCuboidsElevationSpace.push_back(cuboid);
+    /* Because some Cuboids of Component can not collide */
+    inline void addCollidedCuboid(CollisionComponent* collisionComponent,
+        const std::vector<Cuboid6F>::const_iterator& begin, const std::vector<Cuboid6F>::const_iterator& end) {
+            const auto cuboids = ElevationCuboid::transformLocalCuboids(collisionComponent->getParentEntity()->getCuboid(), begin, end);
+        collisionResults.push_back(std::make_tuple(collisionComponent, cuboids));
+    }
+
+    template <CollisionAbility ability>
+    CollisionResults getFilteredWithAbility() {
+        ResultsVector filteredResults;
+        for (const auto& result : collisionResults) {
+            const auto& collisionComponent = std::get<0>(result);
+            const auto& cuboids = std::get<1>(result);
+            if(ability == CollisionAbility::WALKABLE) {
+                if (collisionComponent->canWalkOn()) {
+                    filteredResults.push_back(std::make_tuple(collisionComponent, cuboids));
+                }
+            }
+        }
+        return CollisionResults{collisionDetectorCmp, filteredResults.begin(), filteredResults.end()};
     }
 
 private:
@@ -61,6 +107,5 @@ private:
     CollisionDetectorComponent* collisionDetectorCmp{nullptr};
 
     /* Related to collision component envountered by detector */
-    CollisionComponent* collidedComponent{nullptr};
-    std::vector<Cuboid6F> collidedCuboidsElevationSpace;
+    ResultsVector collisionResults;
 };

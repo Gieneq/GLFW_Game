@@ -4,6 +4,7 @@
 #include <vector>
 #include "Component.h"
 #include "Maths.h"
+#include "Coordinates.h"
 #include "TextureID.h"
 
 enum class EntityType {
@@ -25,7 +26,7 @@ class AnimationComponent;
 class Entity {
 protected:
     // Entity() = default;
-    Entity(Elevation* elevation, EntityType etype) : containingElevation{elevation}, type{etype} {}
+    Entity(Elevation* elevation, EntityType etype) : containingElevation{elevation}, type{etype}, cuboid{reinterpret_cast<ElevationDepth*>(elevation), 0,0,0,1,1,1} {}
 
 public:
     // todo make Entity responsible for deleting components - IMPORTANT!
@@ -119,15 +120,15 @@ public:
     
     /* Position related methods */
 
-    inline Cuboid6F& getCuboidElevationSpace() {
-        return cuboidElevationSpace;
+    inline ElevationCuboid& getCuboid() {
+        return cuboid;
     }
 
-    inline const Cuboid6F& getCuboidElevationSpace() const {
-        return cuboidElevationSpace;
+    inline const ElevationCuboid& getCuboid() const {
+        return cuboid;
     }
-   
-    Cuboid6F getCuboidWorldSpace() const;
+
+
 
 protected:
     /* Quick access to popular components */
@@ -136,6 +137,7 @@ protected:
     TextureComponent* textureComponent{nullptr};
 
 private:
+    void setElevation(Elevation* elevation);
     /**
      * ID is ised to distinguish entities.
     */
@@ -150,7 +152,7 @@ private:
 
     Elevation* containingElevation{nullptr};
 
-    Cuboid6F cuboidElevationSpace{0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0.0F};
+    ElevationCuboid cuboid{nullptr, 0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0.0F};
 
     /* General step in adding components */
     void addComponent(Component* component);

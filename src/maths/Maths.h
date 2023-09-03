@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <array>
+#include <functional>
 
 /********************************************
  *     Naming convention for Cuboid6F       *
@@ -31,6 +32,19 @@
  * inclusive [back, front) exclusive        *
  *                                          *
  *******************************************/
+
+enum class Side {
+    LEFT = 0,
+    RIGHT,
+    TOP,
+    BOTTOM,
+    FRONT,
+    BACK
+};
+
+constexpr int sideToInt(Side side) {
+    return static_cast<int>(side);
+}
 
 class Vect2F {
 public:
@@ -274,6 +288,8 @@ private:
 
 class Cuboid6F {
 public:
+    using SideFunction = std::function<float()>;
+
     Cuboid6F() : topLeft{}, size{} {}
     Cuboid6F(float x, float y, float z, float w, float h, float d) : 
         topLeft{x, y, z}, size{w, h, d} {}
@@ -302,6 +318,20 @@ public:
     /** Back is where there topLeft is */
     inline float back() const {
         return topLeft.z;
+    }
+
+    template <Side side>
+    float getSide() const {
+        static std::array<SideFunction, 6> sideGettersFunctions {
+            [this]() { return left(); },
+            [this]() { return right(); },
+            [this]() { return top(); },
+            [this]() { return bottom(); },
+            [this]() { return front(); },
+            [this]() { return back(); }
+        };
+
+        return sideGettersFunctions[sideToInt(side)]();
     }
     
     static Cuboid6F fromSides(float left, float right, float top, float bottom, float back, float front);
@@ -350,6 +380,18 @@ public:
         return Cuboid6F{topLeft.x + translation.x, topLeft.y + translation.y, topLeft.z + translation.z, size.w, size.h, size.d};
     }
 
+    inline void translate(const Vect3F& translation) {
+        topLeft.x += translation.x;
+        topLeft.y += translation.y;
+        topLeft.z += translation.z;
+    }
+
+    inline void translate(const float x, const float y, const float z) {
+        topLeft.x += x;
+        topLeft.y += y;
+        topLeft.z += z;
+    }
+
     inline Vect2F getXY() const {
         return Vect2F{topLeft.x, topLeft.y};
     }
@@ -373,8 +415,35 @@ public:
         return os;
     }
 
-    Vect3F topLeft;
+    inline void setTopLeft(const Vect3F& topLeft) {
+        this->topLeft = topLeft;
+    }
 
+    inline void setTopLeft(const float x, const float y, const float z) {
+        this->topLeft = Vect3F{x, y, z};
+    }
+
+    inline void setSize(const Size3F& size) {
+        this->size = size;
+    }
+
+    inline void setSize(const float w, const float h, const float d) {
+        this->size = Size3F{w, h, d};
+    }
+
+    /* Accesors to corners */
+    
+    inline const Vect3F& topLeftBottom() const {
+        return topLeft;
+    }
+
+    
+    inline Vect3F& topLeftBottom() {
+        return topLeft;
+    }
+
+private:
+    Vect3F topLeft;
     Size3F size;
 };
 

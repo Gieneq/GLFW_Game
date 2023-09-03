@@ -73,10 +73,10 @@ bool Loader::loadPlayer(World& world) {
     }
 
     /* Set starting position */
-    player->getCuboidElevationSpace().topLeft.x = Settings::Player::INITIAL_X;
-    player->getCuboidElevationSpace().topLeft.y = Settings::Player::INITIAL_Y;
+    player->getCuboid().value().x() = Settings::Player::INITIAL_X;
+    player->getCuboid().value().y() = Settings::Player::INITIAL_Y;
     const int playerElevationIndex = Settings::Player::INITIAL_ELEVATION_IDX;
-    player->getCuboidElevationSpace().topLeft.z = Settings::Player::INITIAL_Z;
+    player->getCuboid().value().z() = Settings::Player::INITIAL_Z;
 
     /* Try adding texture to player */
     auto playersTextureIDOption = Loader::getLoader().getTextureDataByName("some_tiles");
@@ -662,7 +662,7 @@ std::optional<bool> Loader::retriveTileDataCollisionFromTileNode(const pugi::xml
 
                     /* Apply to all collision cuboids depths */
                     for(auto& collisionCuboid : tileData->collisionCuboids) {
-                        collisionCuboid.size.d = static_cast<float>(value) / static_cast<float>(Settings::Map::TILE_DEPTH);
+                        collisionCuboid.d() = static_cast<float>(value) / static_cast<float>(Settings::Map::TILE_DEPTH);
                     }
                 }
             }
@@ -817,18 +817,20 @@ bool Loader::fillElevationWithEntities(World& world, Elevation* elevation, Entit
 
 
         /* Position */
-        tileEntity->getCuboidElevationSpace().topLeft = Vect3F(
+        
+
+        tileEntity->getCuboid().value().setTopLeft(
             tileX, 
             tileY - ((tilesetData->getTileRelativeHeightScale() > 1.0F) ? (tilesetData->getTileRelativeHeightScale() - 1.0F) : 0.0F), 
             0.0F
         );
 #ifdef USE_Y_ELEVATION_FIX
         const int elevationFixY = elevation->getIndex();
-        tileEntity->getCuboidElevationSpace().topLeft.y += elevationFixY;
+        tileEntity->getCuboid().value().y() += elevationFixY;
 #endif
 
         /* Size */
-        tileEntity->getCuboidElevationSpace().size = Size3F(
+        tileEntity->getCuboid().value().setSize(
             1.0F * tilesetData->getTileRelativeWidthtScale(), 
             1.0F * tilesetData->getTileRelativeHeightScale(), 
             0.0F
