@@ -198,6 +198,14 @@ void GameBase::render() {
             }
         }
 
+        {
+            /* Black - entities debug */
+            const auto debugCuboidsWorldSpace = collisionsSystem.getDebugResults();
+            for(const auto& debugCuboidWorldSpace :  debugCuboidsWorldSpace) {
+                render_system.renderTranslucentFilledCuboid6F(debugCuboidWorldSpace.value(), 0.0F, 0.0F, 0.0F, 0.5F);
+            }
+        }
+
         /* White - detector */
         const auto playerBoundingWorldSpace = world.player.collisionDetectorComponent->getElevationBoundingCuboid().toWorldSpace();
         render_system.renderTranslucentFilledCuboid6F(playerBoundingWorldSpace.value(), 1.0F, 1.0F, 1.0F, 0.3F);

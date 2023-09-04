@@ -31,3 +31,4 @@ TEST(WorldCuboidTest, Creation) {
     EXPECT_CALL(mockElevation, getIndex()).WillOnce(::testing::Return(elevationIndex));
     EXPECT_EQ(mockElevation.getIndex(), elevationIndex);
 }
+

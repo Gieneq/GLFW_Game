@@ -134,3 +134,14 @@ void Entity::setElevation(Elevation* elevation) {
     this->containingElevation = elevation;
     this->cuboid.setElevationDepth(elevation);
 }
+
+std::vector<CollisionComponent*> Entity::getCollisionComponents(std::vector<Entity*>::const_iterator begin, std::vector<Entity*>::const_iterator end) {
+    std::vector<CollisionComponent*> collisionComponents;
+    for(auto it = begin; it != end; ++it) {
+        auto collisionComponent = (*it)->getComponent<CollisionComponent>();
+        if(collisionComponent) {
+            collisionComponents.push_back(collisionComponent);
+        }
+    }
+    return collisionComponents;
+}

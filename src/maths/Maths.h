@@ -254,8 +254,9 @@ public:
 
     inline float height() const { return size.h; }
 
+    /* Be careful - point on edge is not valid */
     inline bool hasPointInside(const Vect2F& point) const {
-        return point.x >= left() && point.x < right() && point.y >= top() && point.y < bottom();
+        return point.x > left() && point.x < right() && point.y > top() && point.y < bottom();
     }
 
     inline bool checkIntersection(const Rect4F& other) const {

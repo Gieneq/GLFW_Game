@@ -128,7 +128,7 @@ public:
         return cuboid;
     }
 
-
+    static std::vector<CollisionComponent*> getCollisionComponents(std::vector<Entity*>::const_iterator begin, std::vector<Entity*>::const_iterator end);
 
 protected:
     /* Quick access to popular components */

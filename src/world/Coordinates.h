@@ -36,31 +36,35 @@ public:
         const std::vector<Cuboid6F>::const_iterator& begin, const std::vector<Cuboid6F>::const_iterator& end);
 
     template <Side side>
-    static float getMaxSide(const std::vector<WorldCuboid>::const_iterator& worldCuboidsBegin, 
+    static WorldCuboid& getMaxSide(const std::vector<WorldCuboid>::const_iterator& worldCuboidsBegin, 
         const std::vector<WorldCuboid>::const_iterator& worldCuboidsEnd) {
         float maxSide = std::numeric_limits<float>::min();
+        auto maxSideIt = worldCuboidsBegin;
         for (auto wCuboidsIt = worldCuboidsBegin; wCuboidsIt != worldCuboidsEnd; ++wCuboidsIt) {
-            const auto& cuboid = (*wCuboidsIt).cuboid.value();
+            const auto& cuboid = (*wCuboidsIt).value();
             const auto side = cuboid.getSide<side>();
             if (side > maxSide) {
                 maxSide = side;
+                maxSideIt = wCuboidsIt;
             }
         }
-        return maxSide;
+        return *maxSideIt;
     }
     
     template <Side side>
-    static float getMinSide(const std::vector<WorldCuboid>::const_iterator& worldCuboidsBegin, 
+    static WorldCuboid& getMinSide(const std::vector<WorldCuboid>::const_iterator& worldCuboidsBegin, 
         const std::vector<WorldCuboid>::const_iterator& worldCuboidsEnd) {
         float minSide = std::numeric_limits<float>::max();
+        auto minSideIt = worldCuboidsBegin;
         for (auto wCuboidsIt = worldCuboidsBegin; wCuboidsIt != worldCuboidsEnd; ++wCuboidsIt) {
-            const auto& cuboid = (*wCuboidsIt).cuboid.value();
+            const auto& cuboid = (*wCuboidsIt).value();
             const auto side = cuboid.getSide<side>();
             if (side < minSide) {
                 minSide = side;
+                minSideIt = wCuboidsIt;
             }
         }
-        return minSide;
+        return *minSideIt;
     }
 
 private:
@@ -98,31 +102,35 @@ public:
         const std::vector<Cuboid6F>::const_iterator& begin, const std::vector<Cuboid6F>::const_iterator& end);
 
     template <Side side>
-    static float getMaxSide(const std::vector<ElevationCuboid>::const_iterator& elevationCuboidsBegin, 
+    static const ElevationCuboid& getMaxSide(const std::vector<ElevationCuboid>::const_iterator& elevationCuboidsBegin, 
         const std::vector<ElevationCuboid>::const_iterator& elevationCuboidsEnd) {
         float maxSide = std::numeric_limits<float>::min();
+        auto maxSideIt = elevationCuboidsBegin;
         for (auto eCuboidsIt = elevationCuboidsBegin; eCuboidsIt != elevationCuboidsEnd; ++eCuboidsIt) {
-            const auto& cuboid = (*eCuboidsIt).cuboid.value();
-            const auto side = cuboid.getSide<side>();
-            if (side > maxSide) {
-                maxSide = side;
+            const auto& cuboid = (*eCuboidsIt).value();
+            const auto sideValue = cuboid.getSide<side>();
+            if (sideValue > maxSide) {
+                maxSide = sideValue;
+                maxSideIt = eCuboidsIt;
             }
         }
-        return maxSide;
+        return *maxSideIt;
     }
     
     template <Side side>
-    static float getMinSide(const std::vector<ElevationCuboid>::const_iterator& elevationCuboidsBegin, 
+    static const ElevationCuboid& getMinSide(const std::vector<ElevationCuboid>::const_iterator& elevationCuboidsBegin, 
         const std::vector<ElevationCuboid>::const_iterator& elevationCuboidsEnd) {
         float minSide = std::numeric_limits<float>::max();
+        auto minSideIt = elevationCuboidsBegin;
         for (auto eCuboidsIt = elevationCuboidsBegin; eCuboidsIt != elevationCuboidsEnd; ++eCuboidsIt) {
-            const auto& cuboid = (*eCuboidsIt).cuboid.value();
-            const auto side = cuboid.getSide<side>();
-            if (side < minSide) {
-                minSide = side;
+            const auto& cuboid = (*eCuboidsIt).value();
+            const auto sideValue = cuboid.getSide<side>();
+            if (sideValue < minSide) {
+                minSide = sideValue;
+                minSideIt = eCuboidsIt;
             }
         }
-        return minSide;
+        return *minSideIt;
     }
 
 private:

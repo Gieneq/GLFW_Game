@@ -4,46 +4,6 @@
 #include "MovementComponent.h"
 #include <algorithm>
 
-/* Tiles Pair/Quad */
-
-// TilesPair TilesQuad::getFrontTilesRelativeToDirection(Vect2F direction) const {
-//     if(direction.x > 0) {
-//         return TilesPair(topRightGlobal, bottomRightGlobal);
-//     } 
-//     else if(direction.x < 0) {
-//         return TilesPair(bottomLeftGlobal, topLeftGlobal);
-//     } 
-//     else if(direction.y < 0) {
-//         return TilesPair(topLeftGlobal, topRightGlobal);
-//     } 
-//     else if(direction.y > 0) {
-//         return TilesPair(bottomRightGlobal, bottomLeftGlobal);
-//     }
-//     /* No direction same as direction (0, 1)*/
-//     return TilesPair(bottomRightGlobal, bottomLeftGlobal);
-// }
-
-// Rect4F TilesPair::getBoundingRect() const {
-//     if(!hasAny()) {
-//         return Rect4F{0,0,0,0};
-//     }
-
-//     Entity* first = left != nullptr ? left : right;
-//     /* First is for sure not null */
-    
-//     Entity* second = left != nullptr ? right : left;
-//     if(!second) {
-//         second = first;
-//     }
-//     /* If second was null, now they are the same for easier calc */
-
-//     float leftValue = std::min(first->getCuboid().value().left(), second->getCuboid().value().left());
-//     float rightValue = std::max(first->getCuboid().value().right(), second->getCuboid().value().right());
-//     float topValue = std::min(first->getCuboid().value().top(), second->getCuboid().value().top());
-//     float bottomValue = std::max(first->getCuboid().value().bottom(), second->getCuboid().value().bottom());
-
-//     return Rect4F{leftValue, topValue, rightValue - leftValue, bottomValue - topValue};
-// }
 
 
 /* Elevation class */
@@ -225,25 +185,59 @@ bool Elevation::deleteEntityIfExists(Entity* entity) {
 
 /* Other */
 
-Entity* Elevation::getFloorEntityByXY(const Vect2F& entityPosition) {
+Entity* Elevation::getFloorEntityByXY(const Vect2F& elevationSpacePoint) {
+
+    /* Fix preventing hitting edge */
+    const Vect2F consistentPoint{elevationSpacePoint.x + EDGE_EPSILON, elevationSpacePoint.y + EDGE_EPSILON};
+
     for(auto entity : floorEntities) {
-        if(entity->getCuboid().value().getFlatten().hasPointInside(entityPosition)) {
+        if(entity->getCuboid().value().getFlatten().hasPointInside(consistentPoint)) {
             return entity;
         }
     }
     return nullptr;
 }
 
-// TilesQuad Elevation::getFloorNearbyTilesQuad(const Rect4F& entityRect) {
-//     TilesQuad tilesQuad{
-//         getFloorEntityByXY(entityRect.topLeft()),
-//         getFloorEntityByXY(entityRect.topRight()),
-//         getFloorEntityByXY(entityRect.bottomLeft()),
-//         getFloorEntityByXY(entityRect.bottomRight())
-//     };
+FloorSegment3X3 Elevation::getFloorEntities3X3(const Vect2F& centerElevationSpacePoint, const Size2F tileSize) {
+    FloorSegment3X3 result;
 
-//     return tilesQuad;
-// }
+    /* Fix preventing hitting edge */
+    const Vect2F consistentPoint{centerElevationSpacePoint.x + EDGE_EPSILON, centerElevationSpacePoint.y + EDGE_EPSILON};
+
+    for(int row = -1; row < 2; ++row) {
+        for(int col = -1; col < 2; ++col) {
+            const Vect2F tileCenter{consistentPoint.x + tileSize.w * col, consistentPoint.y + tileSize.h * row};
+            result.setRelative(std::make_optional(getFloorEntityByXY(tileCenter)), col, row);
+        }
+    }
+
+    return result;
+}
+
+
+std::vector<Entity*> Elevation::getFloorEntitiesInRect(const Rect4F& rectElevationSpace) {
+    std::vector<Entity*> result;
+
+    for(auto entity : floorEntities) {
+        if(entity->getCuboid().value().getFlatten().checkIntersection(rectElevationSpace)) {
+            result.push_back(entity);
+        }
+    }
+
+    return result;
+}
+
+std::vector<CollisionComponent*> Elevation::getCollisionComponentsInRect(const Rect4F& flattenCollisionDetectorElevation) {
+    std::vector<CollisionComponent*> result;
+
+    for(auto collisonCmp : collisionComponentsRegister) {
+        if(collisonCmp->getParentEntity()->getCuboid().value().getFlatten().checkIntersection(flattenCollisionDetectorElevation)) {
+            result.push_back(collisonCmp);
+        }
+    }
+
+    return result;
+}
 
 std::vector<Entity*> Elevation::getAnyIntersectingEntities(Vect2F pointElevationSpace) {
     std::vector<Entity*> result;
@@ -287,9 +281,7 @@ std::vector<Entity*> Elevation::getAnyIntersectingEntities(const Rect4F& rectEle
 
     /* Combine results */
     std::vector<Entity*> result;
-    // std::copy(firstVertexCollidingEntities.begin(), firstVertexCollidingEntities.end(), std::back_inserter(result));
-    // std::copy(secondVertexCollidingEntities.begin(), secondVertexCollidingEntities.end(), std::back_inserter(result));
-
+    
     /* Pass only unique */
     for(Entity* e : firstVertexCollidingEntities) {
         if(std::find(result.begin(), result.end(), e) == result.end()) {

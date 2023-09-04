@@ -1,6 +1,7 @@
 message(STATUS " * Building entity")
 
 list(APPEND LIB_DEPENDENCIES 
+  utils
   maths
   component
   world
@@ -10,7 +11,7 @@ message(STATUS "   -> ${LIB_DEPENDENCIES}")
 
 add_library(entity 
   Entity.cpp
-  EntitiesList.cpp
+  EntityContainers.cpp
   Player.cpp
 )
 

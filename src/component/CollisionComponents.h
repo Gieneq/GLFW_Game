@@ -20,6 +20,8 @@ public:
         return allowWalkOn;
     }
 
+    static std::vector<ElevationCuboid> retriveElevationCuboidsFromComponents(const std::vector<CollisionComponent*>::const_iterator& begin, const std::vector<CollisionComponent*>::const_iterator& end);
+
 private:
     inline void appendCollisionCuboid(const Cuboid6F& cuboid) {
         collisionCuboids.push_back(cuboid);

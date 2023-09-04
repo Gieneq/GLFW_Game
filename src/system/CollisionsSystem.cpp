@@ -75,7 +75,54 @@ void CollisionsSystem::processDetector(Entity* detectorEntity, const CollisionCo
         }
         else {
             /* Has no collisions - chack if outside elevation */
-            std::cout << "Todo: Outside elevation or standing on ground with no collisions." << std::endl;
+
+            auto floorEntitiesUnderDetector = parentElevation->getFloorEntitiesInRect(detectorEntity->getCuboid().value().getFlatten());
+            debugEntites.insert(debugEntites.end(), floorEntitiesUnderDetector.begin(), floorEntitiesUnderDetector.end());
+
+            bool isAboveGround = detectorEntity->getCuboid().value().z() > 0.0F;
+            bool hasFloorUnder = floorEntitiesUnderDetector.size() > 0;
+
+            /* Case 3 - remains on floor */
+            if(hasFloorUnder) {
+                /* Case 3.1 - is above the ground - place on enetity or ground */
+
+                /* Case 3.1.1 - place on entity */
+                if(isAboveGround) {
+                    auto collisionCmpUnderDetector = parentElevation->getCollisionComponentsInRect(detectorEntity->getCuboid().value().getFlatten());
+
+                    if(collisionCmpUnderDetector.size() > 0) {
+
+                        auto elevationCuboids = CollisionComponent::retriveElevationCuboidsFromComponents(collisionCmpUnderDetector.begin(), collisionCmpUnderDetector.end());
+                        const auto& tallestElevationCuboid = ElevationCuboid::getMaxSide<Side::FRONT>(elevationCuboids.begin(), elevationCuboids.end());
+                        CollisionsSystem::standOnObstacle(detectorCmp, tallestElevationCuboid);
+                    }
+                                    
+                    /* Case 3.1.2 - place on ground */
+                    else {
+                        detectorEntity->getCuboid().value().z() = 0.0F;
+                    }
+                }
+                    
+                /* Case 3.1 - remains on floor */
+                else {
+                    // std::cout << "Todo: Touching ground. Nothing" << std::endl;
+                }
+
+            }
+
+            /* Case 4 - outside elevation */
+            else {
+                bool hasLowerElevation = false;
+                /* Case 4.1 - has lower elevation - fall */
+                if(hasLowerElevation) {
+                    std::cout << "Todo: falling down like on stairs..." << std::endl;
+                }
+
+                /* Case 4.2 - is outside the world */
+                else {
+                    std::cout << "Todo: outside the world. Not important" << std::endl;
+                }
+            }
         }
     }
 
@@ -109,11 +156,9 @@ void CollisionsSystem::leanAgainstObstacle(CollisionDetectorComponent* detectorC
 
 
 void CollisionsSystem::standOnObstacle(CollisionDetectorComponent* detectorCmp, const ElevationCuboid& obstacle) {
-    // const auto cuboidWithHighestFront = ElevationCuboid::getMaxSide<Side::FRONT>(cuboidsBegin, cuboidsEnd);
     auto& parentCuboid = detectorCmp->getParentEntity()->getCuboid().value();
     const auto boundingCuboid = detectorCmp->getElevationBoundingCuboid().value();
     Cuboid6F::placeParentCuboidOnOther(parentCuboid, boundingCuboid, obstacle.value());
-    // detectorEntity->getCuboid().value().z() = maxFrontValue;
 }
 
 std::vector<WorldCuboid> CollisionsSystem::getDebugResults() {

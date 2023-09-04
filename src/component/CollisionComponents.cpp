@@ -14,6 +14,18 @@ std::vector<WorldCuboid> CollisionComponent::getWorldCollisionCuboids() const {
     return WorldCuboid::transformLocalCuboids(parent->getCuboid(), collisionCuboids.begin(), collisionCuboids.end());
 }
 
+std::vector<ElevationCuboid> CollisionComponent::retriveElevationCuboidsFromComponents(const std::vector<CollisionComponent*>::const_iterator& begin, 
+    const std::vector<CollisionComponent*>::const_iterator& end) {
+    auto cuboids = std::vector<ElevationCuboid>{};
+    for (auto collisionCmpIt = begin; collisionCmpIt != end; ++collisionCmpIt) {
+        auto collisionCmp = *collisionCmpIt;
+        auto cuboids = collisionCmp->getElevationCollisionCuboids();
+        cuboids.insert(cuboids.end(), cuboids.begin(), cuboids.end());
+    }
+    return cuboids;
+}
+
+
 /* CollisionDetectorComponent */
 
 CollisionResults CollisionDetectorComponent::checkCollision(const CollisonCmpsVector::const_iterator& begin, const CollisonCmpsVector::const_iterator& end) const {
@@ -34,7 +46,9 @@ CollisionResults CollisionDetectorComponent::checkCollision(const CollisonCmpsVe
             if (thisBounding.checkIntersection(otherCuboid)) {
                 elevationCollidingCuboids.push_back(otherCuboid);
             }
-            result.addCollidedCuboids(collisionCmp, elevationCollidingCuboids.cbegin(), elevationCollidingCuboids.cend());
+            if(elevationCollidingCuboids.size() > 0) {
+                result.addCollidedCuboids(collisionCmp, elevationCollidingCuboids.cbegin(), elevationCollidingCuboids.cend());
+            }
         }
     }
     
