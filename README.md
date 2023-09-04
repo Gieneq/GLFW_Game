@@ -6,7 +6,7 @@ Another attempt to create my dream game. Long jurney starting from 2012 C++ & Al
 
 ## Recent state
 
-World start to look like game. There was added loading of map files with resources for tilesets and textures. Player can move freely around the world without any interaction. Component system and existing tile data are ready for collion detection.
+After many changes collision system, with elevation changing was finally introduced. Not polished yet.
 
 <p align="center">
     <img src="img/current_state_capture.PNG" width="500" alt="Recent state">
@@ -20,6 +20,7 @@ World start to look like game. There was added loading of map files with resourc
 - 07.08.2023: Map TMX & Tileset TSX files loading and rendering
 - 08.08.2023: Tiles animation with common timing listeners
 - 10.08.2023: Collision detection
+- 04.09.2023: Functional stairs
 
 ## Dependencies:
 - https://github.com/glfw/glfw

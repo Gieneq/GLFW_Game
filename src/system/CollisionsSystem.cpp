@@ -28,6 +28,58 @@ void CollisionsSystem::processDetector(Entity* detectorEntity, const CollisionCo
 
         auto [detectorCmp, movementCmp, parentElevation] = requirements.value();
 
+        auto floorEntitiesUnderDetector = parentElevation->getFloorEntitiesInRect(detectorEntity->getCuboid().value().getFlatten());
+        debugEntites.insert(debugEntites.end(), floorEntitiesUnderDetector.begin(), floorEntitiesUnderDetector.end());
+
+        const bool hasFloorUnder = floorEntitiesUnderDetector.size() > 0;
+
+
+        /* Elevating UP */
+
+        if(detectorEntity->getCuboid().value().z() > 0.999F) {
+            const float nextZ = detectorEntity->getCuboid().value().z() - 1.0F;
+            const int nextElevationIdx = parentElevation->getIndex() + 1;
+            std::cout << "Switching to elevation: " << nextElevationIdx << std::endl;
+            try {
+                /* Elevating Down */
+                parentElevation->getContainingWorld().moveDynamicEntityToElevationOrThrow(detectorEntity, nextElevationIdx);
+                detectorEntity->getCuboid().value().z() = nextZ;
+                return;
+            } catch(const std::exception&) {
+                /* No lower elevations */
+                detectorEntity->getCuboid().value().z() = 0.0F;
+            }
+        }
+
+        /* Movement check */
+        const float dt = 0.1F;
+        if(detectorEntity->getCuboid().value().z() > 0.0F || !hasFloorUnder) {
+            detectorEntity->getCuboid().value().z() -= 2.0F * dt;
+            if(detectorEntity->getCuboid().value().z() < 0.0F) {
+                if(!hasFloorUnder) {
+                    const float nextZ = detectorEntity->getCuboid().value().z() + 1.0F;
+                    const int nextElevationIdx = parentElevation->getIndex() - 1;
+                    std::cout << "Switching to elevation: " << nextElevationIdx << std::endl;
+                    try {
+                        /* Elevating Down */
+                        parentElevation->getContainingWorld().moveDynamicEntityToElevationOrThrow(detectorEntity, nextElevationIdx);
+                        detectorEntity->getCuboid().value().z() = nextZ;
+                        return;
+                    } catch(const std::exception&) {
+                        /* No lower elevations */
+                        detectorEntity->getCuboid().value().z() = 0.0F;
+                    }
+                }
+                else {
+                    detectorEntity->getCuboid().value().z() = 0.0F;
+                }
+            }
+        }
+        
+        /* Assumption - detetorBoundingZ = entityCuboidZ */
+
+        /* Collison check and reaction */
+
         auto results = detectorCmp->checkCollision(collisionComponentsBegin, collisionComponentsEnd);
 
         /**
@@ -56,8 +108,8 @@ void CollisionsSystem::processDetector(Entity* detectorEntity, const CollisionCo
                     for (const auto& collisionCuboid : collisionCuboids) {
                         const float heightDiff = collisionCuboid.value().z() - detectorCmp->getElevationBoundingCuboid().value().z();
 
-                        const bool isTooLow = heightDiff < 0.0F;
-                        const bool isTooHigh = heightDiff > Settings::Systems::Collisions::MAX_WALKABLE_DEPTH;
+                        const bool isTooLow = false;//heightDiff < -Settings::Systems::Collisions::MAX_WALKABLE_DEPTH;
+                        const bool isTooHigh = false;//heightDiff > Settings::Systems::Collisions::MAX_WALKABLE_DEPTH;
 
                         /* Case 2.1 - walkable, but too high */
                         if(isTooLow || isTooHigh) {
@@ -73,57 +125,57 @@ void CollisionsSystem::processDetector(Entity* detectorEntity, const CollisionCo
                 }
             }
         }
-        else {
-            /* Has no collisions - chack if outside elevation */
+        // else {
+        //     /* Has no collisions - chack if outside elevation */
 
-            auto floorEntitiesUnderDetector = parentElevation->getFloorEntitiesInRect(detectorEntity->getCuboid().value().getFlatten());
-            debugEntites.insert(debugEntites.end(), floorEntitiesUnderDetector.begin(), floorEntitiesUnderDetector.end());
+        //     auto floorEntitiesUnderDetector = parentElevation->getFloorEntitiesInRect(detectorEntity->getCuboid().value().getFlatten());
+        //     debugEntites.insert(debugEntites.end(), floorEntitiesUnderDetector.begin(), floorEntitiesUnderDetector.end());
 
-            bool isAboveGround = detectorEntity->getCuboid().value().z() > 0.0F;
-            bool hasFloorUnder = floorEntitiesUnderDetector.size() > 0;
+        //     bool isAboveGround = detectorEntity->getCuboid().value().z() > 0.0F;
+        //     bool hasFloorUnder = floorEntitiesUnderDetector.size() > 0;
 
-            /* Case 3 - remains on floor */
-            if(hasFloorUnder) {
-                /* Case 3.1 - is above the ground - place on enetity or ground */
+        //     /* Case 3 - remains on floor */
+        //     if(hasFloorUnder) {
+        //         /* Case 3.1 - is above the ground - place on enetity or ground */
 
-                /* Case 3.1.1 - place on entity */
-                if(isAboveGround) {
-                    auto collisionCmpUnderDetector = parentElevation->getCollisionComponentsInRect(detectorEntity->getCuboid().value().getFlatten());
+        //         /* Case 3.1.1 - place on entity */
+        //         if(isAboveGround) {
+        //             auto collisionCmpUnderDetector = parentElevation->getCollisionComponentsInRect(detectorEntity->getCuboid().value().getFlatten());
 
-                    if(collisionCmpUnderDetector.size() > 0) {
+        //             if(collisionCmpUnderDetector.size() > 0) {
 
-                        auto elevationCuboids = CollisionComponent::retriveElevationCuboidsFromComponents(collisionCmpUnderDetector.begin(), collisionCmpUnderDetector.end());
-                        const auto& tallestElevationCuboid = ElevationCuboid::getMaxSide<Side::FRONT>(elevationCuboids.begin(), elevationCuboids.end());
-                        CollisionsSystem::standOnObstacle(detectorCmp, tallestElevationCuboid);
-                    }
+        //                 auto elevationCuboids = CollisionComponent::retriveElevationCuboidsFromComponents(collisionCmpUnderDetector.begin(), collisionCmpUnderDetector.end());
+        //                 const auto& tallestElevationCuboid = ElevationCuboid::getMaxSide<Side::FRONT>(elevationCuboids.begin(), elevationCuboids.end());
+        //                 CollisionsSystem::standOnObstacle(detectorCmp, tallestElevationCuboid);
+        //             }
                                     
-                    /* Case 3.1.2 - place on ground */
-                    else {
-                        detectorEntity->getCuboid().value().z() = 0.0F;
-                    }
-                }
+        //             /* Case 3.1.2 - place on ground */
+        //             else {
+        //                 detectorEntity->getCuboid().value().z() = 0.0F;
+        //             }
+        //         }
                     
-                /* Case 3.1 - remains on floor */
-                else {
-                    // std::cout << "Todo: Touching ground. Nothing" << std::endl;
-                }
+        //         /* Case 3.1 - remains on floor */
+        //         else {
+        //             // std::cout << "Todo: Touching ground. Nothing" << std::endl;
+        //         }
 
-            }
+        //     }
 
-            /* Case 4 - outside elevation */
-            else {
-                bool hasLowerElevation = false;
-                /* Case 4.1 - has lower elevation - fall */
-                if(hasLowerElevation) {
-                    std::cout << "Todo: falling down like on stairs..." << std::endl;
-                }
+        //     /* Case 4 - outside elevation */
+        //     else {
+        //         bool hasLowerElevation = false;
+        //         /* Case 4.1 - has lower elevation - fall */
+        //         if(hasLowerElevation) {
+        //             std::cout << "Todo: falling down like on stairs..." << std::endl;
+        //         }
 
-                /* Case 4.2 - is outside the world */
-                else {
-                    std::cout << "Todo: outside the world. Not important" << std::endl;
-                }
-            }
-        }
+        //         /* Case 4.2 - is outside the world */
+        //         else {
+        //             std::cout << "Todo: outside the world. Not important" << std::endl;
+        //         }
+        //     }
+        // }
     }
 
 
