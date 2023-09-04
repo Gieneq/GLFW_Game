@@ -6,41 +6,41 @@
 #include "Settings.h"
 #include "Maths.h"
 #include "CollisionResult.h"
+#include "Coordinates.h"
 
 class Entity;
+class Elevation;
 class MovementComponent;
 class CollisionComponent;
 class CollisionDetectorComponent;
-class TilesQuad;
-
 
 class CollisionsSystem : public SystemBase {
 public:
-    // using EntitiesList = std::vector<Entity*>;
-    // using ObstaclesList = std::vector<CollisionComponent*>;
+    using EntitiesList = std::vector<Entity*>;
+    using CollisionComponentsList = std::vector<CollisionComponent*>;
+    using ElevationCuboidsList = std::vector<ElevationCuboid>;
+    using InitialRequirements = std::tuple<CollisionDetectorComponent*, MovementComponent*, Elevation*>;
 
     int system_id;
     void init();
-    void processDetector(Entity* detectorEntity);
-    std::vector<Cuboid6F> getDebugResultsCuboidsWorldSpace();
-
-    /* Frontal means colliding to front edge */
-    // static ObstaclesList detectorGetFrontalObstacles(Entity* detectorEntity);
-    // static ObstaclesList detectorGetFrontalObstacles(Entity* detectorEntity, int elevationIndex);
-
-    // static std::optional<CollisionComponent*> getHighestObstacle(const ObstaclesList& collidingComponents);
-    // static ObstaclesList retriveObstaclessFromEntities(const EntitiesList& entities);
-    // static EntitiesList retriveEntitiesFromObstacles(const ObstaclesList& collidingComponents);
-    // static std::vector<Cuboid6F> retriveElevationSpaceCuboidsFromObstacles(const ObstaclesList& collidingComponents);
-    // static std::vector<Cuboid6F> retriveWorldSpaceCuboidsFromObstacles(const ObstaclesList& collidingComponents);
-
-
+    void startSession();
+    void processDetector(Entity* detectorEntity, const CollisionComponentsList::const_iterator& collisionComponentsBegin, 
+        const CollisionComponentsList::const_iterator& collisionComponentsEnd);
+    std::vector<WorldCuboid> getDebugResults();
+    std::vector<WorldCuboid> getWalkableObstaclesCuboids();
+    std::vector<WorldCuboid> getNotWalkableObstaclesCuboids();
 
 private:
-    void onCollisionAlignToEdge(Cuboid6F& detectorElevationSpace, const Cuboid6F boundignBoxElevationSpace, const Cuboid6F& obstacleElevationSpace, Vect2F direction);
-    void onCollisionStandOntop(Cuboid6F& detectorElevationSpace, const Cuboid6F& obstacleElevationSpace);
-    void alignEntityCuboidToTilesQuad(Entity* entity, TilesQuad* tilesQuad, Vect2F direction);
+    static std::optional<InitialRequirements> checkDetectororRequirements(Entity* detectorEntity);
 
+    static void leanAgainstObstacle(CollisionDetectorComponent* detectorCmp, const Vect2F& direction, const ElevationCuboid& obstacle);
+
+    static void standOnObstacle(CollisionDetectorComponent* detectorCmp, const ElevationCuboid& obstacle);
+    
+
+    std::vector<CollisionResults> lastResults;
     std::vector<Entity*> debugEntites;
+    std::vector<ElevationCuboid> walkableCuboids;
+    std::vector<ElevationCuboid> notWalkableCuboids;
 };
 

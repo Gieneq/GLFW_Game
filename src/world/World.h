@@ -11,56 +11,56 @@ class CollisionComponent;
 class World;
 class ElevationDepth;
 
-class TilesPair {
-public:
-    TilesPair(Entity* left, Entity* right) : left(left), right(right) {}
-    bool hasAny() const {
-        return left != nullptr || right != nullptr;
-    }
+// class TilesPair {
+// public:
+//     TilesPair(Entity* left, Entity* right) : left(left), right(right) {}
+//     bool hasAny() const {
+//         return left != nullptr || right != nullptr;
+//     }
 
-    Rect4F getBoundingRect() const;
+//     Rect4F getBoundingRect() const;
 
-    Entity* left;
-    Entity* right;
+//     Entity* left;
+//     Entity* right;
 
-    friend std::ostream& operator<<(std::ostream& os, const TilesPair& tilesPair) {
-        os << "[L: "  << (tilesPair.left ? tilesPair.left->getId() : -2);
-        os << ", R: "  << (tilesPair.right ? tilesPair.right->getId() : -2);
-        os << "]";
-        return os;
-    }
-};
+//     friend std::ostream& operator<<(std::ostream& os, const TilesPair& tilesPair) {
+//         os << "[L: "  << (tilesPair.left ? tilesPair.left->getId() : -2);
+//         os << ", R: "  << (tilesPair.right ? tilesPair.right->getId() : -2);
+//         os << "]";
+//         return os;
+//     }
+// };
 
-class TilesQuad {
-public:
-    TilesQuad(Entity* topLeftGlobal, Entity* topRightGlobal, Entity* bottomLeftGlobal, Entity* bottomRightGlobal) 
-        : topLeftGlobal(topLeftGlobal), topRightGlobal(topRightGlobal), bottomLeftGlobal(bottomLeftGlobal), bottomRightGlobal(bottomRightGlobal) {}
+// class TilesQuad {
+// public:
+//     TilesQuad(Entity* topLeftGlobal, Entity* topRightGlobal, Entity* bottomLeftGlobal, Entity* bottomRightGlobal) 
+//         : topLeftGlobal(topLeftGlobal), topRightGlobal(topRightGlobal), bottomLeftGlobal(bottomLeftGlobal), bottomRightGlobal(bottomRightGlobal) {}
 
-    TilesPair getFrontTilesRelativeToDirection(Vect2F direction) const;
+//     TilesPair getFrontTilesRelativeToDirection(Vect2F direction) const;
 
-    bool hasAnyTile() const {
-        return topLeftGlobal != nullptr || topRightGlobal != nullptr || bottomLeftGlobal != nullptr || bottomRightGlobal != nullptr;
-    }    
+//     bool hasAnyTile() const {
+//         return topLeftGlobal != nullptr || topRightGlobal != nullptr || bottomLeftGlobal != nullptr || bottomRightGlobal != nullptr;
+//     }    
 
-    bool hasMissingTile() const {
-        return topLeftGlobal == nullptr || topRightGlobal == nullptr || bottomLeftGlobal == nullptr || bottomRightGlobal == nullptr;
-    }
+//     bool hasMissingTile() const {
+//         return topLeftGlobal == nullptr || topRightGlobal == nullptr || bottomLeftGlobal == nullptr || bottomRightGlobal == nullptr;
+//     }
 
-    friend std::ostream& operator<<(std::ostream& os, const TilesQuad& tilesQuad) {
-        os << "[TL: "  << (tilesQuad.topLeftGlobal ? tilesQuad.topLeftGlobal->getId() : -2);
-        os << ", TR: "  << (tilesQuad.topRightGlobal ? tilesQuad.topRightGlobal->getId() : -2);
-        os << ", BL: "  << (tilesQuad.bottomLeftGlobal ? tilesQuad.bottomLeftGlobal->getId() : -2);
-        os << ", BR: "  << (tilesQuad.bottomRightGlobal ? tilesQuad.bottomRightGlobal->getId() : -2);
-        os << "]";
-        return os;
-    }
+//     friend std::ostream& operator<<(std::ostream& os, const TilesQuad& tilesQuad) {
+//         os << "[TL: "  << (tilesQuad.topLeftGlobal ? tilesQuad.topLeftGlobal->getId() : -2);
+//         os << ", TR: "  << (tilesQuad.topRightGlobal ? tilesQuad.topRightGlobal->getId() : -2);
+//         os << ", BL: "  << (tilesQuad.bottomLeftGlobal ? tilesQuad.bottomLeftGlobal->getId() : -2);
+//         os << ", BR: "  << (tilesQuad.bottomRightGlobal ? tilesQuad.bottomRightGlobal->getId() : -2);
+//         os << "]";
+//         return os;
+//     }
 
-private:
-    Entity* topLeftGlobal;
-    Entity* topRightGlobal;
-    Entity* bottomLeftGlobal;
-    Entity* bottomRightGlobal;
-};
+// private:
+//     Entity* topLeftGlobal;
+//     Entity* topRightGlobal;
+//     Entity* bottomLeftGlobal;
+//     Entity* bottomRightGlobal;
+// };
 
 class ElevationDepth {
 public:
@@ -312,7 +312,7 @@ public:
 
     Entity* getFloorEntityByXY(const Vect2F& entityPosition);
 
-    TilesQuad getFloorNearbyTilesQuad(const Rect4F& entityRect);
+    // TilesQuad getFloorNearbyTilesQuad(const Rect4F& entityRect);
 
     std::vector<Entity*> getAnyIntersectingEntities(Vect2F pointElevationSpace);
 

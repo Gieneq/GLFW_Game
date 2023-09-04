@@ -154,6 +154,33 @@ std::array<Vect2F, 2> Rect4F::getPointsInDirection(const Vect2F& direction) cons
 
 /* Cuboid6F */
 
+Cuboid6F::Cuboid6F(const Rect4F* rect) {
+    topLeft = Vect3F{rect->x(), rect->y(), 0.0F};
+    size = Size3F{rect->w(), rect->h(), 0.0F};
+}
+
 Cuboid6F Cuboid6F::fromSides(float left, float right, float top, float bottom, float back, float front) {
     return Cuboid6F{left, top, back, right-left, bottom-top, front-back};
+}
+
+void Cuboid6F::alignParentCuboidToOther(Cuboid6F& outer, const Cuboid6F inner, const Cuboid6F& other, const Vect2F& direction) {
+    /* Align in X */
+    if(direction.x > 0.0F) {
+        outer.x() = other.x() - inner.width() - (inner.x() - outer.x());
+    }
+    else if(direction.x < 0.0F) {
+        outer.x() = other.x() + other.width() - (inner.x() - outer.x());
+    }
+
+    /* Align in Y */
+    if(direction.y > 0.0F) {
+        outer.y() = other.y() - inner.height() - (inner.y() - outer.y());
+    }
+    else if(direction.y < 0.0F) {
+        outer.y() = other.y() + other.height() - (inner.y() - outer.y());
+    }
+}
+
+void Cuboid6F::placeParentCuboidOnOther(Cuboid6F& outer, const Cuboid6F inner, const Cuboid6F& other) {
+    outer.z() = other.z() + other.depth() - (inner.z() - outer.z());
 }

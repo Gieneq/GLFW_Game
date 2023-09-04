@@ -42,6 +42,8 @@ enum class Side {
     BACK
 };
 
+class Rect4F;
+
 constexpr int sideToInt(Side side) {
     return static_cast<int>(side);
 }
@@ -99,6 +101,12 @@ public:
     Vect3F(float x, float y, float z) : x{x}, y{y}, z{z} {}
 
     Vect3F(const Vect2F& xy, float z) : x{xy.x}, y{xy.y}, z{z} {}
+
+    inline void set(const Vect3F& other) {
+        x = other.x;
+        y = other.y;
+        z = other.z;
+    }
 
     void negate();
 
@@ -293,6 +301,7 @@ public:
     Cuboid6F() : topLeft{}, size{} {}
     Cuboid6F(float x, float y, float z, float w, float h, float d) : 
         topLeft{x, y, z}, size{w, h, d} {}
+    Cuboid6F(const Rect4F* rect);
 
     inline float left() const {
         return topLeft.x;
@@ -442,6 +451,10 @@ public:
         return topLeft;
     }
 
+    static void alignParentCuboidToOther(Cuboid6F& outer, const Cuboid6F inner, const Cuboid6F& other, const Vect2F& direction);
+    
+    static void placeParentCuboidOnOther(Cuboid6F& outer, const Cuboid6F inner, const Cuboid6F& other);
+    
 private:
     Vect3F topLeft;
     Size3F size;

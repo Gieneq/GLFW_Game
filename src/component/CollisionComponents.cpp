@@ -16,24 +16,25 @@ std::vector<WorldCuboid> CollisionComponent::getWorldCollisionCuboids() const {
 
 /* CollisionDetectorComponent */
 
-CollisionResults checkCollision(const CollisonCmpsVector::const_iterator& begin, const CollisonCmpsVector::const_iterator& end) const {
-    /* Filter out check with self */
-    if (other.getParentEntity()->getId() == parent->getId()) {
-        return CollisionResult::NONE();
-    }
+CollisionResults CollisionDetectorComponent::checkCollision(const CollisonCmpsVector::const_iterator& begin, const CollisonCmpsVector::const_iterator& end) const {
+    auto result = CollisionResults(this);
+    for (auto collisionCmpIt = begin; collisionCmpIt != end; ++collisionCmpIt) {
+        auto collisionCmp = *collisionCmpIt;
 
-    auto result = CollisionResult(this, &other);
+        /* Filter out check with self */
+        if (collisionCmp->getParentEntity()->getId() == parent->getId()) {
+            continue;
+        }
 
-    const auto collisionElevationCuboids = other.get
+        const auto thisBounding = getElevationBoundingCuboid();
+        const auto otherCollisionElevationCuboids = collisionCmp->getElevationCollisionCuboids();
 
-    const auto otherCollisionElevationSpaceCuboids = other.getElevationSpaceCollisionCuboids();
-    const auto thisBoundingElevationSpaceCuboids = getElevationSpaceBoundingCuboid();
-
-    for (const auto& otherCuboidElevationSpace : otherCollisionElevationSpaceCuboids) {
-        if (thisBoundingElevationSpaceCuboids.checkIntersection(otherCuboidElevationSpace)) {
-            // return CollisionResult{this, &other, other.getParentEntity(), otherCuboidElevationSpace};
-            // #error
-            result.addCollidedCuboid(otherCuboidElevationSpace);
+        for (const auto& otherCuboid : otherCollisionElevationCuboids) {
+            auto elevationCollidingCuboids = std::vector<ElevationCuboid>{};
+            if (thisBounding.checkIntersection(otherCuboid)) {
+                elevationCollidingCuboids.push_back(otherCuboid);
+            }
+            result.addCollidedCuboids(collisionCmp, elevationCollidingCuboids.cbegin(), elevationCollidingCuboids.cend());
         }
     }
     

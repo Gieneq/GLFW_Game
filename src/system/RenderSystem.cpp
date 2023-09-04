@@ -35,7 +35,7 @@ void RenderSystem::batchStart() {
 }
 
 void RenderSystem::temporaryBatchAppendEntity(Entity* entity) {
-    if(renderBoxWorldSpace.checkIntersection(entity->getCuboidWorldSpace().getFlatten())) {
+    if(renderBoxWorldSpace.checkIntersection(entity->getCuboid().toWorldSpace().value().getFlatten())) {
         temporaryBatch.push_back(EntityBatchData {
             entity
         });
@@ -155,9 +155,9 @@ void RenderSystem::renderCollisionBoxes(int elevationIndex,
         std::vector<CollisionComponent*>::const_iterator collisionCmpsEnd) {
     for(auto collisionCmpIt = collisionCmpsBegin; collisionCmpIt != collisionCmpsEnd; collisionCmpIt++) {
         auto collisionCmp = *collisionCmpIt;
-        const auto collisionCuboids = collisionCmp->getWorldSpaceCollisionCuboids();
+        const auto collisionCuboids = collisionCmp->getWorldCollisionCuboids();
         for (const auto& collCuboid : collisionCuboids) {
-            renderTranslucentFilledCuboid6F(collCuboid, 0.0F, 0.0F, 1.0F, 0.1F);
+            renderTranslucentFilledCuboid6F(collCuboid.value(), 0.0F, 0.0F, 1.0F, 0.1F);
         }
     }
 }

@@ -21,6 +21,10 @@ public:
         return cuboid;
     }
 
+    inline bool checkIntersection(const WorldCuboid& other) const {
+        return cuboid.checkIntersection(other.cuboid);
+    }
+
     static WorldCuboid transformCuboid(ElevationDepth* elevationDepth, const Cuboid6F& cuboid);
 
     static std::vector<WorldCuboid> transformCuboids(ElevationDepth* elevationDepth, 
@@ -38,8 +42,8 @@ public:
         for (auto wCuboidsIt = worldCuboidsBegin; wCuboidsIt != worldCuboidsEnd; ++wCuboidsIt) {
             const auto& cuboid = (*wCuboidsIt).cuboid.value();
             const auto side = cuboid.getSide<side>();
-            if (sideLength > maxSide) {
-                maxSide = sideLength;
+            if (side > maxSide) {
+                maxSide = side;
             }
         }
         return maxSide;
@@ -52,8 +56,8 @@ public:
         for (auto wCuboidsIt = worldCuboidsBegin; wCuboidsIt != worldCuboidsEnd; ++wCuboidsIt) {
             const auto& cuboid = (*wCuboidsIt).cuboid.value();
             const auto side = cuboid.getSide<side>();
-            if (sideLength < minSide) {
-                minSide = sideLength;
+            if (side < minSide) {
+                minSide = side;
             }
         }
         return minSide;
@@ -79,6 +83,10 @@ public:
 
     inline void setElevationDepth(ElevationDepth* ed) { elevationDepth = ed; }
 
+    inline bool checkIntersection(const ElevationCuboid& other) const {
+        return cuboid.checkIntersection(other.cuboid);
+    }
+
     static ElevationCuboid transformCuboid(ElevationDepth* elevationDepth, const Cuboid6F& cuboid);
 
     static std::vector<ElevationCuboid> transformCuboids(ElevationDepth* elevationDepth, 
@@ -88,6 +96,34 @@ public:
 
     static std::vector<ElevationCuboid> transformLocalCuboids(const ElevationCuboid& parent, 
         const std::vector<Cuboid6F>::const_iterator& begin, const std::vector<Cuboid6F>::const_iterator& end);
+
+    template <Side side>
+    static float getMaxSide(const std::vector<ElevationCuboid>::const_iterator& elevationCuboidsBegin, 
+        const std::vector<ElevationCuboid>::const_iterator& elevationCuboidsEnd) {
+        float maxSide = std::numeric_limits<float>::min();
+        for (auto eCuboidsIt = elevationCuboidsBegin; eCuboidsIt != elevationCuboidsEnd; ++eCuboidsIt) {
+            const auto& cuboid = (*eCuboidsIt).cuboid.value();
+            const auto side = cuboid.getSide<side>();
+            if (side > maxSide) {
+                maxSide = side;
+            }
+        }
+        return maxSide;
+    }
+    
+    template <Side side>
+    static float getMinSide(const std::vector<ElevationCuboid>::const_iterator& elevationCuboidsBegin, 
+        const std::vector<ElevationCuboid>::const_iterator& elevationCuboidsEnd) {
+        float minSide = std::numeric_limits<float>::max();
+        for (auto eCuboidsIt = elevationCuboidsBegin; eCuboidsIt != elevationCuboidsEnd; ++eCuboidsIt) {
+            const auto& cuboid = (*eCuboidsIt).cuboid.value();
+            const auto side = cuboid.getSide<side>();
+            if (side < minSide) {
+                minSide = side;
+            }
+        }
+        return minSide;
+    }
 
 private:
     ElevationDepth* elevationDepth;

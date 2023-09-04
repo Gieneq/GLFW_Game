@@ -53,7 +53,8 @@ std::vector<ElevationCuboid> ElevationCuboid::transformCuboids(ElevationDepth* e
 
 /* Elevation - in relation */
 ElevationCuboid ElevationCuboid::transformLocalCuboid(const ElevationCuboid& parent, const Cuboid6F& child) {
-    return ElevationCuboid{parent.elevationDepth, parent.value().getTranslated(child.topLeftBottom())};
+    // return ElevationCuboid{parent.elevationDepth, parent.value().getTranslated(child.topLeftBottom())};
+    return ElevationCuboid{parent.elevationDepth, child.getTranslated(parent.value().topLeftBottom())};
 }
 
 std::vector<ElevationCuboid> ElevationCuboid::transformLocalCuboids(const ElevationCuboid& parent, 

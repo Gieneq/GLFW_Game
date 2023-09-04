@@ -60,7 +60,7 @@ bool Loader::loadPlayer(World& world) {
             auto bottomElevation = &world[0];
 
             /* Player has to be added to the Elevation */
-            player->containingElevation = bottomElevation;
+            player->setElevation(bottomElevation);
             bottomElevation->registetedEntityOrThrow(player);
 
         } catch (std::out_of_range& e) {

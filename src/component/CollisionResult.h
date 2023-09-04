@@ -8,7 +8,7 @@
 
 class CollisionDetectorComponent;
 class CollisionComponent;
-
+class Entity;
 
 /**
  * Collision result for collision check with all valid objects.
@@ -19,7 +19,7 @@ enum class CollisionAbility {
     WALKABLE,
 };
 
-constexpr collisionAbilityToInt(CollisionAbility ability) {
+constexpr int collisionAbilityToInt(CollisionAbility ability) {
     switch (ability) {
         case CollisionAbility::WALKABLE:
             return 0;
@@ -32,7 +32,8 @@ class CollisionResults {
 public:
     using ResultsVector = std::vector<std::tuple<CollisionComponent*, std::vector<ElevationCuboid>>>;
 
-    CollisionResults(CollisionDetectorComponent* collisionDetectorCmp, const ResultsVector::const_iterator& begin, 
+    CollisionResults(const CollisionDetectorComponent* collisionDetectorCmp) : collisionDetectorCmp{collisionDetectorCmp} {}
+    CollisionResults(const CollisionDetectorComponent* collisionDetectorCmp, const ResultsVector::const_iterator& begin, 
         const ResultsVector::const_iterator& end) : 
         collisionDetectorCmp{collisionDetectorCmp}, collisionResults{begin, end} {}
 
@@ -56,7 +57,7 @@ public:
         return collidedCuboids;
     }
 
-    CollisionDetectorComponent* getCollisionDetectorComponent() const {
+    const CollisionDetectorComponent* getCollisionDetectorComponent() const {
         return collisionDetectorCmp;
     }
 
@@ -80,11 +81,9 @@ public:
         return CollisionResults{nullptr, {}, {}};
     }
 
-    /* Because some Cuboids of Component can not collide */
-    inline void addCollidedCuboid(CollisionComponent* collisionComponent,
-        const std::vector<Cuboid6F>::const_iterator& begin, const std::vector<Cuboid6F>::const_iterator& end) {
-            const auto cuboids = ElevationCuboid::transformLocalCuboids(collisionComponent->getParentEntity()->getCuboid(), begin, end);
-        collisionResults.push_back(std::make_tuple(collisionComponent, cuboids));
+    inline void addCollidedCuboids(CollisionComponent* collisionComponent,
+        const std::vector<ElevationCuboid>::const_iterator& begin, const std::vector<ElevationCuboid>::const_iterator& end) {
+        collisionResults.push_back(std::make_tuple(collisionComponent, std::vector<ElevationCuboid>{begin, end}));
     }
 
     template <CollisionAbility ability>
@@ -104,7 +103,7 @@ public:
 
 private:
     /* The one moving toward collision component */
-    CollisionDetectorComponent* collisionDetectorCmp{nullptr};
+    const CollisionDetectorComponent* collisionDetectorCmp{nullptr};
 
     /* Related to collision component envountered by detector */
     ResultsVector collisionResults;

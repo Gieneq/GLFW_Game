@@ -4,10 +4,7 @@
 
 void Camera::update(float dt) {
     if(focusedEntity != nullptr) {
-        auto focusedWorldPosition = focusedEntity->getCuboidWorldSpace().topLeft;
-        position.x = focusedWorldPosition.x;
-        position.y = focusedWorldPosition.y;
-        position.z = focusedWorldPosition.z;
+        position.set(focusedEntity->getCuboid().toWorldSpace().value().topLeftBottom());
     }
 }
 

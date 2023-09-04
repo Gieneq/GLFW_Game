@@ -5,6 +5,7 @@
 #include "Settings.h"
 #include "Camera.h"
 #include "Loader.h"
+#include "Coordinates.h"
 
 class ColorComponent;
 class TextureComponent;
@@ -20,7 +21,6 @@ public:
     void attachCamera(Camera *cam);
 
     Rect4F getProjectionRect(const Rect4F& worldRect) const;
-    // Rect4F getProjectionRect(const Rect3F& worldRect) const;
     bool isProjectedRectVisible(const Rect4F& projectionRect) const;
 
     void renderTexturedRect4F(const Rect4F& worldRect, TextureData* textureData, int tilesetIndex);

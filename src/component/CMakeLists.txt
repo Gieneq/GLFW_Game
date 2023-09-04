@@ -13,6 +13,7 @@ add_library(component
   MovementComponent.cpp
   ControllableComponent.cpp
   AnimationComponent.cpp
+  CollisionResult.cpp
   CollisionComponents.cpp
 )
 

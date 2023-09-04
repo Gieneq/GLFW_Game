@@ -2,6 +2,7 @@
 #include <iostream>
 #include "Component.h"
 #include "Maths.h"
+#include "Coordinates.h"
 #include "TextureId.h"
 
 class ColorComponent : public Component {
@@ -16,9 +17,7 @@ public:
 
     Rect4F getDrawableRectFromWorldSpace() const;
 
-    Cuboid6F getCuboidElevationSpace() const;
-
-    Cuboid6F getCuboidWorldSpace() const;
+    ElevationCuboid getElevationCuboid() const;
 
     float r{0.56f};
     float g{1.0f};
@@ -41,9 +40,7 @@ public:
 
     Rect4F getDrawableRectFromWorldSpace() const;
 
-    Cuboid6F getCuboidElevationSpace() const;
-
-    Cuboid6F getCuboidWorldSpace() const;
+    ElevationCuboid getElevationCuboid() const;
 
     TextureID getTextureID() const { return textureID; }
 

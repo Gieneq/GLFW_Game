@@ -66,9 +66,9 @@ bool GameBase::onKeyReleased(int key) {
         auto playersElevation = player->getContainingElevationOrThrow();
 
         std::cout << " _______________________________________________________________" << std::endl;
-        std::cout << "| Player location world space: " << player->getCuboidWorldSpace().topLeft << ", worldSpaceZ: " << playersElevation->z() << std::endl;
-        std::cout << "| Player CuboidWorldSpace: " << player->getCuboidWorldSpace() << " flatten to: " << player->getCuboidWorldSpace().getFlatten() << std::endl;
-        std::cout << "| Player CuboidElevationSpace: " << player->getCuboidElevationSpace() << " flatten to: " << player->getCuboidElevationSpace().getFlatten() << std::endl;
+        std::cout << "| Player location world space: " << player->getCuboid().toWorldSpace().value().topLeftBottom() << ", worldSpaceZ: " << playersElevation->z() << std::endl;
+        std::cout << "| Player CuboidWorldSpace: " << player->getCuboid().toWorldSpace().value() << " flatten to: " << player->getCuboid().toWorldSpace().value().getFlatten() << std::endl;
+        std::cout << "| Player CuboidElevationSpace: " << player->getCuboid().value() << " flatten to: " << player->getCuboid().value().getFlatten() << std::endl;
         std::cout << "| Last loop rendered entities: " << render_system.getLastLoopEntitesCount() << std::endl;
         std::cout << "| Elevation index:" << playersElevation->getIndex() << ", elevations count: " << world.getElevationsCount() << ", this info:" << std::endl;
         std::cout << "|  - entities floor:   " << playersElevation->getFloorEntitiesCount() << std::endl;
@@ -154,9 +154,8 @@ void GameBase::update(float dt) {
      *   - clearing all every loop is not the best option
     */
         
-    // collisionsSystem.update(containingFloor->collisionComponentsRegisterBegin(), containingFloor->collisionComponentsRegisterEnd(), &world.player, dt);
-    
-    collisionsSystem.processDetector(&world.player);
+    collisionsSystem.startSession();
+    collisionsSystem.processDetector(&world.player, containingFloor->collisionComponentsRegisterBegin(), containingFloor->collisionComponentsRegisterEnd());
 
     camera.update(dt);
 }
@@ -180,14 +179,28 @@ void GameBase::render() {
 
     /* Debug shapes */
     if(debugView) {
+        /* Blue - all */
         render_system.renderCollisionBoxes(containingFloor->getIndex(), containingFloor->collisionComponentsRegisterBegin(), containingFloor->collisionComponentsRegisterEnd());
-        const auto playerBoundingWorldSpace = world.player.collisionDetectorComponent->getWorldSpaceBoundingCuboid();
-        render_system.renderTranslucentFilledCuboid6F(playerBoundingWorldSpace, 1.0F, 0.0F, 0.0F, 0.3F);
-
-        const auto debugCuboidsWorldSpace = collisionsSystem.getDebugResultsCuboidsWorldSpace();
-        for(const auto& debugCuboidWorldSpace :  debugCuboidsWorldSpace) {
-            render_system.renderTranslucentFilledCuboid6F(debugCuboidWorldSpace, 0.0F, 1.0F, 1.0F, 0.5F);
+        
+        {
+            /* Red - not walkable */
+            const auto debugCuboidsWorldSpace = collisionsSystem.getNotWalkableObstaclesCuboids();
+            for(const auto& debugCuboidWorldSpace :  debugCuboidsWorldSpace) {
+                render_system.renderTranslucentFilledCuboid6F(debugCuboidWorldSpace.value(), 1.0F, 0.0F, 0.0F, 0.5F);
+            }
         }
+        
+        {
+            /* Green - walkable */
+            const auto debugCuboidsWorldSpace = collisionsSystem.getWalkableObstaclesCuboids();
+            for(const auto& debugCuboidWorldSpace :  debugCuboidsWorldSpace) {
+                render_system.renderTranslucentFilledCuboid6F(debugCuboidWorldSpace.value(), 0.0F, 1.0F, 0.0F, 0.5F);
+            }
+        }
+
+        /* White - detector */
+        const auto playerBoundingWorldSpace = world.player.collisionDetectorComponent->getElevationBoundingCuboid().toWorldSpace();
+        render_system.renderTranslucentFilledCuboid6F(playerBoundingWorldSpace.value(), 1.0F, 1.0F, 1.0F, 0.3F);
     }
 
     render_system.loopEnd();

@@ -6,44 +6,44 @@
 
 /* Tiles Pair/Quad */
 
-TilesPair TilesQuad::getFrontTilesRelativeToDirection(Vect2F direction) const {
-    if(direction.x > 0) {
-        return TilesPair(topRightGlobal, bottomRightGlobal);
-    } 
-    else if(direction.x < 0) {
-        return TilesPair(bottomLeftGlobal, topLeftGlobal);
-    } 
-    else if(direction.y < 0) {
-        return TilesPair(topLeftGlobal, topRightGlobal);
-    } 
-    else if(direction.y > 0) {
-        return TilesPair(bottomRightGlobal, bottomLeftGlobal);
-    }
-    /* No direction same as direction (0, 1)*/
-    return TilesPair(bottomRightGlobal, bottomLeftGlobal);
-}
+// TilesPair TilesQuad::getFrontTilesRelativeToDirection(Vect2F direction) const {
+//     if(direction.x > 0) {
+//         return TilesPair(topRightGlobal, bottomRightGlobal);
+//     } 
+//     else if(direction.x < 0) {
+//         return TilesPair(bottomLeftGlobal, topLeftGlobal);
+//     } 
+//     else if(direction.y < 0) {
+//         return TilesPair(topLeftGlobal, topRightGlobal);
+//     } 
+//     else if(direction.y > 0) {
+//         return TilesPair(bottomRightGlobal, bottomLeftGlobal);
+//     }
+//     /* No direction same as direction (0, 1)*/
+//     return TilesPair(bottomRightGlobal, bottomLeftGlobal);
+// }
 
-Rect4F TilesPair::getBoundingRect() const {
-    if(!hasAny()) {
-        return Rect4F{0,0,0,0};
-    }
+// Rect4F TilesPair::getBoundingRect() const {
+//     if(!hasAny()) {
+//         return Rect4F{0,0,0,0};
+//     }
 
-    Entity* first = left != nullptr ? left : right;
-    /* First is for sure not null */
+//     Entity* first = left != nullptr ? left : right;
+//     /* First is for sure not null */
     
-    Entity* second = left != nullptr ? right : left;
-    if(!second) {
-        second = first;
-    }
-    /* If second was null, now they are the same for easier calc */
+//     Entity* second = left != nullptr ? right : left;
+//     if(!second) {
+//         second = first;
+//     }
+//     /* If second was null, now they are the same for easier calc */
 
-    float leftValue = std::min(first->getCuboid().value().left(), second->getCuboid().value().left());
-    float rightValue = std::max(first->getCuboid().value().right(), second->getCuboid().value().right());
-    float topValue = std::min(first->getCuboid().value().top(), second->getCuboid().value().top());
-    float bottomValue = std::max(first->getCuboid().value().bottom(), second->getCuboid().value().bottom());
+//     float leftValue = std::min(first->getCuboid().value().left(), second->getCuboid().value().left());
+//     float rightValue = std::max(first->getCuboid().value().right(), second->getCuboid().value().right());
+//     float topValue = std::min(first->getCuboid().value().top(), second->getCuboid().value().top());
+//     float bottomValue = std::max(first->getCuboid().value().bottom(), second->getCuboid().value().bottom());
 
-    return Rect4F{leftValue, topValue, rightValue - leftValue, bottomValue - topValue};
-}
+//     return Rect4F{leftValue, topValue, rightValue - leftValue, bottomValue - topValue};
+// }
 
 
 /* Elevation class */
@@ -134,7 +134,7 @@ void Elevation::registetedEntityOrThrow(Entity* newEntity) {
     /* Finally add to all elevations entities register */
     allEntitiesRegister.push_back(newEntity);
 
-    newEntity->containingElevation = this;
+    newEntity->setElevation(this);
 }
 
 void Elevation::deregisterEntityOrThrow(Entity* entity) {
@@ -203,7 +203,7 @@ void Elevation::deregisterEntityOrThrow(Entity* entity) {
         dynamicEntities.erase(dynamicEntityIt);
     }
 
-    entity->containingElevation = nullptr;
+    entity->setElevation(nullptr);
 }
 
 bool Elevation::deleteEntityIfExists(Entity* entity) {
@@ -234,16 +234,16 @@ Entity* Elevation::getFloorEntityByXY(const Vect2F& entityPosition) {
     return nullptr;
 }
 
-TilesQuad Elevation::getFloorNearbyTilesQuad(const Rect4F& entityRect) {
-    TilesQuad tilesQuad{
-        getFloorEntityByXY(entityRect.topLeft()),
-        getFloorEntityByXY(entityRect.topRight()),
-        getFloorEntityByXY(entityRect.bottomLeft()),
-        getFloorEntityByXY(entityRect.bottomRight())
-    };
+// TilesQuad Elevation::getFloorNearbyTilesQuad(const Rect4F& entityRect) {
+//     TilesQuad tilesQuad{
+//         getFloorEntityByXY(entityRect.topLeft()),
+//         getFloorEntityByXY(entityRect.topRight()),
+//         getFloorEntityByXY(entityRect.bottomLeft()),
+//         getFloorEntityByXY(entityRect.bottomRight())
+//     };
 
-    return tilesQuad;
-}
+//     return tilesQuad;
+// }
 
 std::vector<Entity*> Elevation::getAnyIntersectingEntities(Vect2F pointElevationSpace) {
     std::vector<Entity*> result;
