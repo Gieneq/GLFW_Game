@@ -204,9 +204,9 @@ private:
         {EntityType::STATIC, {}},
         {EntityType::DYNAMIC, {}},
         {EntityType::BORDER, {}},
-        {EntityType::BIGGER, {}},
-        {EntityType::ALL, {}},
     };
+
+    
 
     std::unordered_map<std::string, std::vector<Component*>> componentsRegisterByTypeName {
         // {ComponentName<MovementComponent>::get(), {}},

@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <vector>
 
 class Entity;
 
@@ -11,27 +12,47 @@ public:
     inline Entity* getParentEntity() {
         return parent;
     }
-
+    
     template <typename Cmp>
-    static typename std::vector<Cmp*> getComponents(const std::vector<Entity*>& entities) {
+    static std::vector<Cmp*> getComponents(std::vector<Entity*>::const_iterator begin, std::vector<Entity*>::const_iterator end) {
         std::vector<Cmp*> result;
-        for (auto entity : entities) {
-            const std::vector<Cmp*> cmps = entity->getComponents<Cmp>();
-            if (cmp.size() > 0) {
-                result.insert(result.end(), cmps.begin(), cmps.end());
+        for (auto it = begin; it != end; ++it) {
+            /* Assume - each entity has up to 1 component of each type */
+            Cmp* cmp = (*it)->getComponent<Cmp>();
+            if (cmp) {
+                result.push_back(cmp);
             }
         }
         return result;
     }
+
+    template <typename Cmp>
+    static int getComponentId() {
+        static_assert(std::is_base_of<Component, Cmp>::value, "Cmp must be a Component");
+        static int id = nextId++;
+        return id;
+    }
+
+    static int getId() {
+        return id;
+    }
+
     
 protected:
     Entity* parent{nullptr};
+
+private:
+    static int id;
+    static int nextId;
 };
 
-template <typename T>
-struct ComponentName {
-    static std::string get() {
-        static_assert(std::is_base_of<Component, T>::value, "T must be a Component");
-        return "UnknownComponent";
-    }
-};
+int Component::id = 0;
+int Component::nextId = 0;
+
+// template <typename T>
+// struct ComponentName {
+//     static std::string get() {
+//         static_assert(std::is_base_of<Component, T>::value, "T must be a Component");
+//         return "UnknownComponent";
+//     }
+// };

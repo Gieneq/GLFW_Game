@@ -9,18 +9,13 @@
 
 enum class EntityType {
     NONE,
-    ALL,
     FLOOR,
     CLUTTER,
     STATIC,
     DYNAMIC,
     BORDER,
-    BIGGER,
-
-    _SIZE
 };
 
-constexpr int EntityTypeCount = static_cast<int>(EntityType::_SIZE) - 1;
 
 class Elevation;
 class ColorComponent;
@@ -122,8 +117,6 @@ public:
     inline const ElevationCuboid& getCuboid() const {
         return cuboid;
     }
-
-    static std::vector<CollisionComponent*> getCollisionComponents(std::vector<Entity*>::const_iterator begin, std::vector<Entity*>::const_iterator end);
 
 protected:
     /* Quick access to popular components */
