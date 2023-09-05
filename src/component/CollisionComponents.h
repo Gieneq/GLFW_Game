@@ -33,6 +33,13 @@ private:
     friend class Loader;
 };
 
+template <>
+struct ComponentName<CollisionComponent> {
+    static std::string get() {
+        return "CollisionComponent";
+    }
+};
+
 
 class MovementComponent;
 class CollisionDetectorComponent : public Component {
@@ -52,3 +59,9 @@ private:
     Cuboid6F boundingCuboid{0.0F, 0.15F, 0.0F, 1.0F, 0.85F, 1.0F};
 };
 
+template <>
+struct ComponentName<CollisionDetectorComponent> {
+    static std::string get() {
+        return "CollisionDetectorComponent";
+    }
+};

@@ -9,6 +9,7 @@ message(STATUS "   -> ${LIB_DEPENDENCIES}")
 
 add_library(world 
   Coordinates.cpp
+  Elevation.cpp
   World.cpp
 )
 

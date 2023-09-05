@@ -7,11 +7,21 @@
 #include "Maths.h"
 #include "Coordinates.h"
 #include "CustomContainers.h"
+#include "Entity.h"
 
-class Entity;
-
-
-class FloorSegment3X3 : public Segment3X3<std::optional<Entity*>> {
+template <EntityType type>
+class EntitySegment3X3 : public Segment3X3<std::optional<Entity*>> {
 public:
-    Segment3X3Mask getMask() const;
+    EntitySegment3X3() : Segment3X3<std::optional<Entity*>>(), entitiesType{type} {}    
+
+    Segment3X3Mask getMask() const {
+        Segment3X3Mask mask;
+        for (int i = 0; i < 9; i++) {
+            mask.set(i, get(i).has_value());
+        }
+        return mask;
+    }
+
+private:
+    EntityType entitiesType;
 };

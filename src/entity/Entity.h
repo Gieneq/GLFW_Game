@@ -9,11 +9,18 @@
 
 enum class EntityType {
     NONE,
+    ALL,
     FLOOR,
     CLUTTER,
     STATIC,
-    DYNAMIC
+    DYNAMIC,
+    BORDER,
+    BIGGER,
+
+    _SIZE
 };
+
+constexpr int EntityTypeCount = static_cast<int>(EntityType::_SIZE) - 1;
 
 class Elevation;
 class ColorComponent;
@@ -85,18 +92,6 @@ public:
         }
         return nullptr;
     }
-    
-    template<typename T>
-    std::vector<T*> getComponents() const {
-        std::vector<T*> result;
-        for (auto component : components) {
-            T* t = dynamic_cast<T*>(component);
-            if (t) {
-                result.push_back(t);
-            }
-        }
-        return result;
-    }
 
     /* Components building methods */
     MovementComponent* addMovementComponent(float speed = 1.0F);
@@ -155,7 +150,23 @@ private:
     ElevationCuboid cuboid{nullptr, 0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0.0F};
 
     /* General step in adding components */
-    void addComponent(Component* component);
+    template<typename T>
+    void addComponent(Component* component) {
+        static_assert(std::is_base_of<Component, T>::value, "T must be a Component");
+
+        if(hasComponent<T>()) {
+            throw std::runtime_error("Entity::addMovementComponent: Component already exists");
+        }
+
+        components.push_back(component);
+
+        if (auto colorCmp = dynamic_cast<ColorComponent*>(component)) {
+            colorComponent = colorCmp;
+        }
+        else if (auto textureCmp = dynamic_cast<TextureComponent*>(component)) {
+            textureComponent = textureCmp;
+        }
+    }
 
     EntityType type{EntityType::NONE};
     

@@ -15,24 +15,15 @@ Elevation* Entity::getContainingElevationOrThrow() const {
     return containingElevation;
 }
 
-void Entity::addComponent(Component* component) {
-    components.push_back(component);
-
-    if (auto colorCmp = dynamic_cast<ColorComponent*>(component)) {
-        colorComponent = colorCmp;
-    }
-    else if (auto textureCmp = dynamic_cast<TextureComponent*>(component)) {
-        textureComponent = textureCmp;
-    }
-}
-
 /* Components builders */
 
 MovementComponent* Entity::addMovementComponent(float speed) {
+
+    
     auto movementComponent = new MovementComponent(this);
     movementComponent->speed = speed;
     movementComponent->stop();
-    addComponent(movementComponent);
+    addComponent<MovementComponent>(movementComponent);
 
     
     /* Register movement component */
@@ -43,7 +34,7 @@ MovementComponent* Entity::addMovementComponent(float speed) {
 
 ColorComponent* Entity::addColorComponent(float relX, float relY, float boxWidth, float boxHeight) {
     auto colorComponent = new ColorComponent(this, relX, relY, boxWidth, boxHeight);
-    addComponent(colorComponent);
+    addComponent<ColorComponent>(colorComponent);
     
     this->colorComponent = colorComponent;
     return colorComponent;
@@ -51,7 +42,7 @@ ColorComponent* Entity::addColorComponent(float relX, float relY, float boxWidth
 
 TextureComponent* Entity::addTextureComponent(TextureID id, float relX, float relY, float boxWidth, float boxHeight) {
     auto textureComponent = new TextureComponent(this, relX, relY, boxWidth, boxHeight, id);
-    addComponent(textureComponent);
+    addComponent<TextureComponent>(textureComponent);
     
     this->textureComponent = textureComponent;
     return textureComponent;
@@ -59,7 +50,7 @@ TextureComponent* Entity::addTextureComponent(TextureID id, float relX, float re
 
 CollisionComponent* Entity::addCollisionComponent() {
     auto collisionComponent = new CollisionComponent(this);
-    addComponent(collisionComponent);
+    addComponent<CollisionComponent>(collisionComponent);
 
     /* Register collision component */
     containingElevation->addEntitisComponentsToRegisters(this);
@@ -79,7 +70,7 @@ std::optional<CollisionDetectorComponent*> Entity::addCollisionDetectorComponent
     }
 
     auto collisionDetectorComponent = new CollisionDetectorComponent(this, movementCmp, boundingCuboid);
-    addComponent(collisionDetectorComponent);
+    addComponent<CollisionDetectorComponent>(collisionDetectorComponent);
     return collisionDetectorComponent;
 }
 
@@ -95,7 +86,7 @@ std::optional<ControllableComponent*> Entity::addControllableComponent() {
     }
 
     auto controllableComponent = new ControllableComponent(this, movementCmp);
-    addComponent(controllableComponent);
+    addComponent<ControllableComponent>(controllableComponent);
     return controllableComponent;
 }
 
@@ -111,7 +102,7 @@ std::optional<AnimationComponent*> Entity::addAnimationComponent(int interval) {
     }
 
     auto animationComponent = new AnimationComponent(this, textureCmp, interval);
-    addComponent(animationComponent);
+    addComponent<AnimationComponent>(animationComponent);
     return animationComponent;
 }
 
