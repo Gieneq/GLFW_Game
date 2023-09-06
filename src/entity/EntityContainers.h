@@ -9,10 +9,9 @@
 #include "CustomContainers.h"
 #include "Entity.h"
 
-template <EntityType type>
 class EntitySegment3X3 : public Segment3X3<std::optional<Entity*>> {
 public:
-    EntitySegment3X3() : Segment3X3<std::optional<Entity*>>(), entitiesType{type} {}    
+    EntitySegment3X3(Entity::Type type) : Segment3X3<std::optional<Entity*>>(), entitiesType{type} {}    
 
     Segment3X3Mask getMask() const {
         Segment3X3Mask mask;
@@ -23,5 +22,5 @@ public:
     }
 
 private:
-    EntityType entitiesType;
+    Entity::Type entitiesType;
 };

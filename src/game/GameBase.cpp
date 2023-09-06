@@ -51,10 +51,10 @@ bool GameBase::init() {
     }
 
     /* Set camera on just loaded player */
-    camera.focusOn(&world.player);
+    camera.focusOn(&world.getPlayer());
 
     /* Attach controller to just loaded player */
-    userInputSystem.attachControllabe(&world.player);
+    userInputSystem.attachControllabe(&world.getPlayer());
     
     return result;
 }
@@ -62,7 +62,7 @@ bool GameBase::init() {
 bool GameBase::onKeyReleased(int key) {
     if(key == GLFW_KEY_I) {
         /* Print some informations */
-        auto player = &world.player;
+        auto player = &world.getPlayer();
         auto playersElevation = player->getContainingElevationOrThrow();
 
         std::cout << " _______________________________________________________________" << std::endl;
@@ -71,13 +71,12 @@ bool GameBase::onKeyReleased(int key) {
         std::cout << "| Player CuboidElevationSpace: " << player->getCuboid().value() << " flatten to: " << player->getCuboid().value().getFlatten() << std::endl;
         std::cout << "| Last loop rendered entities: " << render_system.getLastLoopEntitesCount() << std::endl;
         std::cout << "| Elevation index:" << playersElevation->getIndex() << ", elevations count: " << world.getElevationsCount() << ", this info:" << std::endl;
-        std::cout << "|  - entities floor:   " << playersElevation->getFloorEntitiesCount() << std::endl;
-        std::cout << "|  - entities clutter: " << playersElevation->getClutterEntitiesCount() << std::endl;
-        std::cout << "|  - entities static:  " << playersElevation->getStaticEntitiesCount() << std::endl;
-        std::cout << "|  - entities dynamic: " << playersElevation->getDynamicEntitiesCount() << std::endl;
-        std::cout << "|  - entities bigger:  " << playersElevation->getBiggerEntitiesCount() << std::endl;
-        std::cout << "|  - components movement: " << playersElevation->getMovementComponentsCount() << std::endl;
-        std::cout << "|  - components collision: " << playersElevation->getCollisionComponentsCount() << std::endl;
+        for(const auto entityType: Entity::AllTypes) {
+            std::cout << "|  - entities " << Entity::typeToString(entityType) << ":   " << playersElevation->getEntitiesCount(entityType) << std::endl;
+        }
+        std::cout << "|  - entities BIGGER:  " << playersElevation->getBiggerEntitiesCount() << std::endl;
+        std::cout << "|  - components movement: " << playersElevation->getCollisionComponentsCount() << std::endl;
+        std::cout << "|  - components collision: " << playersElevation->getMovementComponentsCount() << std::endl;
         std::cout << "| WorldClipRect: " << render_system.getRenderBoxWorldSpace() << std::endl;
         std::cout << "| Loaded tilesets count: " << Loader::getLoader().getLoadedTilesetsCount() << std::endl;
         std::cout << "| Loaded tile datas count: " << Loader::getLoader().getLoadedTilesDataCount() << std::endl;
@@ -133,13 +132,13 @@ bool GameBase::input() {
 
 void GameBase::update(float dt) {
 
-    auto containingFloor = world.player.getContainingElevationOrThrow();
+    auto containingFloor = world.getPlayer().getContainingElevationOrThrow();
 
     /**
      * Update movement is for dynamicEntities only.
      * Player is also dynamicEntity.
      */
-    for(auto dynamicEntityIt = containingFloor->dynamicEntitiesBegin(); dynamicEntityIt != containingFloor->dynamicEntitiesEnd(); ++dynamicEntityIt) {
+    for(auto dynamicEntityIt = containingFloor->entitiesBegin(Entity::Type::DYNAMIC); dynamicEntityIt != containingFloor->entitiesEnd(Entity::Type::DYNAMIC); ++dynamicEntityIt) {
         auto dynamicEntity = *dynamicEntityIt;
         movementSystem.update(dynamicEntity, dt);
     }
@@ -155,19 +154,19 @@ void GameBase::update(float dt) {
     */
         
     collisionsSystem.startSession();
-    collisionsSystem.processDetector(&world.player, containingFloor->collisionComponentsRegisterBegin(), containingFloor->collisionComponentsRegisterEnd());
+    collisionsSystem.processDetector(&world.getPlayer(), containingFloor->collisionComponentsBegin(), containingFloor->collisionComponentsEnd());
 
     camera.update(dt);
 }
 
 void GameBase::render() {
     render_system.loopStart();
-    auto containingFloor = world.player.getContainingElevationOrThrow();
+    auto containingFloor = world.getPlayer().getContainingElevationOrThrow();
 
     for(auto elevation : world) {
     render_system.batchStart();
         //todo probably can be const
-        if(elevation->getIndex() == world.player.getContainingElevationOrThrow()->getIndex()) {
+        if(elevation->getIndex() == world.getPlayer().getContainingElevationOrThrow()->getIndex()) {
             const float minOpacity = 0.2F;
             const float opacity = minOpacity +  (1.0F - minOpacity) * elevation->z() / static_cast<float>(world.getElevationsCount());
             render_system.fillScreen(0.0F, 0.0F, 0.0F, opacity);
@@ -180,7 +179,7 @@ void GameBase::render() {
     /* Debug shapes */
     if(debugView) {
         /* Blue - all */
-        render_system.renderCollisionBoxes(containingFloor->getIndex(), containingFloor->collisionComponentsRegisterBegin(), containingFloor->collisionComponentsRegisterEnd());
+        render_system.renderCollisionBoxes(containingFloor->getIndex(), containingFloor->collisionComponentsBegin(), containingFloor->collisionComponentsEnd());
         
         {
             /* Red - not walkable */
@@ -207,7 +206,7 @@ void GameBase::render() {
         }
 
         /* White - detector */
-        const auto playerBoundingWorldSpace = world.player.collisionDetectorComponent->getElevationBoundingCuboid().toWorldSpace();
+        const auto playerBoundingWorldSpace = world.getPlayer().getCollisionDetectorComponent()->getElevationBoundingCuboid().toWorldSpace();
         render_system.renderTranslucentFilledCuboid6F(playerBoundingWorldSpace.value(), 1.0F, 1.0F, 1.0F, 0.3F);
     }
 

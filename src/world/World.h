@@ -19,53 +19,76 @@ public:
     ~World() = default;
     World() = default;
 
-    Elevation* createElevationOrThrow();
+    /* Counts */
 
     int getElevationsCount() const;
 
+
     /* Access Elevation */
+
     std::optional<Elevation*> getElevationOption(int elevation);
+    
+    std::optional<const Elevation*> getElevationOption(int elevation) const;
 
     std::optional<Elevation*> getLowerElevation(Elevation* elevation);
     
+    std::optional<const Elevation*> getLowerElevation(Elevation* elevation) const;
+    
     std::optional<Elevation*> getHigherElevation(Elevation* elevation);
+    
+    std::optional<const Elevation*> getHigherElevation(Elevation* elevation) const;
 
     std::optional<Elevation*> getTopElevationOption();
+    
+    std::optional<const Elevation*> getTopElevationOption() const;
 
-    Elevation& operator[](int elevation);
+    Elevation* operator[](int elevation);
 
-    const Elevation& operator[](int elevation) const;
+    const Elevation* operator[](int elevation) const;
 
-    Elevation& getTopElevationOrThrow();
-
-    const Elevation& getTopElevationConstOrThrow();
 
     /* Iterators over Elevations */
 
-    std::vector<Elevation*>::iterator begin();
+    inline std::vector<Elevation*>::iterator World::begin() {
+        return elevations.begin();
+    }
 
-    std::vector<Elevation*>::iterator end();
+    inline std::vector<Elevation*>::iterator World::end() {
+        return elevations.end();
+    }
 
-    std::vector<Elevation*>::const_iterator begin() const;
+    inline std::vector<Elevation*>::const_iterator World::begin() const {
+        return elevations.cbegin();
+    }
 
-    std::vector<Elevation*>::const_iterator end() const;
+    inline std::vector<Elevation*>::const_iterator World::end() const {
+        return elevations.cend();
+    }
 
     /* Other */
-    void moveDynamicEntityToElevationOrThrow(Entity* e, int destinationElevationIndex);
-
-    /* Creation Entities on Elevations */
+    void moveEntityToElevationOrThrow(Entity* e, int destinationElevationIndex);
     
-    Entity* createEntityOnElevationOrThrow(int elevationIndex, EntityType type);
+    inline Player& getPlayer() {
+        return player;
+    }
 
-    Entity* createEntityOnElevationOrThrow(Elevation* elevation, EntityType type);
+    inline const Player& getPlayer() const {
+        return player;
+    }
 
-    /* Deletion */
-    void deleteEntityOrThrow(Entity* e);
+private:
+    /* Creation/Deletion */
     
-    std::vector<Entity*> getAnyIntersectingEntities(Vect2F pointElevationSpace, int elevationIndex);
+    Elevation* createElevationOrThrow();
+
+    void deleteElevationOrThrow(Elevation* elevation);
+
+
+    /* Variables */
     
     Player player;
 
-private:
     std::vector<Elevation*> elevations;
+
+    friend class Loader;
 };

@@ -2,20 +2,11 @@
 #include <iostream>
 #include <optional>
 #include <vector>
+#include <array>
 #include "Component.h"
 #include "Maths.h"
 #include "Coordinates.h"
 #include "TextureID.h"
-
-enum class EntityType {
-    NONE,
-    FLOOR,
-    CLUTTER,
-    STATIC,
-    DYNAMIC,
-    BORDER,
-};
-
 
 class Elevation;
 class ColorComponent;
@@ -25,19 +16,63 @@ class CollisionComponent;
 class CollisionDetectorComponent;
 class ControllableComponent;
 class AnimationComponent;
-class Entity {
-protected:
-    // Entity() = default;
-    Entity(Elevation* elevation, EntityType etype) : containingElevation{elevation}, type{etype}, cuboid{reinterpret_cast<ElevationDepth*>(elevation), 0,0,0,1,1,1} {}
 
+class Entity {
 public:
-    // todo make Entity responsible for deleting components - IMPORTANT!
+    enum class Type {
+        NONE,
+        FLOOR,
+        CLUTTER,
+        STATIC,
+        DYNAMIC,
+        BORDER,
+    };
+
+    static bool isBiggerType(Type entityType) {
+        return entityType == Type::STATIC || entityType == Type::DYNAMIC;
+    }
+
+    static constexpr const char* typeToString(Type type) {
+        switch (type) {
+            case Type::NONE:
+                return "NONE";
+            case Type::FLOOR:
+                return "FLOOR";
+            case Type::CLUTTER:
+                return "CLUTTER";
+            case Type::STATIC:
+                return "STATIC";
+            case Type::DYNAMIC:
+                return "DYNAMIC";
+            case Type::BORDER:
+                return "BORDER";
+            default:
+                return "UNKNOWN";
+        }
+    }
+
+    static constexpr std::array<Type, 6> AllTypes = {
+        Type::NONE,
+        Type::FLOOR,
+        Type::CLUTTER,
+        Type::STATIC,
+        Type::DYNAMIC,
+        Type::BORDER
+    };
+
+    static constexpr auto TypesCount = AllTypes.size();
+
+protected:
+    Entity(Elevation* elevation, Entity::Type etype) : containingElevation{elevation}, 
+        type{etype}, cuboid{reinterpret_cast<ElevationDepth*>(elevation), 0,0,0,1,1,1} {}
+   
     ~Entity() {
         for (auto component : components) {
             delete component;
         }
     }
 
+public:
     bool operator==(const Entity& other) const {
         return getId() == other.getId();
     }
@@ -58,7 +93,7 @@ public:
         return id;
     }
 
-    inline EntityType getType() const {
+    inline Entity::Type getType() const {
         return type;
     } 
 
@@ -89,7 +124,7 @@ public:
     }
 
     /* Components building methods */
-    MovementComponent* addMovementComponent(float speed = 1.0F);
+    virtual MovementComponent* addMovementComponent(float speed = 1.0F);
 
     ColorComponent* addColorComponent(float relX = 0.0F, float relY = 0.0F, float boxWidth = 1.0F, float boxHeight = 1.0F);
 
@@ -97,9 +132,9 @@ public:
 
     CollisionComponent* addCollisionComponent();
 
-    std::optional<CollisionDetectorComponent*> addCollisionDetectorComponent(const Cuboid6F& boundingCuboid);
+    virtual std::optional<CollisionDetectorComponent*> addCollisionDetectorComponent(const Cuboid6F& boundingCuboid);
 
-    std::optional<ControllableComponent*> addControllableComponent();
+    virtual std::optional<ControllableComponent*> addControllableComponent();
 
     std::optional<AnimationComponent*> addAnimationComponent(int interval);
     
@@ -108,8 +143,7 @@ public:
 
     std::optional<TextureComponent*> getTextureComponent() const;
     
-    /* Position related methods */
-
+    /* Position related member functions */
     inline ElevationCuboid& getCuboid() {
         return cuboid;
     }
@@ -119,7 +153,10 @@ public:
     }
 
 protected:
-    /* Quick access to popular components */
+    /**
+     * Quick access to popular components.
+     * Entity can has up to one component of each type.
+     */
     ColorComponent* colorComponent{nullptr};
 
     TextureComponent* textureComponent{nullptr};
@@ -142,7 +179,10 @@ private:
 
     ElevationCuboid cuboid{nullptr, 0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0.0F};
 
-    /* General step in adding components */
+    /**
+     * General step in adding components.
+     * Esures only up to one component of each type is added.
+     */
     template<typename T>
     void addComponent(Component* component) {
         static_assert(std::is_base_of<Component, T>::value, "T must be a Component");
@@ -161,10 +201,10 @@ private:
         }
     }
 
-    EntityType type{EntityType::NONE};
+    Entity::Type type{Entity::Type::NONE};
     
     static long long nextID;
 
-    friend class Loader;
     friend class Elevation;
+    friend class Loader;
 };

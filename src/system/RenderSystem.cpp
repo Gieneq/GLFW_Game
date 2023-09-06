@@ -50,18 +50,18 @@ void RenderSystem::batchAppendElevation(Elevation* elevation) {
     }
 
     /* Floor flat tiles */
-    for(auto entityIt = elevation->floorEntitiesBegin(); entityIt != elevation->floorEntitiesEnd(); entityIt++) {
+    for(auto entityIt = elevation->entitiesBegin(Entity::Type::FLOOR); entityIt != elevation->entitiesEnd(Entity::Type::FLOOR); entityIt++) {
         this->temporaryBatchAppendEntity(*entityIt);
     }
 
     /* Clutter flat tiles */
-    for(auto entityIt = elevation->clutterEntitiesBegin(); entityIt != elevation->clutterEntitiesEnd(); entityIt++) {
+    for(auto entityIt = elevation->entitiesBegin(Entity::Type::FLOOR); entityIt != elevation->entitiesEnd(Entity::Type::FLOOR); entityIt++) {
         this->temporaryBatchAppendEntity(*entityIt);
     }
     
     /* Other big tiles */
     std::vector<EntityBatchData> tmpBatch;
-    for(auto entityIt = elevation->biggerEntitiesRegisterBegin(); entityIt != elevation->biggerEntitiesRegisterEnd(); entityIt++) {
+    for(auto entityIt = elevation->entitiesBiggerBegin(); entityIt != elevation->entitiesBiggerEnd(); entityIt++) {
         auto entity = *entityIt;
         tmpBatch.push_back(EntityBatchData {
             entity

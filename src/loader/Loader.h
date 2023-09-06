@@ -66,7 +66,7 @@ private:
     /* Other */
     bool buildWorldFromMapData(World& world);
 
-    bool fillElevationWithEntities(World& world, Elevation* elevation, EntityType entityType, const std::vector<int> layerDataIndices);
+    bool fillElevationWithEntities(World& world, Elevation* elevation, Entity::Type entityType, const std::vector<int> layerDataIndices);
 
     MapData mapData{};
 };

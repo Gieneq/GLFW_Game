@@ -28,7 +28,7 @@ void CollisionsSystem::processDetector(Entity* detectorEntity, const CollisionCo
 
         auto [detectorCmp, movementCmp, parentElevation] = requirements.value();
 
-        auto floorEntitiesUnderDetector = parentElevation->getFloorEntitiesInRect(detectorEntity->getCuboid().value().getFlatten());
+        auto floorEntitiesUnderDetector = parentElevation->getEntitiesIntersetingWith(Entity::Type::FLOOR, detectorEntity->getCuboid().value().getFlatten());
         debugEntites.insert(debugEntites.end(), floorEntitiesUnderDetector.begin(), floorEntitiesUnderDetector.end());
 
         const bool hasFloorUnder = floorEntitiesUnderDetector.size() > 0;
@@ -42,7 +42,7 @@ void CollisionsSystem::processDetector(Entity* detectorEntity, const CollisionCo
             std::cout << "Switching to elevation: " << nextElevationIdx << std::endl;
             try {
                 /* Elevating Down */
-                parentElevation->getContainingWorld().moveDynamicEntityToElevationOrThrow(detectorEntity, nextElevationIdx);
+                parentElevation->getContainingWorld().moveEntityToElevationOrThrow(detectorEntity, nextElevationIdx);
                 detectorEntity->getCuboid().value().z() = nextZ;
                 return;
             } catch(const std::exception&) {
@@ -62,7 +62,7 @@ void CollisionsSystem::processDetector(Entity* detectorEntity, const CollisionCo
                     std::cout << "Switching to elevation: " << nextElevationIdx << std::endl;
                     try {
                         /* Elevating Down */
-                        parentElevation->getContainingWorld().moveDynamicEntityToElevationOrThrow(detectorEntity, nextElevationIdx);
+                        parentElevation->getContainingWorld().moveEntityToElevationOrThrow(detectorEntity, nextElevationIdx);
                         detectorEntity->getCuboid().value().z() = nextZ;
                         return;
                     } catch(const std::exception&) {

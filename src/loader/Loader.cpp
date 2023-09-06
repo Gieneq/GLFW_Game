@@ -55,9 +55,9 @@ bool Loader::loadPlayer(World& world) {
     try {
         auto playersElevation = player->getContainingElevationOrThrow();
     } catch (std::runtime_error&) {
-        std::cout << "Player has no Elevation, create one" << std::endl;
+        std::cout << "Player has no Elevation, try setting bottom [0]" << std::endl;
         try {
-            auto bottomElevation = &world[0];
+            auto bottomElevation = world[0];
 
             /* Player has to be added to the Elevation */
             player->setElevation(bottomElevation);
@@ -115,7 +115,7 @@ bool Loader::loadPlayer(World& world) {
         return false;
     }
 
-    world.moveDynamicEntityToElevationOrThrow(player, playerElevationIndex);
+    world.moveEntityToElevationOrThrow(player, playerElevationIndex);
 
     return true;
 }
@@ -742,7 +742,7 @@ bool Loader::buildWorldFromMapData(World& world) {
             std::cout << "     - layerDataIndices.size(): " << layerDataIndices.size() << std::endl;
             
             /* With layer index find entity type */
-            EntityType newEntityType = (layerIdx < 2) ? EntityType::FLOOR : EntityType::STATIC;
+            Entity::Type newEntityType = (layerIdx < 2) ? Entity::Type::FLOOR : Entity::Type::STATIC;
 
             /* Append layer */
             auto fillingResult = fillElevationWithEntities(world, recentTopElevation, newEntityType, layerDataIndices);
@@ -771,7 +771,7 @@ bool Loader::buildWorldFromMapData(World& world) {
 
 #define USE_Y_ELEVATION_FIX 1
 
-bool Loader::fillElevationWithEntities(World& world, Elevation* elevation, EntityType entityType, const std::vector<int> layerDataIndices) {
+bool Loader::fillElevationWithEntities(World& world, Elevation* elevation, Entity::Type entityType, const std::vector<int> layerDataIndices) {
     int tileIndex{0};
     float tileX{0};
     float tileY{0};
@@ -808,7 +808,7 @@ bool Loader::fillElevationWithEntities(World& world, Elevation* elevation, Entit
         Entity* tileEntity = nullptr;
 
         try {
-            tileEntity = world.createEntityOnElevationOrThrow(elevation, entityType);
+            tileEntity = elevation->createEntityOrThrow(entityType);
         } catch (std::bad_alloc& e) {
             std::cerr << "Error creating Entity: " << e.what() << std::endl;
             return false;

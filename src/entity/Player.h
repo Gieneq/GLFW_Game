@@ -9,16 +9,36 @@ class ControllableComponent;
 class TextureComponent;
 class ColorComponent;
 class Elevation;
+
 class Player : public Entity {
+private:
+    Player() : Entity(nullptr, Entity::Type::DYNAMIC) {};
+    Player(Elevation* elevation) : Entity(elevation, Entity::Type::DYNAMIC) {}
+    ~Player() = default;
+
 public:
-    Player() : Entity(nullptr, EntityType::DYNAMIC) {};
-    Player(Elevation* elevation) : Entity(elevation, EntityType::DYNAMIC) {}
+    MovementComponent* addMovementComponent(float speed) override;
+    std::optional<CollisionDetectorComponent*> addCollisionDetectorComponent(const Cuboid6F& boundingCuboid) override ;  
+    std::optional<ControllableComponent*> addControllableComponent() override ;
 
-    MovementComponent* addMovementComponent(float speed);
-    std::optional<CollisionDetectorComponent*> addCollisionDetectorComponent(const Cuboid6F& boundingCuboid);  
-    std::optional<ControllableComponent*> addControllableComponent();
 
+    /* Access quick pointers - they are set for sure */
+    inline MovementComponent* getMovementComponent() const {
+        return movementComponent;
+    }
+
+    inline CollisionDetectorComponent* getCollisionDetectorComponent() const {
+        return collisionDetectorComponent;
+    }
+
+    inline ControllableComponent* getControllableComponent() const {
+        return controllableComponent;
+    }
+
+protected:
     MovementComponent* movementComponent{nullptr};
     CollisionDetectorComponent* collisionDetectorComponent{nullptr};
     ControllableComponent* controllableComponent{nullptr};
+
+    friend class World;
 };

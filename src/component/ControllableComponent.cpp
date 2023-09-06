@@ -97,7 +97,7 @@ void ControllableComponent::onReleaseSpaceKey() {
     if(elevation->getIndex() + 1 >= world.getElevationsCount()) {
         return;
     }
-    world.moveDynamicEntityToElevationOrThrow(parent, elevation->getIndex() + 1);
+    world.moveEntityToElevationOrThrow(parent, elevation->getIndex() + 1);
 }
 
 void ControllableComponent::onPressLShiftKey() {
@@ -115,5 +115,5 @@ void ControllableComponent::onReleaseLShiftKey() {
     if(elevation->getIndex() -1 < 0) {
         return;
     }
-    world.moveDynamicEntityToElevationOrThrow(parent, elevation->getIndex() - 1);
+    world.moveEntityToElevationOrThrow(parent, elevation->getIndex() - 1);
 }

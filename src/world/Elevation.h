@@ -5,13 +5,13 @@
 #include <optional>
 #include <iostream>
 #include <typeinfo>
+#include <type_traits>
 
 #include "Component.h"
 #include "Maths.h"
 #include "Coordinates.h"
 #include "Entity.h"
 #include "EntityContainers.h"
-
 
 #define EDGE_EPSILON 0.0001f
 
@@ -23,8 +23,11 @@ class ElevationDepth;
 class ElevationDepth {
 public:
     virtual ~ElevationDepth() = default;
+
     virtual float z() const = 0;
+
     virtual int getIndex() const = 0;
+
 protected:
     virtual void setIndex(const int index) = 0;
 };
@@ -32,7 +35,16 @@ protected:
 
 class Elevation : public ElevationDepth {
     ~Elevation() = default;
-    Elevation(int elevation, World& containingWorld) : elevation(elevation), containingWorld(containingWorld) {}
+    Elevation(int elevation, World& containingWorld) : elevation(elevation), containingWorld(containingWorld) {
+
+        /* Setup regiester for entities */
+        for(auto type : Entity::AllTypes) {
+            entitiesRegisterByType.insert({type, {}});
+        }
+
+        /* Setup regiester for components */
+        //todo
+    }
 
 public:
     inline World& getContainingWorld() {
@@ -59,161 +71,189 @@ public:
         return elevationSpaceCuboid.getTranslated(Vect3F{0, 0, this->z()});
     }
 
+
     /* Counts */
-    template <EntityType type>
-    int getEntitiesCount() const {
+
+    inline int getEntitiesCount(Entity::Type type) const {
         return static_cast<int>(entitiesRegisterByType.at(type).size());
     }
 
-    template <typename Cmp>
-    int getComponentsCount() const {
-        return static_cast<int>(componentsRegisterByType.at(ComponentName<Cmp>).size());
+    inline int getAllEntitiesCount() const {
+        return static_cast<int>(allEntities.size());
     }
 
-    /* Access elements & iterators */
-    template <EntityType type>
-    Entity& getEntityOrThrow(int index) {
+    inline int getCollisionComponentsCount() const {
+        return static_cast<int>(collisionComponentsRegister.size());
+    }
+
+    inline int getMovementComponentsCount() const {
+        return static_cast<int>(movementComponentsRegister.size());
+    }
+
+    inline int getBiggerEntitiesCount() {
+        return static_cast<int>(biggerEntitiesRegister.size());
+    }
+
+
+    /* Access elements & iterators - entity by type */
+
+    inline Entity& getEntityOrThrow(Entity::Type type, int index) {
         return *entitiesRegisterByType.at(type).at(index);
     }
 
-    template <EntityType type>
-    const Entity& getEntityOrThrow(int index) const {
+    inline const Entity& getEntityOrThrow(Entity::Type type, int index) const {
         return *entitiesRegisterByType.at(type).at(index);
     }
 
-    template <EntityType type>
-    std::vector<Entity*>::iterator entitiesBegin() {
+    inline std::vector<Entity*>::iterator entitiesBegin(Entity::Type type) {
         return entitiesRegisterByType.at(type).begin();
     }
 
-    template <EntityType type>
-    std::vector<Entity*>::iterator entitiesEnd() {
+    inline std::vector<Entity*>::iterator entitiesEnd(Entity::Type type) {
         return entitiesRegisterByType.at(type).end();
     }
 
-    template <EntityType type>
-    std::vector<Entity*>::const_iterator entitiesBegin() const {
+    inline std::vector<Entity*>::const_iterator entitiesBegin(Entity::Type type) const {
         return entitiesRegisterByType.at(type).cbegin();
     }
 
-    template <EntityType type>
-    std::vector<Entity*>::const_iterator entitiesEnd() const {
+    inline std::vector<Entity*>::const_iterator entitiesEnd(Entity::Type type) const {
         return entitiesRegisterByType.at(type).cend();
     }
 
-    
+
+    /* Access elements & iterators - entity all */
+
+    Entity* operator[](int index) {
+        return allEntities[index];
+    }
+
+    const Entity* operator[](int index) const {
+        return allEntities[index];
+    }
+
+    inline std::vector<Entity*>::iterator begin(Entity::Type type) {
+        return allEntities.begin();
+    }
+
+    inline std::vector<Entity*>::iterator end(Entity::Type type) {
+        return allEntities.end();
+    }
+
+    inline std::vector<Entity*>::const_iterator begin(Entity::Type type) const {
+        return allEntities.cbegin();
+    }
+
+    inline std::vector<Entity*>::const_iterator end(Entity::Type type) const {
+        return allEntities.cend();
+    }
+
+
+    /* Bigger entities */
+
+    inline std::vector<Entity*>::iterator entitiesBiggerBegin() {
+        return biggerEntitiesRegister.begin();
+    }
+
+    inline std::vector<Entity*>::iterator entitiesBiggerEnd() {
+        return biggerEntitiesRegister.end();
+    }
+
+    inline std::vector<Entity*>::const_iterator entitiesBiggerBegin() const {
+        return biggerEntitiesRegister.cbegin();
+    }
+
+    inline std::vector<Entity*>::const_iterator entitiesBiggerEnd() const {
+        return biggerEntitiesRegister.cend();
+    }
+
+
+    /* Access elements & iterators - components registers */
+
+    /* Collision - todo combine */
+
+    inline std::vector<CollisionComponent*>::iterator collisionComponentsBegin() {
+        return collisionComponentsRegister.begin();
+    }
+
+    inline std::vector<CollisionComponent*>::iterator collisionComponentsEnd() {
+        return collisionComponentsRegister.end();
+    }
+
+    inline std::vector<CollisionComponent*>::const_iterator collisionComponentsBegin() const {
+        return collisionComponentsRegister.cbegin();
+    }
+
+    inline std::vector<CollisionComponent*>::const_iterator collisionComponentsEnd() const {
+        return collisionComponentsRegister.cend();
+    }
+
+
+    /* Movement - todo combine */
+
+    inline std::vector<MovementComponent*>::iterator movementComponentsBegin() {
+        return movementComponentsRegister.begin();
+    }
+
+    inline std::vector<MovementComponent*>::iterator movementComponentsEnd() {
+        return movementComponentsRegister.end();
+    }
+
+    inline std::vector<MovementComponent*>::const_iterator movementComponentsBegin() const {
+        return movementComponentsRegister.cbegin();
+    }
+
+    inline std::vector<MovementComponent*>::const_iterator movementComponentsEnd() const {
+        return movementComponentsRegister.cend();
+    }
+
+
     /* Other */
 
-    template <EntityType type>
-    Entity* getEntityByXY(const Vect2F& elevationSpacePoint) {
-        /* Fix preventing hitting edge */
-        const Vect2F consistentPoint{elevationSpacePoint.x + EDGE_EPSILON, elevationSpacePoint.y + EDGE_EPSILON};
+    Entity* getEntityByXY(Entity::Type type, const Vect2F& elevationSpacePoint);
 
-        for(auto entity : entitiesRegisterByType.at(type)) {
-            if(entity->getCuboid().value().getFlatten().hasPointInside(consistentPoint)) {
-                return entity;
-            }
-        }
-        return nullptr;
-    }
+    EntitySegment3X3 getEntities3X3(Entity::Type type, 
+        const Vect2F& centerElevationSpacePoint, const Size2F tileSize);
 
-    template <EntityType type>
-    EntitySegment3X3<type> getEntities3X3(const Vect2F& centerElevationSpacePoint, const Size2F tileSize) {
-        EntitySegment3X3<type> result;
+    std::vector<Entity*> getEntitiesIntersetingWith(Entity::Type type, 
+        const Rect4F& rectElevationSpace);
 
-        /* Fix preventing hitting edge */
-        const Vect2F consistentPoint{centerElevationSpacePoint.x + EDGE_EPSILON, centerElevationSpacePoint.y + EDGE_EPSILON};
+protected:
+    /* Entity Create/Delete */
 
-        for(int row = -1; row < 2; ++row) {
-            for(int col = -1; col < 2; ++col) {
-                const Vect2F entityCenter{consistentPoint.x + tileSize.w * col, consistentPoint.y + tileSize.h * row};
-                result.setRelative(std::make_optional(getEntityByXY<type>(entityCenter)), col, row);
-            }
-        }
-
-        return result;
-    }
-
-    template <EntityType type>
-    std::vector<Entity*> getEntitiesIntersetingWith(const Rect4F& rectElevationSpace) {
-        std::vector<Entity*> result;
-
-        for(auto entity : entitiesRegisterByType.at(type)) {
-            if(entity->getCuboid().value().getFlatten().checkIntersection(rectElevationSpace)) {
-                result.push_back(entity);
-            }
-        }
-
-        return result;
-    }
+    Entity* createEntityOrThrow(Entity::Type type);
+    
+    bool deleteEntityIfExists(Entity* oldEntity);
 
 private:
-    int elevation{0};
-    void addEntitisComponentsToRegisters(Entity* entity); //Used by Entity
+    /* Registartion of Entity or its Components */
 
-    void moveEntityToElevationOrThrow(Entity* entity, Elevation* nextElevation); //Used by World
+    void registetedEntityOrThrow(Entity* newEntity);
     
-    //Used by World
-    template <EntityType type> 
-    Entity* createEntityOrThrow() {
-        /* Add entity to proper container */
-        Entity* newEntity = nullptr;
-        try {
-            newEntity = new Entity(this, type);
-        } catch(std::bad_alloc& e) {
-            std::cerr << "Elevation::createEntityOrThrow: " << e.what() << std::endl;
-            throw e;
-        }
+    void regiesterComponentsOfEntity(Entity* entity);
 
-        try {
-            registetedEntityOrThrow<type>(newEntity);
-        } catch(std::invalid_argument& e) {
-            std::cerr << "Elevation::createEntityOrThrow: " << e.what() << std::endl;
-            throw std::bad_alloc();
-        }
 
-        return newEntity;
-    }
+    /* Deregistartion of Entity or its Components */
 
-    template <EntityType type>
-    void registetedEntityOrThrow(Entity* newEntity) {
-        /* Type cannot be ALL */
-        if(type == EntityType::ALL) {
-            throw std::invalid_argument("Elevation::registetedEntityOrThrow: Type cannot be ALL");
-        }
-        
-        entitiesRegisterByType.at(type).push_back(newEntity);
+    void deregisterEntityOrThrow(Entity* oldEntity);
 
-        entitiesRegisterByType.at(EntityType::ALL).push_back(newEntity);
-    }
+    void deregiesterComponentsOfEntity(Entity* entity);
+    
 
-    template <EntityType type>
-    void deregisterEntityOrThrow(Entity* entity) {
-        
-    }
-
-    bool deleteEntityIfExists(Entity* entity); //Used by World
+    /* Member variables */
+    int elevation{0};
 
     World& containingWorld;
     
-    std::vector<Entity*> entitiesContainer;
-    std::unordered_map<EntityType, std::vector<Entity*>> entitiesRegisterByType {
-        {EntityType::NONE, {}},
-        {EntityType::FLOOR, {}},
-        {EntityType::CLUTTER, {}},
-        {EntityType::STATIC, {}},
-        {EntityType::DYNAMIC, {}},
-        {EntityType::BORDER, {}},
-    };
+    std::vector<Entity*> allEntities;
 
-    
+    std::vector<Entity*> biggerEntitiesRegister;
 
-    std::unordered_map<std::string, std::vector<Component*>> componentsRegisterByTypeName {
-        // {ComponentName<MovementComponent>::get(), {}},
-        // {ComponentName<CollisionComponent>::get(), {}},
-        {"MovementComponent", {}},
-        {"CollisionComponent", {}},
-    };
+    std::unordered_map<Entity::Type, std::vector<Entity*>> entitiesRegisterByType;
+
+    std::vector<CollisionComponent*> collisionComponentsRegister;
+
+    std::vector<MovementComponent*> movementComponentsRegister;
 
     /* World manages elevation indices */
     friend class World;

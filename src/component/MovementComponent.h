@@ -31,10 +31,3 @@ private:
 
     friend class CollisionDetectorComponent;
 };
-
-template <>
-struct ComponentName<MovementComponent> {
-    static std::string get() {
-        return "MovementComponent";
-    }
-};
