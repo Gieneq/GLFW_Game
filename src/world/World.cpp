@@ -97,6 +97,11 @@ void World::moveEntityToElevationOrThrow(Entity* entity, int destinationElevatio
     auto oldElevation = entity->getContainingElevationOrThrow();
     auto nextElevation = (*this)[destinationElevationIndex];
 
+    /* Check if is already on destination elevation */
+    if(oldElevation == nextElevation) {
+        return;
+    }
+
     /* Transfer from old to next elevation without deleting Entity from heap*/
 
     /* Deregister from old elevation */

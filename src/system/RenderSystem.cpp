@@ -129,7 +129,7 @@ void RenderSystem::renderEntityData(const EntityBatchData& entityData) {
 
         /* Check if has valid texture */
         auto textureDataOption = Loader::getLoader().getTextureDataByID(textureCmp->getTextureID());
-        const auto textureRect = textureCmp->getDrawableRectFromWorldSpace();
+        const auto textureRect = textureCmp->getDrawableRectFromWorldSpace(useProjection);
 
         if(!textureDataOption.has_value()) {
             /* Corrupted */
@@ -145,7 +145,7 @@ void RenderSystem::renderEntityData(const EntityBatchData& entityData) {
     if(colorCmpOption.has_value()) {
         auto colorCmp = colorCmpOption.value();
         //todo colorCmp->a
-        renderFilledRect4F(colorCmp->getDrawableRectFromWorldSpace(), colorCmp->r, colorCmp->g, colorCmp->b);
+        renderFilledRect4F(colorCmp->getDrawableRectFromWorldSpace(useProjection), colorCmp->r, colorCmp->g, colorCmp->b);
     }
 }
 

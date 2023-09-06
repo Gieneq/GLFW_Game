@@ -4,11 +4,11 @@
 
 
 
-Rect4F ColorComponent::getDrawableRectFromWorldSpace() const {
+Rect4F ColorComponent::getDrawableRectFromWorldSpace(bool useProjection) const {
     const auto wolrdCuboid = getElevationCuboid().toWorldSpace().value();
     const Rect4F textureRect{
         wolrdCuboid.x(),
-        wolrdCuboid.y() - wolrdCuboid.z(),
+        wolrdCuboid.y() - wolrdCuboid.z() / (useProjection ? 2.0F : 1.0F),
         wolrdCuboid.w(),
         wolrdCuboid.h()
     };
@@ -22,11 +22,11 @@ ElevationCuboid ColorComponent::getElevationCuboid() const {
 
 /* Texture Cmp */
 
-Rect4F TextureComponent::getDrawableRectFromWorldSpace() const {
+Rect4F TextureComponent::getDrawableRectFromWorldSpace(bool useProjection) const {
     const auto wolrdCuboid = getElevationCuboid().toWorldSpace().value();
     const Rect4F textureRect{
         wolrdCuboid.x(),
-        wolrdCuboid.y() - wolrdCuboid.z(),
+        wolrdCuboid.y() - wolrdCuboid.z() / (useProjection ? 2.0F : 1.0F),
         wolrdCuboid.w(),
         wolrdCuboid.h()
     };

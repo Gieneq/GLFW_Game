@@ -69,6 +69,9 @@ public:
         }
     }
 
+    /* Debug only */
+    bool useProjection{false};
+
 private:
     void renderEntityData(const EntityBatchData& entityData);
     int lastBatchEntitesCount{0};

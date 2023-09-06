@@ -53,8 +53,16 @@ void CollisionsSystem::processDetector(Entity* detectorEntity, const CollisionCo
 
         /* Movement check */
         const float dt = 0.1F;
+
+        //todo use z velocity?
         if(detectorEntity->getCuboid().value().z() > 0.0F || !hasFloorUnder) {
             detectorEntity->getCuboid().value().z() -= 2.0F * dt;
+
+            /* Stop movementin XY during flight */
+            if(!hasFloorUnder) {
+                movementCmp->stop();
+            }
+
             if(detectorEntity->getCuboid().value().z() < 0.0F) {
                 if(!hasFloorUnder) {
                     const float nextZ = detectorEntity->getCuboid().value().z() + 1.0F;

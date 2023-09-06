@@ -15,7 +15,7 @@ public:
         return &rectRelative;
     }
 
-    Rect4F getDrawableRectFromWorldSpace() const;
+    Rect4F getDrawableRectFromWorldSpace(bool useProjection=true) const;
 
     ElevationCuboid getElevationCuboid() const;
 
@@ -38,7 +38,7 @@ public:
         return &rectRelative;
     }
 
-    Rect4F getDrawableRectFromWorldSpace() const;
+    Rect4F getDrawableRectFromWorldSpace(bool useProjection=true) const;
 
     ElevationCuboid getElevationCuboid() const;
 

@@ -96,6 +96,20 @@ bool GameBase::onKeyReleased(int key) {
         render_system.debugView = debugView;
         return true;
     }
+
+    if(key == GLFW_KEY_P) {
+        /* Toggle projection */
+        render_system.useProjection = !render_system.useProjection;
+        return true;
+    }
+
+    if(key == GLFW_KEY_Q) {
+        auto player = &world.getPlayer();
+        player->getCuboid().value().x() = Settings::Player::INITIAL_X;
+        player->getCuboid().value().y() = Settings::Player::INITIAL_Y;
+        player->getCuboid().value().z() = Settings::Player::INITIAL_Z;
+        world.moveEntityToElevationOrThrow(player, Settings::Player::INITIAL_ELEVATION_IDX);
+    }
     
     if(key == GLFW_KEY_UP) {
         render_system.setClipElevationIndex(render_system.getClipElevationIndex() + 1);
