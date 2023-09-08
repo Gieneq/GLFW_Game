@@ -39,11 +39,11 @@ void CollisionsSystem::processDetector(Entity* detectorEntity, const CollisionCo
         if(detectorEntity->getCuboid().value().z() > 0.999F) {
             const float nextZ = detectorEntity->getCuboid().value().z() - 1.0F;
             const int nextElevationIdx = parentElevation->getIndex() + 1;
-            std::cout << "Switching to elevation: " << nextElevationIdx << std::endl;
             try {
                 /* Elevating Down */
                 parentElevation->getContainingWorld().moveEntityToElevationOrThrow(detectorEntity, nextElevationIdx);
                 detectorEntity->getCuboid().value().z() = nextZ;
+                std::cout << "Switching to elevation: " << nextElevationIdx << std::endl;
                 return;
             } catch(const std::exception&) {
                 /* No lower elevations */
@@ -58,24 +58,23 @@ void CollisionsSystem::processDetector(Entity* detectorEntity, const CollisionCo
         if(detectorEntity->getCuboid().value().z() > 0.0F || !hasFloorUnder) {
             detectorEntity->getCuboid().value().z() -= 2.0F * dt;
 
-            /* Stop movementin XY during flight */
-            if(!hasFloorUnder) {
-                movementCmp->stop();
-            }
+
 
             if(detectorEntity->getCuboid().value().z() < 0.0F) {
                 if(!hasFloorUnder) {
                     const float nextZ = detectorEntity->getCuboid().value().z() + 1.0F;
                     const int nextElevationIdx = parentElevation->getIndex() - 1;
-                    std::cout << "Switching to elevation: " << nextElevationIdx << std::endl;
-                    try {
-                        /* Elevating Down */
-                        parentElevation->getContainingWorld().moveEntityToElevationOrThrow(detectorEntity, nextElevationIdx);
-                        detectorEntity->getCuboid().value().z() = nextZ;
-                        return;
-                    } catch(const std::exception&) {
-                        /* No lower elevations */
-                        detectorEntity->getCuboid().value().z() = 0.0F;
+                    if(nextElevationIdx >= 0) {
+                        try {
+                            /* Elevating Down */
+                            parentElevation->getContainingWorld().moveEntityToElevationOrThrow(detectorEntity, nextElevationIdx);
+                            detectorEntity->getCuboid().value().z() = nextZ;
+                        std::cout << "Switching to elevation: " << nextElevationIdx << std::endl;
+                            return;
+                        } catch(const std::exception&) {
+                            /* No lower elevations */
+                            detectorEntity->getCuboid().value().z() = 0.0F;
+                        }
                     }
                 }
                 else {

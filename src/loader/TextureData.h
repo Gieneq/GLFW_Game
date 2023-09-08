@@ -2,6 +2,8 @@
 #include <string>
 #include "TextureId.h"
 #include "GLCommon.h"
+#include "Settings.h"
+#include "Maths.h"
 
 class TextureData {
 public:
@@ -60,6 +62,23 @@ public:
     friend std::ostream& operator<<(std::ostream& os, const TextureData& texture_data) {
         os << "\'" << texture_data.name << "\'" << " (" << texture_data.absolute_path << ") " << texture_data.getImageWidth() << "x" << texture_data.getImageHeight() << " (" << texture_data.getTileWidth() << ", " << texture_data.getTileHeight() << ") GPU: " << texture_data.id;
         return os;
+    }
+
+    Rect4F getUV(const int tilesetIndex) {
+        const int u_idx = tilesetIndex % this->getColumns();
+        const int v_idx = tilesetIndex / this->getColumns();
+
+        const int tileLeftPx = Settings::Rendering::Bleeding::MARGIN + u_idx * (Settings::Rendering::Bleeding::SPACING + this->getTileWidth());
+        const int tileRightPx = tileLeftPx + this->getTileWidth();
+        const int tileTopPx = Settings::Rendering::Bleeding::MARGIN + v_idx * (Settings::Rendering::Bleeding::SPACING + this->getTileHeight());
+        const int tileBottomPx = tileTopPx + this->getTileHeight();
+
+        const float u1 = static_cast<float>(tileLeftPx) / static_cast<float>(this->getImageWidth());
+        const float u2 = static_cast<float>(tileRightPx) / static_cast<float>(this->getImageWidth());
+        const float v1 = static_cast<float>(tileTopPx) / static_cast<float>(this->getImageHeight());
+        const float v2 = static_cast<float>(tileBottomPx) / static_cast<float>(this->getImageHeight());
+
+        return Rect4F(u1, v1, u2-u1, v2-v1);
     }
 
 private:    

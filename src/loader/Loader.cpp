@@ -34,7 +34,7 @@ bool Loader::loadWorld(World& world) {
      * Tiles are not built yet.
      * It is used to build tiles and populate world.
      */
-    const std::string mapFileName = "testmap.tmx";
+    const std::string mapFileName = "testisland.tmx";
 
     auto mapLoadingResul = loadMapDataFromTMXFile(world, mapFileName);
     if(!mapLoadingResul) {
@@ -789,11 +789,12 @@ bool Loader::fillElevationWithEntities(World& world, Elevation* elevation, Entit
         tileY = static_cast<float>(tileIndex / mapData.getTotalWidth());
 
         /* Test block */
+#ifdef USE_TEST_BLOCK
         if(!(tileX > 80 && tileX < 102 && tileY > 80 && tileY < 102)) {
             ++tileIndex;
             continue;
         }
-
+#endif
         /* Retrive TilesetData corresponding to GID */
         auto tilesetDataOption = mapData.getTilesetDataCorrespondingToGID(tileGID);
         if(!tilesetDataOption.has_value()) {

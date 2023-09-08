@@ -78,29 +78,23 @@ void RenderSystemBase::renderTexturedRect4F(const Rect4F& worldRect, TextureData
     glBindTexture(GL_TEXTURE_2D, textureData->getTextureID().getID());
     glEnable(GL_TEXTURE_2D);
         
-    int u_idx = tilesetIndex % textureData->getColumns();
-    int v_idx = tilesetIndex / textureData->getColumns();
-
-    float u1 = static_cast<float>((u_idx + 0) * textureData->getTileWidth()) / static_cast<float>(textureData->getImageWidth());
-    float u2 = static_cast<float>((u_idx + 1) * textureData->getTileWidth()) / static_cast<float>(textureData->getImageWidth());
-    float v1 = static_cast<float>((v_idx + 0) * textureData->getTileHeight()) / static_cast<float>(textureData->getImageHeight());
-    float v2 = static_cast<float>((v_idx + 1) * textureData->getTileHeight()) / static_cast<float>(textureData->getImageHeight());
-
-    /* Remove bleeding effect */
-    u1 += 0.5F / static_cast<float>(textureData->getImageWidth());
-    u2 -= 0.5F / static_cast<float>(textureData->getImageWidth());
-    v1 += 0.5F / static_cast<float>(textureData->getImageHeight());
-    v2 -= 0.5F / static_cast<float>(textureData->getImageHeight());
+    const auto uv = textureData->getUV(tilesetIndex);
 
     glBegin(GL_QUADS);
-    glTexCoord2f(u1, v1);
+
+    //todo ispect why bottom must be replaced with top in UV
+    glTexCoord2f(uv.left(), uv.top());
     glVertex2f(projRect.left(), projRect.bottom());
-    glTexCoord2f(u1, v2);
+
+    glTexCoord2f(uv.left(), uv.bottom());
     glVertex2f(projRect.left(), projRect.top());
-    glTexCoord2f(u2, v2);
+
+    glTexCoord2f(uv.right(), uv.bottom());
     glVertex2f(projRect.right(), projRect.top());
-    glTexCoord2f(u2, v1);
+
+    glTexCoord2f(uv.right(), uv.top());
     glVertex2f(projRect.right(), projRect.bottom());
+
     glEnd();
 
 

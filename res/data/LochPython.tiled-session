@@ -3,12 +3,12 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "maps/testmap.tmx",
+    "activeFile": "",
     "expandedProjectPaths": [
+        ".",
         "maps",
-        "tilesets",
         "entities",
-        "."
+        "tilesets"
     ],
     "file.lastUsedOpenFilter": "Wszystkie pliki (*)",
     "fileStates": {
@@ -16,12 +16,36 @@
             "scaleInDock": 1,
             "scaleInEditor": 1
         },
+        "maps/f3.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "maps/floor.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 3
+        },
+        "maps/floor2.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 5.5
+        },
         "maps/junkyworld.tmx": {
             "scale": 1.5421666666666665,
             "selectedLayer": 0,
             "viewCenter": {
                 "x": 186.10180482005842,
                 "y": 200.04322922295472
+            }
+        },
+        "maps/testisland.tmx": {
+            "expandedGroupLayers": [
+                3,
+                4
+            ],
+            "scale": 0.75,
+            "selectedLayer": 4,
+            "viewCenter": {
+                "x": 466,
+                "y": 266.6666666666667
             }
         },
         "maps/testmap — kopia.tmx": {
@@ -34,16 +58,16 @@
         },
         "maps/testmap.tmx": {
             "expandedGroupLayers": [
-                3,
-                5,
+                7,
                 2,
-                7
+                3,
+                5
             ],
-            "scale": 3,
-            "selectedLayer": 2,
+            "scale": 2,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": 1982.3333333333333,
-                "y": 1790.8333333333333
+                "x": 1711.75,
+                "y": 447.75
             }
         },
         "tilesets/details.tsx": {
@@ -52,13 +76,14 @@
         },
         "tilesets/floor.tsx": {
             "scaleInDock": 1,
-            "scaleInEditor": 2
+            "scaleInEditor": 4
         },
         "tilesets/objects.tsx": {
             "scaleInDock": 1,
             "scaleInEditor": 2
         },
         "tilesets/objects_1x2.tsx": {
+            "dynamicWrapping": false,
             "scaleInDock": 1,
             "scaleInEditor": 2
         },
@@ -71,36 +96,35 @@
             "scaleInEditor": 32
         }
     },
-    "frame.defaultDuration": 2000,
-    "last.imagePath": "C:/Users/Lenovo/Documents/_Moje/Piotr/Pyrograf/LochPythonWS/LochPythonRPG/data/tilesets",
+    "frame.defaultDuration": 1000,
+    "last.imagePath": "C:/Users/piotr/Documents/cpp_projects/GLFW_Game/res/data/tilesets",
     "map.lastUsedFormat": "tmx",
-    "map.tileHeight": 20,
-    "map.tileWidth": 20,
+    "map.renderOrder": null,
+    "map.tileHeight": 32,
+    "map.tileWidth": 32,
     "openFiles": [
-        "maps/testmap.tmx",
-        "tilesets/objects.tsx",
-        "tilesets/details.tsx",
-        "tilesets/floor.tsx",
-        "tilesets/objects_1x2.tsx",
-        "tilesets/objects_2x2.tsx"
     ],
     "project": "LochPython.tiled-project",
     "property.type": "int",
     "recentFiles": [
+        "maps/f3.tsx",
+        "maps/floor2.tsx",
+        "maps/floor.tsx",
+        "tilesets/floor.tsx",
+        "maps/testisland.tmx",
+        "maps/testmap.tmx",
         "tilesets/objects_2x2.tsx",
         "tilesets/objects_1x2.tsx",
-        "tilesets/floor.tsx",
         "tilesets/details.tsx",
         "tilesets/objects.tsx",
-        "maps/testmap.tmx",
         "maps/testmap — kopia.tmx",
-        "maps/junkyworld.tmx",
-        "tilesets/particles.tsx",
-        "entities/player.tsx"
+        "maps/junkyworld.tmx"
     ],
     "tileset.lastUsedFormat": "tsx",
+    "tileset.margin": 1,
+    "tileset.spacing": 2,
     "tileset.tileSize": {
-        "height": 2,
-        "width": 2
+        "height": 64,
+        "width": 32
     }
 }
