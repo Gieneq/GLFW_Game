@@ -3,10 +3,10 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "",
+    "activeFile": "maps/testisland.tmx",
     "expandedProjectPaths": [
-        ".",
         "maps",
+        ".",
         "entities",
         "tilesets"
     ],
@@ -41,11 +41,11 @@
                 3,
                 4
             ],
-            "scale": 0.75,
-            "selectedLayer": 4,
+            "scale": 1,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": 466,
-                "y": 266.6666666666667
+                "x": 578.5,
+                "y": 406.5
             }
         },
         "maps/testmap — kopia.tmx": {
@@ -76,7 +76,7 @@
         },
         "tilesets/floor.tsx": {
             "scaleInDock": 1,
-            "scaleInEditor": 4
+            "scaleInEditor": 2
         },
         "tilesets/objects.tsx": {
             "scaleInDock": 1,
@@ -96,25 +96,28 @@
             "scaleInEditor": 32
         }
     },
-    "frame.defaultDuration": 1000,
+    "frame.defaultDuration": 500,
     "last.imagePath": "C:/Users/piotr/Documents/cpp_projects/GLFW_Game/res/data/tilesets",
     "map.lastUsedFormat": "tmx",
     "map.renderOrder": null,
     "map.tileHeight": 32,
     "map.tileWidth": 32,
     "openFiles": [
+        "maps/testisland.tmx",
+        "tilesets/floor.tsx",
+        "tilesets/objects_1x2.tsx"
     ],
     "project": "LochPython.tiled-project",
     "property.type": "int",
     "recentFiles": [
+        "tilesets/objects_1x2.tsx",
+        "tilesets/floor.tsx",
+        "maps/testisland.tmx",
         "maps/f3.tsx",
         "maps/floor2.tsx",
         "maps/floor.tsx",
-        "tilesets/floor.tsx",
-        "maps/testisland.tmx",
         "maps/testmap.tmx",
         "tilesets/objects_2x2.tsx",
-        "tilesets/objects_1x2.tsx",
         "tilesets/details.tsx",
         "tilesets/objects.tsx",
         "maps/testmap — kopia.tmx",
