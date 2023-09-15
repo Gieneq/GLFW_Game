@@ -109,7 +109,9 @@ bool Loader::loadPlayer(World& world) {
     }
 
     /* Collision detector */
-    auto collisionDetectorCmpOption = player->addCollisionDetectorComponent(Cuboid6F(0.0F, 0.15F, 0.0F, 1.0F, 0.85F, 1.0F));
+    //todo - applying some shift in box, cause problems. Seems detection box is not used in elevation change, but
+    //entitiy box is used.
+    auto collisionDetectorCmpOption = player->addCollisionDetectorComponent(Cuboid6F(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F));
     if(!collisionDetectorCmpOption.has_value()) {
         std::cerr << "Error adding collision detector component to player" << std::endl;
         return false;
@@ -769,8 +771,6 @@ bool Loader::buildWorldFromMapData(World& world) {
 }
 
 
-#define USE_Y_ELEVATION_FIX 1
-
 bool Loader::fillElevationWithEntities(World& world, Elevation* elevation, Entity::Type entityType, const std::vector<int> layerDataIndices) {
     int tileIndex{0};
     float tileX{0};
@@ -825,10 +825,11 @@ bool Loader::fillElevationWithEntities(World& world, Elevation* elevation, Entit
             tileY - ((tilesetData->getTileRelativeHeightScale() > 1.0F) ? (tilesetData->getTileRelativeHeightScale() - 1.0F) : 0.0F), 
             0.0F
         );
-#ifdef USE_Y_ELEVATION_FIX
-        const int elevationFixY = elevation->getIndex();
-        tileEntity->getCuboid().value().y() += elevationFixY;
-#endif
+
+        if(Settings::Resources::USE_VERTICAL_SHIFT) {
+            const int elevationFixY = elevation->getIndex();
+            tileEntity->getCuboid().value().y() += elevationFixY;
+        }
 
         /* Size */
         tileEntity->getCuboid().value().setSize(

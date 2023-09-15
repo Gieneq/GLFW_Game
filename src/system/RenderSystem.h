@@ -70,7 +70,7 @@ public:
     }
 
     /* Debug only */
-    bool useProjection{false};
+    bool useProjection{Settings::Rendering::USE_Y_PERSPECTIVE};
 
 private:
     void renderEntityData(const EntityBatchData& entityData);

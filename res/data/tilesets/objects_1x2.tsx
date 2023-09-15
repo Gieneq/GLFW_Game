@@ -37,4 +37,72 @@
    </object>
   </objectgroup>
  </tile>
+ <tile id="4">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="32" width="32" height="32"/>
+  </objectgroup>
+ </tile>
+ <tile id="5">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="32" width="32" height="12"/>
+  </objectgroup>
+ </tile>
+ <tile id="6">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="32" width="12" height="12"/>
+  </objectgroup>
+ </tile>
+ <tile id="7">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="32" width="12" height="32"/>
+  </objectgroup>
+ </tile>
+ <tile id="8">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="32" width="32" height="32"/>
+  </objectgroup>
+ </tile>
+ <tile id="9">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="20" y="32" width="12" height="12"/>
+  </objectgroup>
+ </tile>
+ <tile id="10">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="20" y="32" width="12" height="32"/>
+  </objectgroup>
+ </tile>
+ <tile id="11">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="32" width="32" height="32"/>
+  </objectgroup>
+ </tile>
+ <tile id="12">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="32" width="32" height="12"/>
+  </objectgroup>
+ </tile>
+ <tile id="13">
+  <properties>
+   <property name="stairs" value="top"/>
+  </properties>
+ </tile>
+ <tile id="14">
+  <properties>
+   <property name="stairs" value="top"/>
+  </properties>
+ </tile>
+ <wangsets>
+  <wangset name="Stones" type="corner" tile="-1">
+   <wangcolor name="stonz" color="#ff0000" tile="-1" probability="1"/>
+   <wangtile tileid="4" wangid="0,1,0,1,0,1,0,1"/>
+   <wangtile tileid="5" wangid="0,1,0,0,0,0,0,1"/>
+   <wangtile tileid="6" wangid="0,0,0,0,0,0,0,1"/>
+   <wangtile tileid="7" wangid="0,0,0,0,0,1,0,1"/>
+   <wangtile tileid="8" wangid="0,1,0,0,0,1,0,1"/>
+   <wangtile tileid="9" wangid="0,1,0,0,0,0,0,0"/>
+   <wangtile tileid="10" wangid="0,1,0,1,0,0,0,0"/>
+   <wangtile tileid="11" wangid="0,1,0,1,0,0,0,1"/>
+  </wangset>
+ </wangsets>
 </tileset>

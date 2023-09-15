@@ -36,18 +36,18 @@ namespace Settings {
         static constexpr char* ASSETS_PATH  = "../../res/assets/";
         static constexpr char* DATA_PATH  = "../../res/data/";
         static constexpr char* MAPS_DIR  = "maps/";
+        static constexpr bool USE_VERTICAL_SHIFT{false};
     };
 
     struct Player {
         static constexpr float INITIAL_SPEED = 4.5F;
-        static constexpr float INITIAL_X = 5.4601F;
-        static constexpr float INITIAL_Y = 12.2446F;
+        static constexpr float INITIAL_X = 37.0F;
+        static constexpr float INITIAL_Y = 12.0F;
         static constexpr int INITIAL_ELEVATION_IDX = 0;
         static constexpr float INITIAL_Z = 0.0F;
     };
     
     struct General {
-        static constexpr float SHIFT_FACTOR_Y{1};
         static constexpr double FPS_MEASURE_INTERVAL{0.5};
         static constexpr double LOG_STATE_INTERVAL{1.0};
         static constexpr bool LOG_STATE{true};
@@ -72,6 +72,8 @@ namespace Settings {
             static constexpr int MARGIN = 1;
             static constexpr int SPACING = 2;
         };
+        static constexpr bool USE_Y_PERSPECTIVE{true};
+        static constexpr float Y_PERSPECTIVE_SHIFT{1.0F};
     };
     
     struct Systems {
