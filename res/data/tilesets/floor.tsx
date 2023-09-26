@@ -75,6 +75,87 @@
    <frame tileid="127" duration="500"/>
   </animation>
  </tile>
+ <tile id="128">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="6" height="32"/>
+   <object id="2" x="0" y="0" width="32" height="6"/>
+  </objectgroup>
+ </tile>
+ <tile id="129">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="32" height="6"/>
+  </objectgroup>
+ </tile>
+ <tile id="130">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="32" height="6"/>
+   <object id="2" x="26" y="0" width="6" height="32"/>
+  </objectgroup>
+ </tile>
+ <tile id="131">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="26" y="26" width="6" height="6"/>
+  </objectgroup>
+ </tile>
+ <tile id="132">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="26" width="6" height="6"/>
+  </objectgroup>
+ </tile>
+ <tile id="133">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="32" height="6"/>
+   <object id="2" x="0" y="0" width="6" height="32"/>
+  </objectgroup>
+ </tile>
+ <tile id="134">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="32" height="6"/>
+  </objectgroup>
+ </tile>
+ <tile id="135">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="32" height="6"/>
+   <object id="2" x="26" y="0" width="6" height="32"/>
+  </objectgroup>
+ </tile>
+ <tile id="136">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="26" y="26" width="6" height="6"/>
+  </objectgroup>
+ </tile>
+ <tile id="137">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="26" width="6" height="6"/>
+  </objectgroup>
+ </tile>
+ <tile id="138">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="32" height="6"/>
+   <object id="2" x="0" y="0" width="6" height="32"/>
+  </objectgroup>
+ </tile>
+ <tile id="139">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="32" height="6"/>
+  </objectgroup>
+ </tile>
+ <tile id="140">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="32" height="6"/>
+   <object id="2" x="26" y="0" width="6" height="32"/>
+  </objectgroup>
+ </tile>
+ <tile id="141">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="26" y="26" width="6" height="6"/>
+  </objectgroup>
+ </tile>
+ <tile id="142">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="26" width="6" height="6"/>
+  </objectgroup>
+ </tile>
  <tile id="150">
   <objectgroup draworder="index" id="2">
    <object id="1" x="12" y="12" width="20" height="20"/>
@@ -90,6 +171,66 @@
    <frame tileid="157" duration="500"/>
   </animation>
  </tile>
+ <tile id="158">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="6" height="32"/>
+  </objectgroup>
+ </tile>
+ <tile id="160">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="26" y="0" width="6" height="32"/>
+  </objectgroup>
+ </tile>
+ <tile id="161">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="26" y="0" width="6" height="6"/>
+  </objectgroup>
+ </tile>
+ <tile id="162">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="6" height="6"/>
+  </objectgroup>
+ </tile>
+ <tile id="163">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="6" height="32"/>
+  </objectgroup>
+ </tile>
+ <tile id="165">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="26" y="0" width="6" height="32"/>
+  </objectgroup>
+ </tile>
+ <tile id="166">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="26" y="0" width="6" height="6"/>
+  </objectgroup>
+ </tile>
+ <tile id="167">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="6" height="6"/>
+  </objectgroup>
+ </tile>
+ <tile id="168">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="6" height="32"/>
+  </objectgroup>
+ </tile>
+ <tile id="170">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="26" y="0" width="6" height="32"/>
+  </objectgroup>
+ </tile>
+ <tile id="171">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="26" y="0" width="6" height="6"/>
+  </objectgroup>
+ </tile>
+ <tile id="172">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="6" height="6"/>
+  </objectgroup>
+ </tile>
  <tile id="180">
   <objectgroup draworder="index" id="2">
    <object id="1" x="12" y="0" width="20" height="20"/>
@@ -104,6 +245,93 @@
    <frame tileid="186" duration="500"/>
    <frame tileid="187" duration="500"/>
   </animation>
+ </tile>
+ <tile id="188">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="6" height="32"/>
+   <object id="2" x="0" y="26" width="32" height="6"/>
+  </objectgroup>
+ </tile>
+ <tile id="189">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="26" width="32" height="6"/>
+  </objectgroup>
+ </tile>
+ <tile id="190">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="26" width="32" height="6"/>
+   <object id="2" x="26" y="0" width="6" height="32"/>
+  </objectgroup>
+ </tile>
+ <tile id="191">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="6" height="6"/>
+   <object id="2" x="26" y="26" width="6" height="6"/>
+  </objectgroup>
+ </tile>
+ <tile id="192">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="26" width="6" height="6"/>
+   <object id="2" x="26" y="0" width="6" height="6"/>
+  </objectgroup>
+ </tile>
+ <tile id="193">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="6" height="32"/>
+   <object id="2" x="0" y="26" width="32" height="6"/>
+  </objectgroup>
+ </tile>
+ <tile id="194">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="26" width="32" height="6"/>
+  </objectgroup>
+ </tile>
+ <tile id="195">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="26" y="0" width="6" height="32"/>
+   <object id="2" x="0" y="26" width="32" height="6"/>
+  </objectgroup>
+ </tile>
+ <tile id="196">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="6" height="6"/>
+   <object id="2" x="26" y="26" width="6" height="6"/>
+  </objectgroup>
+ </tile>
+ <tile id="197">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="26" width="6" height="6"/>
+   <object id="2" x="26" y="0" width="6" height="6"/>
+  </objectgroup>
+ </tile>
+ <tile id="198">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="26" width="32" height="6"/>
+   <object id="2" x="0" y="0" width="6" height="32"/>
+  </objectgroup>
+ </tile>
+ <tile id="199">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="26" width="32" height="6"/>
+  </objectgroup>
+ </tile>
+ <tile id="200">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="26" width="32" height="6"/>
+   <object id="2" x="26" y="0" width="6" height="32"/>
+  </objectgroup>
+ </tile>
+ <tile id="201">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="6" height="6"/>
+   <object id="2" x="26" y="26" width="6" height="6"/>
+  </objectgroup>
+ </tile>
+ <tile id="202">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="26" y="0" width="6" height="6"/>
+   <object id="2" x="0" y="26" width="6" height="6"/>
+  </objectgroup>
  </tile>
  <tile id="210">
   <objectgroup draworder="index" id="2">

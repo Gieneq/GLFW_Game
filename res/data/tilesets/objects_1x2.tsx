@@ -92,6 +92,46 @@
    <property name="stairs" value="top"/>
   </properties>
  </tile>
+ <tile id="15">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="2" y="32" width="30" height="26"/>
+  </objectgroup>
+ </tile>
+ <tile id="16">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="32" width="30" height="26"/>
+  </objectgroup>
+ </tile>
+ <tile id="18">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="44" width="20" height="15"/>
+  </objectgroup>
+ </tile>
+ <tile id="19">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="4" y="42" width="24" height="16"/>
+  </objectgroup>
+ </tile>
+ <tile id="30">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="34" width="32" height="23"/>
+  </objectgroup>
+ </tile>
+ <tile id="31">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="3" y="40" width="28" height="16"/>
+  </objectgroup>
+ </tile>
+ <tile id="32">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="12" y="34" width="20" height="26"/>
+  </objectgroup>
+ </tile>
+ <tile id="33">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="34" width="20" height="26"/>
+  </objectgroup>
+ </tile>
  <wangsets>
   <wangset name="Stones" type="corner" tile="-1">
    <wangcolor name="stonz" color="#ff0000" tile="-1" probability="1"/>
