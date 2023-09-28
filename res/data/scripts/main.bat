@@ -1,3 +1,3 @@
 @echo off
-python main.py -c config.json
+python main.py -p . -v
 pause
