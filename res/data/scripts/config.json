@@ -1,0 +1,14 @@
+{
+  "maps_dir": "../maps",
+  "chunk_height": 64,
+  "chunk_width": 64,
+  "default_tile_gid": 1,
+  "void_tile_gid": 0,
+  "output_root_dir": "../generated",
+  "output_data_dir_name": "chunks",
+  "output_world_file": "world.json",
+  "output_visualization_file": "world_map.png",
+  "fancy_json": true,
+  "gid_infinity": null,
+  "forward_slash_path": true
+}

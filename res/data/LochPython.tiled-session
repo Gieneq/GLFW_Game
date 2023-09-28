@@ -5,10 +5,10 @@
     },
     "activeFile": "maps/testisland.tmx",
     "expandedProjectPaths": [
+        ".",
         "tilesets",
         "maps",
-        "entities",
-        "."
+        "entities"
     ],
     "file.lastUsedOpenFilter": "Wszystkie pliki (*)",
     "fileStates": {
@@ -39,15 +39,13 @@
         "maps/testisland.tmx": {
             "expandedGroupLayers": [
                 14,
-                3,
-                10,
-                4
+                3
             ],
             "scale": 0.75,
-            "selectedLayer": 2,
+            "selectedLayer": 3,
             "viewCenter": {
-                "x": 697.3333333333333,
-                "y": 478
+                "x": 689.3333333333334,
+                "y": 186
             }
         },
         "maps/testmap — kopia.tmx": {
@@ -78,7 +76,7 @@
         },
         "tilesets/floor.tsx": {
             "scaleInDock": 1,
-            "scaleInEditor": 4
+            "scaleInEditor": 1
         },
         "tilesets/objects.tsx": {
             "scaleInDock": 1,
@@ -87,7 +85,7 @@
         "tilesets/objects_1x2.tsx": {
             "dynamicWrapping": false,
             "scaleInDock": 1,
-            "scaleInEditor": 4
+            "scaleInEditor": 1.5
         },
         "tilesets/objects_2x2.tsx": {
             "scaleInDock": 1,
