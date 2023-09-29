@@ -5,10 +5,10 @@
     },
     "activeFile": "maps/testisland.tmx",
     "expandedProjectPaths": [
-        ".",
         "tilesets",
         "maps",
-        "entities"
+        "entities",
+        "."
     ],
     "file.lastUsedOpenFilter": "Wszystkie pliki (*)",
     "fileStates": {
@@ -42,10 +42,10 @@
                 3
             ],
             "scale": 0.75,
-            "selectedLayer": 3,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 689.3333333333334,
-                "y": 186
+                "x": 1392.6666666666665,
+                "y": 414
             }
         },
         "maps/testmap — kopia.tmx": {

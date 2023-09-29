@@ -1,6 +1,7 @@
 from common.config import Config
 import xml.etree.ElementTree as ET
 import os
+from common.rect import Rect
 
 class MapFileValidator:
     def __init__(self, config: Config):
@@ -47,3 +48,12 @@ class MapFileValidator:
             return False
 
         return True
+    
+    
+def check_outlines_overlapping(outlines: list[Rect]) -> bool:
+    for idx, outline in enumerate(outlines):
+        for other_idx in range(idx + 1, len(outlines)):
+            other_outline = outlines[other_idx]
+            if outline.is_intersecting(other_outline):
+                return True
+    return False

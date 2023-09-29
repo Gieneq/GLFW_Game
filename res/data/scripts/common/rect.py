@@ -30,7 +30,7 @@ class Rect:
     def bottom(self):
         return self.y + self.height
 
-    def intersect(self, other):
+    def is_intersecting(self, other):
         if (self.left() < other.right() and self.right() > other.left() and
                 self.top() < other.bottom() and self.bottom() > other.top()):
             return True
@@ -45,7 +45,7 @@ class Rect:
 
 
 def test_intersection(r1, r2, should_be):
-    print(f"{r1} & {r2} : {r1.intersect(r2)} ? {should_be}")
+    print(f"{r1} & {r2} : {r1.is_intersecting(r2)} ? {should_be}")
 
 
 def test_align(r1, align_x, align_y):
