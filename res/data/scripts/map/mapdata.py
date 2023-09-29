@@ -1,4 +1,6 @@
+from map.elevationdata import Elevation
 from common.rect import Rect
+
 
 class MapData:
     def __init__(self, outline_rect: Rect, global_z: float, depth: float, filepath: str):
@@ -6,16 +8,42 @@ class MapData:
         self.global_z = global_z
         self.depth = depth
         self.filepath = filepath
-        self.elevations = []
+        self.elevations: list[Elevation] = []
+        self.locked = False
 
-# class ElevationError(Exception):
-#     pass
 
-# class LayerError(Exception):
-#     pass
+    def add_elevation(self, elevation: Elevation) -> None:
+        if self.locked:
+            raise Exception("MapData is locked")
+        self.elevations.append(elevation)
 
-# class PositionError(Exception):
-#     pass
+
+    def add_elevations(self, elevations: list[Elevation]) -> None:
+        if self.locked:
+            raise Exception("MapData is locked")
+        self.elevations.extend(elevations)
+
+
+    def validate(self) -> bool:
+        if self.locked:
+            raise Exception("MapData is locked")
+
+        if len(self.elevations) != self.depth:
+            return False
+
+        for elevation in self.elevations:
+            if not elevation.validate():
+                return False
+            
+        self.locked = True
+        return True
+    
+    def __str__(self) -> str:
+        string = f"MapData(filepath={self.filepath}, outline={self.outline}, global_z={self.global_z}, depth={self.depth}), elevations:\n"
+        for _, elevation in enumerate(self.elevations):
+            string += str(elevation)
+
+        return string
 
 # class MapData(Rect):
 #     def __init__(self, data):

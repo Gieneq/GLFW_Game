@@ -67,6 +67,24 @@ class TilesetsDatabase:
             raise KeyError(f"Tileset with id={id} not found")
         
         return self.assignment[id]
+    
+    def get_ids_of_tilesets(self, tilesets: list[dict]) -> list[int]:
+        if not self.locked:
+            raise Exception("TilesetsDatabase is not locked")
+        
+        ids = []
+        for tileset in tilesets:
+            if "first_gid" not in tileset:
+                raise KeyError("first_gid not found in tileset")
+            
+            # tileset_path is hard to use
+            
+            for id in self.assignment.keys():
+                if self.assignment[id].first_gid == tileset["first_gid"]:
+                    ids.append(id)
+                    break
+        
+        return ids
 
 
     def organize(self):
@@ -90,5 +108,8 @@ class TilesetsDatabase:
         string = ""
         for id in self.assignment.keys():
             string += f"{id}: {self.assignment[id]}\n"
-        return string
+        return string[:-1]
 
+
+    def __len__(self):
+        return len(self.assignment)

@@ -30,7 +30,7 @@ class Rect:
     def bottom(self):
         return self.y + self.height
 
-    def is_intersecting(self, other):
+    def is_intersecting(self, other: 'Rect') -> bool:
         if (self.left() < other.right() and self.right() > other.left() and
                 self.top() < other.bottom() and self.bottom() > other.top()):
             return True

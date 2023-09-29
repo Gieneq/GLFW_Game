@@ -51,6 +51,9 @@ class MapFileValidator:
     
     
 def check_outlines_overlapping(outlines: list[Rect]) -> bool:
+    if len(outlines) < 2:
+        return False
+    
     for idx, outline in enumerate(outlines):
         for other_idx in range(idx + 1, len(outlines)):
             other_outline = outlines[other_idx]

@@ -11,14 +11,11 @@ class MapsLoader:
     def __init__(self, config: Config) -> None:
         self.config = config
         self.tilesetsDatabase = TilesetsDatabase()
-        self.maps_outlines = [Rect]
+        self.maps_outlines: list[Rect] = []
 
 
     def get_mapfile_root(self, filename) -> tuple[str, ET.Element]:
         map_path = os.path.join(self.config.maps_dirpath, filename)
-        
-        if self.config.verbose:
-            print(f"Loading map: {map_path}")
 
         """ Load map data from file """
         tree = ET.parse(map_path)
@@ -42,32 +39,37 @@ class MapsLoader:
 
         """ Parse map data xml """
         parser = MapDataParser(self.config)
+
         tileset_dicts = parser.parseTilesetsData(root)
         for tileset_dict in tileset_dicts:
             self.tilesetsDatabase.add(tileset_dict)
+
+        """ Parse map cuboid """
+        map_cuboid_dict = parser.parseMapCuboid(root)
+        outline_rect = map_cuboid_dict["outline_rect"]
+        self.maps_outlines.append(outline_rect)
 
         return True
 
 
     def load(self, filename: str) -> MapData:
+        map_path, root = self.get_mapfile_root(filename)
 
-        # """ Parse map data xml """
-        # parser = MapDataParser(self.config)
-        # tilesets_data, map_data = parser.parse(map_path, root)
-        # if map_data is None:
-        #     print(f"Error parsing map: {map_path}")
-        #     return None
-        # elif self.config.verbose:
-        #     print(f"Map parsed: {map_path}")
+        """ Parse map data xml """
+        parser = MapDataParser(self.config)
+        map_data = parser.parseMapData(map_path, root, self.tilesetsDatabase)
+        if map_data is None:
+            print(f"Error parsing map: {map_path}")
+            return None
+        
+        if self.config.verbose:
+            print(f"Map loaded succesfully: {map_path}", end="\n\n")
 
-        # return map_data
-        return None
+        return map_data
     
 
     def loadAll(self) -> list[MapData]:
         maps_data = []
-        if self.config.verbose:
-            print("Loading maps from: ", self.config.maps_dirpath)
 
         if not (os.path.exists(self.config.maps_dirpath) 
                 and os.path.isdir(self.config.maps_dirpath)):
@@ -80,20 +82,27 @@ class MapsLoader:
             if not self.preflight(filename):
                 return None
             
+        if self.config.verbose:
+            print(f"All maps [{len(valid_filenames)}] validated", end="\n\n")
+            
         """ Check for collision between maps """
         if check_outlines_overlapping(self.maps_outlines):
-            print("Error: overlapping between maps")
+            print(f"Error: overlapping between [{len(self.maps_outlines)}] maps")
             return None
 
         if self.config.verbose:
-            print("No overlappings between maps")
+            print(f"No overlappings between [{len(self.maps_outlines)}] maps")
 
         """ Organize tilesets database """
         self.tilesetsDatabase.organize()
         
         if self.config.verbose:
-            print("Tilesets organized")
+            print(f"Tilesets [{len(self.tilesetsDatabase)}] organized")
             print(self.tilesetsDatabase)
+
+
+        if self.config.verbose:
+            print("Loading maps from: ", self.config.maps_dirpath, end="\n\n")
 
         """ Load all maps data """
         for filename in valid_filenames:

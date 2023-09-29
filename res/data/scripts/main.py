@@ -60,7 +60,7 @@ if __name__ == '__main__':
         config.verbose = True
 
     if config.verbose:
-        print(config)
+        print(config, end="\n\n")
 
     """ Clear output dirs """
     # if not remove_dir_if_possible(config.output_root_dir):
@@ -82,7 +82,10 @@ if __name__ == '__main__':
         abort_and_exit()
         
     if config.verbose:
-        print(maps_data)
+        print("-------------------------------------------------------------")
+        print("Loaded maps:")
+        for map_data in maps_data:
+            print(map_data, end="\n\n")
     
     """ Process all maps data into chunks """
 
