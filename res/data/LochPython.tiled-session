@@ -109,7 +109,7 @@
         "tilesets/details.tsx"
     ],
     "project": "LochPython.tiled-project",
-    "property.type": "string",
+    "property.type": "int",
     "recentFiles": [
         "tilesets/details.tsx",
         "tilesets/objects_1x2.tsx",

@@ -11,8 +11,11 @@ class Config:
         self.output_world_filepath = None
         self.output_visualization_filepath = None
 
-        self.chunk_height = None
         self.chunk_width = None
+        self.chunk_height = None
+        
+        self.tile_width = None
+        self.tile_height = None
         
         self.default_tile_gid = None
         self.void_tile_gid = None
@@ -52,8 +55,11 @@ class Config:
         config.output_visualization_filepath = os.path.join(config.output_root_dirpath, config_dict["output_visualization_file"])
         config.output_visualization_filepath = os.path.normpath(config.output_visualization_filepath)
 
-        config.chunk_height = config_dict["chunk_height"]
         config.chunk_width = config_dict["chunk_width"]
+        config.chunk_height = config_dict["chunk_height"]
+
+        config.tile_width = config_dict["tile_width"]
+        config.tile_height = config_dict["tile_height"]
 
         config.default_tile_gid = config_dict["default_tile_gid"]
         config.void_tile_gid = config_dict["void_tile_gid"]
@@ -74,8 +80,10 @@ class Config:
     output_data_dirpath={self.output_data_dirpath},
     output_world_filepath={self.output_world_filepath},
     output_visualization_filepath={self.output_visualization_filepath},
-    chunk_height={self.chunk_height},
     chunk_width={self.chunk_width},
+    chunk_height={self.chunk_height},
+    tile_width={self.tile_width},
+    tile_height={self.tile_height},
     default_tile_gid={self.default_tile_gid},
     void_tile_gid={self.void_tile_gid},
     forward_slash_path={self.use_forward_slash},

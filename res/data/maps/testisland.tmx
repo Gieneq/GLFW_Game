@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.10.0" orientation="orthogonal" renderorder="right-down" width="50" height="40" tilewidth="32" tileheight="32" infinite="0" nextlayerid="18" nextobjectid="1">
+ <properties>
+  <property name="global_X" type="int" value="0"/>
+  <property name="global_Y" type="int" value="0"/>
+  <property name="global_Z" type="int" value="0"/>
+ </properties>
  <tileset firstgid="1" source="../tilesets/floor.tsx"/>
  <tileset firstgid="901" source="../tilesets/objects_1x2.tsx"/>
  <tileset firstgid="1006" source="../tilesets/details.tsx"/>
