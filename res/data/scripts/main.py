@@ -2,9 +2,8 @@ import argparse
 import shutil
 import os
 from common.config import Config
-from map.mapdata import MapData
 from map.loader import MapsLoader
-
+from chunking.processor import ChunkingProcessor
 
 def abort_and_exit():
     print('Aborting with error...')
@@ -77,7 +76,7 @@ if __name__ == '__main__':
 
     """ Load all maps data """
     maps_loader = MapsLoader(config)
-    maps_data = maps_loader.loadAll()
+    maps_data = maps_loader.validateAndloadAllMapsData()
     if maps_data is None or len(maps_data) == 0:
         abort_and_exit()
         
@@ -88,6 +87,17 @@ if __name__ == '__main__':
             print(map_data, end="\n\n")
     
     """ Process all maps data into chunks """
+    chunker = ChunkingProcessor(config, maps_loader.tilesetsDatabase)
+    chunks = chunker.splitMapsIntoChunks(maps_data)
+    if chunks is None or len(chunks) == 0:
+        abort_and_exit()
+
+    if config.verbose:
+        print(f"Got [{len(chunks)}] chunks, expected [{chunker.chunks_x * chunker.chunks_y}]")
+
+    if len(chunks) != chunker.chunks_x * chunker.chunks_y:
+        abort_and_exit()
+
 
     """ Visualize chunks and world data """
 

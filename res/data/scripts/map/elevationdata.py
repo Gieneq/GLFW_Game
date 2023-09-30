@@ -2,20 +2,24 @@ from common.config import Config
 
 
 class Layer:
-    def __init__(self, name: str, width: int, height: int) -> None:
+    def __init__(self, name: str, width: int, height: int, void_gid: int) -> None:
         self.name = name
         self.width = width
         self.height = height
         self.data: list[int] = []
-        self.void_blocks_count = 0
+        self.void_gid = void_gid
+
+
+    def get_gids_count(self, gid: int) -> int:
+        return self.data.count(gid)
+    
+
+    def is_filled_with_gid(self, gid: int) -> bool:
+        return self.get_gids_count(gid) == self.width * self.height
 
 
     def set_data(self, data: list[int], config: Config) -> None:
         self.data = data
-
-        for gid in data:
-            if gid == config.void_tile_gid:
-                self.void_blocks_count += 1
 
 
     def get_git_at(self, x: int, y: int) -> int:
@@ -25,6 +29,15 @@ class Layer:
             return None
         
         return self.data[y * self.width + x]
+    
+
+    def set_gid_at(self, x: int, y: int, gid: int) -> None:
+        if x < 0 or x >= self.width:
+            return
+        if y < 0 or y >= self.height:
+            return
+        
+        self.data[y * self.width + x] = gid
 
 
     def is_floor(self) -> bool:
@@ -50,7 +63,7 @@ class Layer:
     
 
     def __str__(self) -> str:
-        return f"Layer(name={self.name}, width={self.width}, height={self.height}, void_blocks_count={self.void_blocks_count})"
+        return f"Layer(name={self.name}, width={self.width}, height={self.height}, void_blocks_count={self.get_gids_count(self.void_gid)})"
 
 
 class Elevation:
@@ -60,6 +73,13 @@ class Elevation:
         self.details_layer: Layer = None
         self.objects_layers: list[Layer] = []
 
+
+    def get_layers_count(self) -> int:
+        layers_count = len(self.objects_layers)
+        layers_count += 1 if self.floor_layer else 0
+        layers_count += 1 if self.details_layer else 0
+        return layers_count
+    
 
     def add_layer(self, layer: Layer) -> None:
         if layer.is_floor():
@@ -118,3 +138,9 @@ class Elevation:
             s += f" objects_layer[{idx}]={layer},\n"
         s += ")"
         return s
+    
+
+def calculate_z_index(offset_y: int, tile_height: int) -> int:
+    if offset_y == 0:
+        return 0
+    return -1 * int(offset_y / tile_height)

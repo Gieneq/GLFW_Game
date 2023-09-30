@@ -3,12 +3,14 @@ from common.config import Config
 from map.mapdata import MapData
 from common.rect import Rect
 import os
-from map.elevationdata import Elevation, Layer
+from map.elevationdata import Elevation, Layer, calculate_z_index
 from map.tileset import TilesetsDatabase
+from typing import Dict
 
 class MapDataParser:
     def __init__(self, config: Config) -> None:
         self.config = config
+
 
     def parseMapData(self, file_path: str, root: ET.Element, 
                      tilesetDatabase: TilesetsDatabase) -> MapData:
@@ -17,17 +19,19 @@ class MapDataParser:
         tilesets_ids = tilesetDatabase.get_ids_of_tilesets(self.parseTilesetsData(root))
 
         """ Parse elevations """
-        elevations = self.parseElevations(root)
+        elevations_dict = self.parseElevations(root)
 
         """ Build map data """
         map_data = MapData(
             outline_rect=map_cuboid_dict["outline_rect"],
-            global_z=map_cuboid_dict["global_z"],
-            depth=map_cuboid_dict["depth"],
+            min_elevation_idx=map_cuboid_dict["min_elevation_idx"],
+            max_elevation_idx=map_cuboid_dict["max_elevation_idx"],
+            elevations_count=map_cuboid_dict["elevations_count"],
             filepath=file_path
         )
 
-        map_data.add_elevations(elevations)
+        map_data.set_elevations(elevations_dict)
+        map_data.add_tilesets_ids(tilesets_ids)
             
         """ Validate map data """
         if not map_data.validate():
@@ -35,6 +39,7 @@ class MapDataParser:
 
         return map_data
     
+
     def parseMapCuboid(self, root: ET.Element) -> dict:
 
         """ Retrive properties - was validated """
@@ -49,15 +54,23 @@ class MapDataParser:
         )
 
         """ Get Z axis values """
-        global_z = int(properties.find("property[@name='global_Z']").attrib["value"])
-        depth = len(root.findall(".//group"))
+        elevations_nodes = root.findall(".//group")
+        
+        """ After validation there iss at least 1 group (elevation) and are sorted from bottom to top """
+        elevations_count = len(elevations_nodes)
+        min_elevation_node = elevations_nodes[0]
+
+        """ Get elevation Z index """
+        min_elevation_idx = 0 if "offsety" not in min_elevation_node.attrib else calculate_z_index(int(min_elevation_node.attrib["offsety"]), self.config.tile_height)
 
         return {
             "outline_rect": outline_rect,
-            "global_z": global_z,
-            "depth": depth
+            "min_elevation_idx": min_elevation_idx,
+            "max_elevation_idx": min_elevation_idx + elevations_count - 1,
+            "elevations_count": elevations_count
         }
     
+
     def parseTilesetsData(self, root: ET.Element) -> list[dict]:
         tilesets = root.findall("tileset")
         tilesets_data = []
@@ -75,18 +88,22 @@ class MapDataParser:
 
         return tilesets_data
     
-    def parseElevations(self, root: ET.Element) -> list[Elevation]:
+
+    def parseElevations(self, root: ET.Element) -> Dict[int, Elevation]:
         elevation_node_name = "group"
-        elevations: list[Elevation] = []
+        elevations_dict: Dict[int, Elevation] = {}
 
-        for elevation_idx, elevation_node in enumerate(root.findall(f".//group")):
-            elevation = self.parseElevation(elevation_idx, elevation_node)
-            if elevation:
-                elevations.append(elevation)
+        for _, elevation_node in enumerate(root.findall(f".//{elevation_node_name}")):
+            # warning - elevation index is not just order
+            elevation_idx, elevation = self.parseElevation(elevation_node)
+            if elevation_idx is not None and elevation is not None:
+                elevations_dict[elevation_idx] = elevation
 
-        return elevations
+        return elevations_dict
     
-    def parseElevation(self, elevation_idx: int, elevation_node: ET.Element) -> Elevation:
+
+    def parseElevation(self, elevation_node: ET.Element) -> tuple[int, Elevation]:
+        elevation_idx = 0 if "offsety" not in elevation_node.attrib else calculate_z_index(int(elevation_node.attrib["offsety"]), self.config.tile_height)
         layer_node_name = "layer"
         layer_data_node_name = "data"
 
@@ -105,14 +122,15 @@ class MapDataParser:
 
         # Layers are validated upon adding
 
-        return elevation
+        return elevation_idx, elevation
     
 
     def parseLayer(self, layer_node: ET.Element, layer_data_node: ET.Element) -> Layer:
         layer = Layer(
             name=layer_node.attrib["name"],
             width=int(layer_node.attrib["width"]),
-            height=int(layer_node.attrib["height"])
+            height=int(layer_node.attrib["height"]),
+            void_gid=self.config.void_tile_gid
         )
 
         data = layer_data_node.text.strip()

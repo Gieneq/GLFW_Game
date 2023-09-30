@@ -12,6 +12,8 @@ class MapsLoader:
         self.config = config
         self.tilesetsDatabase = TilesetsDatabase()
         self.maps_outlines: list[Rect] = []
+        self.min_elevation_index = None
+        self.max_elevation_index = None
 
 
     def get_mapfile_root(self, filename) -> tuple[str, ET.Element]:
@@ -45,14 +47,25 @@ class MapsLoader:
             self.tilesetsDatabase.add(tileset_dict)
 
         """ Parse map cuboid """
+        """ Add outlines, find min/max elevation index """
         map_cuboid_dict = parser.parseMapCuboid(root)
         outline_rect = map_cuboid_dict["outline_rect"]
         self.maps_outlines.append(outline_rect)
 
+        if self.min_elevation_index is None:
+            self.min_elevation_index = map_cuboid_dict["min_elevation_idx"]
+        elif map_cuboid_dict["min_elevation_idx"] < self.min_elevation_index:
+            self.min_elevation_index = map_cuboid_dict["min_elevation_idx"]
+
+        if self.max_elevation_index is None:
+            self.max_elevation_index = map_cuboid_dict["max_elevation_idx"]
+        elif map_cuboid_dict["max_elevation_idx"] > self.max_elevation_index:
+            self.max_elevation_index = map_cuboid_dict["max_elevation_idx"]
+
         return True
 
 
-    def load(self, filename: str) -> MapData:
+    def loadMapData(self, filename: str) -> MapData:
         map_path, root = self.get_mapfile_root(filename)
 
         """ Parse map data xml """
@@ -68,7 +81,7 @@ class MapsLoader:
         return map_data
     
 
-    def loadAll(self) -> list[MapData]:
+    def validateAndloadAllMapsData(self) -> list[MapData]:
         maps_data = []
 
         if not (os.path.exists(self.config.maps_dirpath) 
@@ -81,6 +94,8 @@ class MapsLoader:
         for filename in valid_filenames:
             if not self.preflight(filename):
                 return None
+        # tilesets are stored in self.tilesetsDatabase
+        # outlines are stores in self.maps_outlines
             
         if self.config.verbose:
             print(f"All maps [{len(valid_filenames)}] validated", end="\n\n")
@@ -95,18 +110,18 @@ class MapsLoader:
 
         """ Organize tilesets database """
         self.tilesetsDatabase.organize()
+        # tilesetsDatabase is locked now
         
         if self.config.verbose:
             print(f"Tilesets [{len(self.tilesetsDatabase)}] organized")
             print(self.tilesetsDatabase)
-
 
         if self.config.verbose:
             print("Loading maps from: ", self.config.maps_dirpath, end="\n\n")
 
         """ Load all maps data """
         for filename in valid_filenames:
-            map_data = self.load(filename)
+            map_data = self.loadMapData(filename)
 
             if map_data is None:
                 """ Error loading map data """
