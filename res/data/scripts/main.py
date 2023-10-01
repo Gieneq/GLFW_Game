@@ -100,6 +100,23 @@ if __name__ == '__main__':
 
 
     """ Visualize chunks and world data """
+    print("-------------------------------------------------------------")
+    print("Created chunks:")
+    for chunk in chunks:
+        print(chunk)
+    print("")
+
+    """ Statistics """
+    print("-------------------------------------------------------------")
+    print("Statistics:")
+    
+    # gids_counts = {}
+    # for chunk in chunks:
+    #     for _, elevation in chunk.elevations_map.items():
+    #         elevations_layes = elevation.get_all_layers()
+    ### warning - laye cna be None
+    #         for layer in elevations_layes:
+    #             layer_gids_counts = layer.get_gids_c
 
 
     """ Save chunks and world data """

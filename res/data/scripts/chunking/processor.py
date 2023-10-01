@@ -10,10 +10,15 @@ class ChunkingProcessor:
     def __init__(self, config: Config, tilesets_database: TilesetsDatabase) -> None:
         self.config = config
         self.tilesets_database = tilesets_database
-        self.tileset_of_default_tile = tilesets_database.get_tileset_by_id(self.config.default_tile_gid)
+        
+        self.tileset_of_default_tile = tilesets_database.get_tileset_with_gid(self.config.default_tile_gid)
         if self.tileset_of_default_tile is None:
             raise Exception("Tileset of default tile is None")
-
+        
+        self.tileset_id_of_default_tile = tilesets_database.get_id_of_tileset(self.tileset_of_default_tile)
+        if self.tileset_id_of_default_tile is None:
+            raise Exception("Tileset ID of default tile is None")
+        
         self.bounding_rect_not_aligned = None
         self.bounding_rect_aligned = None
         self.chunks_x = 0
@@ -140,7 +145,7 @@ class ChunkingProcessor:
             elevation.add_layer(layer)
             elevations[0] = elevation
 
-            chunk.add_tilesets_ids([self.tileset_of_default_tile])
+            chunk.add_tilesets_ids([self.tileset_id_of_default_tile])
         else:
             """ Create elevations from interseting maps """
             bag_of_tilesets_ids: int = []
@@ -162,9 +167,9 @@ class ChunkingProcessor:
 
                 """ Populate elevation layers with combined layers from intersecting elevations """
 
-                objects_layers_count = max([len(elevation.objects_layers) for elevation in found_elevations])
                 has_floor_layer = any([elevation.floor_layer is not None for elevation in found_elevations])
                 has_details_layer = any([elevation.details_layer is not None for elevation in found_elevations])
+                objects_layers_count = max([len(elevation.objects_layers) for elevation in found_elevations])
 
                 layers_count = objects_layers_count + (1 if has_floor_layer else 0) + (1 if has_details_layer else 0)
 
@@ -186,32 +191,46 @@ class ChunkingProcessor:
                         name=layer_name,
                         width=window_chunk.width,
                         height=window_chunk.height,
-                void_gid=self.config.void_tile_gid
+                        void_gid=self.config.void_tile_gid
                     )
+
+                    found_layers: list[Layer] = []
+                    for elevation in found_elevations:
+                        equal_level_layer = elevation.get_all_layers()[layer_idx]
+                        if equal_level_layer is not None:
+                            found_layers.append(equal_level_layer)
+
 
                     """ Create layer data """
                     combined_layer.set_data([self.config.void_tile_gid] * window_chunk.width * window_chunk.height, self.config)
 
+                    nonvoid_gids_count = 0
+                    high_gids = 0
                     for iy in range(window_chunk.height):
                         for ix in range(window_chunk.width):
-                            world_space_x = ix + window_chunk.x
-                            world_space_y = iy + window_chunk.y
+                            for found_layer in found_layers:
+                                found_gid = found_layer.get_gid_at(ix, iy)
+                                if found_gid is not None and found_gid != self.config.void_tile_gid:
+                                    if combined_layer.get_gid_at(ix, iy) != self.config.void_tile_gid and combined_layer.get_gid_at(ix, iy) != found_gid:
+                                        raise Exception(f"combined_layer.get_git_at(ix, iy) not null and found_gid also: {combined_layer.get_gid_at(ix, iy)} != {found_gid}")
+                                    combined_layer.set_gid_at(ix, iy, found_gid)
+                                    nonvoid_gids_count += 1
+                                    if found_gid > 900:
+                                        high_gids += 1
 
-                            for map_data in intersecting_maps:
-                                try:
-                                    gid = map_data.get_gid_at(world_space_x, world_space_y, elevation_idx, layer_idx)
-                                    if combined_layer.get_git_at(ix, iy) != self.config.void_tile_gid:
-                                        raise Exception(f"Building chunk failed - non void tile overlapped somehow")
-                                    combined_layer.set_gid_at(ix, iy, gid)
-                                except Exception:
-                                    pass
+                    print(f"@ elevation {elevation_idx}: Creating layer '{layer_name}' [{layer_idx}] with {nonvoid_gids_count} nonvoid gids, higher: {high_gids} ")
+                    """ Prevent creating void layers """
+                    # if combined_layer.is_void_filled():
+                    #     layers_count -= 1
 
                     combined_elevation.add_layer(combined_layer)
 
 
                 """ Check layers count """
-                if combined_elevation.get_layers_count() != layers_count:
-                    raise Exception("combined_elevation.get_layers_count() != layers_count")
+                # if combined_elevation.get_layers_count() != layers_count:
+                #     raise Exception(f"combined_elevation.get_layers_count() != layers_count: {combined_elevation.get_layers_count()} != {layers_count}")
+                
+                #todo prevent empty elevations
                 elevations[elevation_idx] = combined_elevation
 
         """ Finally add elevations to chunk """
@@ -222,142 +241,3 @@ class ChunkingProcessor:
         
         return chunk
         
-
-
-
-
-            #     chunk_content = self._build_chunk(window_chunk, chunk_z_min, intersecting_maps)
-            #     if chunk_content is None:
-            #         return False
-
-            #     self.world_data["tiles_count"] += chunk_content["tiles_count"]
-
-            #     chunk_filename = f"chunk_{chunk_content['x']}_{chunk_content['y']}.json"
-            #     chunk_filepath = os.path.join(self.output_data_dir, chunk_filename)
-            #     chunk_filepath = self._unify_path(chunk_filepath)
-
-            #     if not self._save_chunk_data(chunk_content, chunk_filepath):
-            #         return False
-
-            #     chunk_d = len(chunk_content["elevations"])
-            #     chunk_z_max = chunk_z_min + chunk_d
-
-            #     """ Add to world data for caching """
-            #     if chunk_z_min < self.world_data["bounding_z_min"]:
-            #         self.world_data["bounding_z_min"] = chunk_z_min
-
-            #     if chunk_z_max > self.world_data["bounding_z_max"]:
-            #         self.world_data["bounding_z_max"] = chunk_z_max
-
-            #     self.world_data["tileset_ids_set"] = self.world_data["tileset_ids_set"].union(chunk_content["tilesets"])
-            #     self.world_data["chunks_data"].append({
-            #         "x": window_chunk.x,
-            #         "y": window_chunk.y,
-            #         "z": chunk_z_min,
-            #         "d": chunk_d,
-            #         "file": chunk_filepath,
-            #         "tiles_count": chunk_content["tiles_count"],
-            #         "tilesets": chunk_content["tilesets"],
-            #     })
-
-
-
-
-
-
-            
-    # def _build_chunk(self, window_chunk, chunk_z_min, intersecting_maps):
-    #     chunk_data = {
-    #         "x": window_chunk.x,
-    #         "y": window_chunk.y,
-    #         "z": chunk_z_min,
-    #         "tilesets": None,
-    #         "tiles_count": None,
-    #         "elevations": None,
-    #     }
-
-    #     final_elevations = []
-    #     if len(intersecting_maps) == 0:
-    #         """
-    #         Empty chunk - create one elevation with one layer 
-    #         filled with default tiles global ID.
-    #         """
-    #         layer = [self.default_tile_gid] * self.chunk_width * self.chunk_height
-    #         elevation = [layer]
-    #         final_elevations.append(elevation)
-
-    #     else:
-    #         """
-    #         Find shape of chunk - how many elevations and layers each.
-    #         Fill them all with void values.
-    #         """
-
-    #         elevations_count = max([len(map_data.elevations) for map_data in intersecting_maps])
-    #         for elevation_idx in range(elevations_count):
-    #             found_elevations = []
-
-    #             for map_data in intersecting_maps:
-    #                 try:
-    #                     elevation = map_data.elevations[elevation_idx]
-    #                     found_elevations.append(elevation)
-    #                 except IndexError:
-    #                     pass
-
-    #             combined_elevation = []
-
-    #             layers_count = max([len(elevation) for elevation in found_elevations])
-    #             for layer_idx in range(layers_count):
-    #                 combined_layer = [self.void_tile_gid] * self.chunk_width * self.chunk_height
-    #                 for iy in range(window_chunk.height):
-    #                     for ix in range(window_chunk.width):
-    #                         world_space_x = ix + window_chunk.x
-    #                         world_space_y = iy + window_chunk.y
-
-    #                         for map_data in intersecting_maps:
-    #                             try:
-    #                                 gid = map_data.get_gid_at(elevation_idx, layer_idx, world_space_x, world_space_y)
-    #                                 if combined_layer[ix + iy * window_chunk.width] != self.void_tile_gid:
-    #                                     raise BuildingError(f"Building chunk failed - non void tile overlapped somehow")
-
-    #                                 combined_layer[ix + iy * window_chunk.width] = gid
-    #                             except ElevationError as e_err:
-    #                                 pass
-    #                             except LayerError as l_err:
-    #                                 pass
-    #                             except PositionError as p_err:
-    #                                 pass
-
-    #                 combined_elevation.append(combined_layer)
-    #             final_elevations.append(combined_elevation)
-
-    #     chunk_data["elevations"] = final_elevations
-
-    #     """
-    #     Resources info
-    #     Add to chunk file only those tilesets that will be used.
-    #     Iterate over elevantions in chunk_data and find tilesets paths by GIDs
-    #     """
-    #     required_tilesets = set()
-
-    #     for elevation in chunk_data["elevations"]:
-    #         for layer in elevation:
-    #             for gid in layer:
-    #                 tileset_data = self.get_tileset_from_gid(gid)
-    #                 if tileset_data is not None:
-    #                     tileset_data_idx = self.tilesets_data.index(tileset_data)
-    #                     required_tilesets.add(tileset_data_idx)
-
-    #     chunk_data["tilesets"] = list(required_tilesets)
-
-    #     chunk_items = []
-    #     for elevation in chunk_data["elevations"]:
-    #         for layer in elevation:
-    #             for item in layer:
-    #                 if isinstance(item, list):
-    #                     raise ValueError("is list")
-    #                 chunk_items.append(item)
-
-    #     chunk_data["tiles_count"] = len([item for item in chunk_items if item != self.void_tile_gid])
-
-    #     return chunk_data
-

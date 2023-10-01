@@ -1,5 +1,5 @@
 from common.config import Config
-
+from typing import Dict
 
 class Layer:
     def __init__(self, name: str, width: int, height: int, void_gid: int) -> None:
@@ -16,13 +16,16 @@ class Layer:
 
     def is_filled_with_gid(self, gid: int) -> bool:
         return self.get_gids_count(gid) == self.width * self.height
+    
+    def is_void_filled(self) -> bool:
+        return self.is_filled_with_gid(self.void_gid)
 
 
     def set_data(self, data: list[int], config: Config) -> None:
         self.data = data
 
 
-    def get_git_at(self, x: int, y: int) -> int:
+    def get_gid_at(self, x: int, y: int) -> int:
         if x < 0 or x >= self.width:
             return None
         if y < 0 or y >= self.height:
@@ -61,9 +64,25 @@ class Layer:
             return False
         return True
     
+    def get_gits_counts(self, ordered:bool = False, limit:int = None) -> Dict[int, int]:
+        gids_counts = {}
+        for gid in self.data:
+            if gid not in gids_counts:
+                gids_counts[gid] = 0
+            gids_counts[gid] += 1
+
+        if ordered and len(gids_counts) > 1:
+            gids_counts = dict(sorted(gids_counts.items(), key=lambda item: item[1], reverse=True))
+
+        # what if not sorted?
+        if limit is not None and limit < len(gids_counts):
+            gids_counts = dict(list(gids_counts.items())[:limit])
+
+        return gids_counts
 
     def __str__(self) -> str:
-        return f"Layer(name={self.name}, width={self.width}, height={self.height}, void_blocks_count={self.get_gids_count(self.void_gid)})"
+        counts = self.get_gits_counts(ordered=True, limit=10)
+        return f"Layer(name={self.name}, w={self.width}, h={self.height}, void_gids_count={self.get_gids_count(self.void_gid)}), common_gid={counts})"
 
 
 class Elevation:
@@ -74,6 +93,14 @@ class Elevation:
         self.objects_layers: list[Layer] = []
 
 
+    def get_all_layers(self) -> list[Layer]:
+        layers = []
+        layers.append(self.floor_layer)
+        layers.append(self.details_layer)
+        layers.extend(self.objects_layers)
+        return layers
+
+
     def get_layers_count(self) -> int:
         layers_count = len(self.objects_layers)
         layers_count += 1 if self.floor_layer else 0
@@ -82,6 +109,9 @@ class Elevation:
     
 
     def add_layer(self, layer: Layer) -> None:
+        # if layer.is_void_filled():
+        #     return
+
         if layer.is_floor():
             if self.floor_layer:
                 raise Exception("Elevation already has floor layer")

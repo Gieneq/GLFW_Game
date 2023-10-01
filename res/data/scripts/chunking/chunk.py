@@ -40,3 +40,16 @@ class Chunk:
     def validate(self) -> bool:
         self.locked = True
         return len(self.tilesets_ids) > 0 and len(self.elevations_map.keys()) > 0
+    
+
+    def __str__(self) -> str:
+        string = f"Chunk: x={self.x}, y={self.y}, w={self.width}, h={self.height}, elevation_idx={self.min_elevation_idx}-{self.max_elevation_idx}, tilesets_ids={self.tilesets_ids}, elevations[{self.elevations_count}]:\n"
+        for elevation_idx, elevation in self.elevations_map.items():
+            string += f" * Elevation[{elevation_idx}], has_floor={elevation.floor_layer is not None}, has_details={elevation.details_layer is not None}, objects_layers_count={len(elevation.objects_layers)}\n"
+            all_layers = elevation.get_all_layers()
+            for layer in all_layers:
+                string += f"   - {layer}\n"
+        return string
+
+
+

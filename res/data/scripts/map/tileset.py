@@ -68,6 +68,28 @@ class TilesetsDatabase:
         
         return self.assignment[id]
     
+
+    def get_tileset_with_gid(self, gid: int) -> Tileset:
+        if not self.locked:
+            raise Exception("TilesetsDatabase is not locked")
+        
+        for tileset in self.assignment.values():
+            if tileset.has_gid(gid):
+                return tileset
+            
+        return None
+    
+    def get_id_of_tileset(self, tileset: Tileset) -> int:
+        if not self.locked:
+            raise Exception("TilesetsDatabase is not locked")
+        
+        for id in self.assignment.keys():
+            if self.assignment[id] == tileset:
+                return id
+        
+        return None
+    
+
     def get_ids_of_tilesets(self, tilesets: list[dict]) -> list[int]:
         if not self.locked:
             raise Exception("TilesetsDatabase is not locked")
