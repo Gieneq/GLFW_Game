@@ -14,6 +14,24 @@ class Layer:
         return self.data.count(gid)
     
 
+    def get_gids_counts(self, filtering:list[int] = None, limit:int = None) -> Dict[int, int]:
+        gids_counts = {}
+        for gid in self.data:
+            if gid not in gids_counts:
+                gids_counts[gid] = 0
+            gids_counts[gid] += 1
+
+        if filtering is not None:
+            for gid in filtering:
+                if gid in gids_counts:
+                    gids_counts.pop(gid)
+
+        if limit is not None:
+            limit = min(limit, len(gids_counts))
+            gids_counts = {k: v for k, v in sorted(gids_counts.items(), key=lambda item: item[1], reverse=True)[:limit]}
+        return gids_counts
+    
+
     def is_filled_with_gid(self, gid: int) -> bool:
         return self.get_gids_count(gid) == self.width * self.height
     
@@ -64,24 +82,9 @@ class Layer:
             return False
         return True
     
-    def get_gits_counts(self, ordered:bool = False, limit:int = None) -> Dict[int, int]:
-        gids_counts = {}
-        for gid in self.data:
-            if gid not in gids_counts:
-                gids_counts[gid] = 0
-            gids_counts[gid] += 1
-
-        if ordered and len(gids_counts) > 1:
-            gids_counts = dict(sorted(gids_counts.items(), key=lambda item: item[1], reverse=True))
-
-        # what if not sorted?
-        if limit is not None and limit < len(gids_counts):
-            gids_counts = dict(list(gids_counts.items())[:limit])
-
-        return gids_counts
 
     def __str__(self) -> str:
-        counts = self.get_gits_counts(ordered=True, limit=10)
+        counts = self.get_gids_counts(filtering=[self.void_gid], limit=15)
         return f"Layer(name={self.name}, w={self.width}, h={self.height}, void_gids_count={self.get_gids_count(self.void_gid)}), common_gid={counts})"
 
 
@@ -99,19 +102,28 @@ class Elevation:
         layers.append(self.details_layer)
         layers.extend(self.objects_layers)
         return layers
+    
+    
+    def get_layer_at(self, layer_idx: int) -> Layer:
+        if layer_idx < 0 or layer_idx >= self.get_layers_count():
+            return None
+        
+        layer = None
+        if layer_idx == 0:
+            layer = self.floor_layer
+        elif layer_idx == 1:
+            layer = self.details_layer
+        else:
+            layer = self.objects_layers[layer_idx - 2]
+        
+        return layer
 
 
     def get_layers_count(self) -> int:
-        layers_count = len(self.objects_layers)
-        layers_count += 1 if self.floor_layer else 0
-        layers_count += 1 if self.details_layer else 0
-        return layers_count
+        return 2 + len(self.objects_layers)
     
 
     def add_layer(self, layer: Layer) -> None:
-        # if layer.is_void_filled():
-        #     return
-
         if layer.is_floor():
             if self.floor_layer:
                 raise Exception("Elevation already has floor layer")

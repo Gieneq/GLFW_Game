@@ -41,6 +41,12 @@ class Chunk:
         self.locked = True
         return len(self.tilesets_ids) > 0 and len(self.elevations_map.keys()) > 0
     
+    
+    def get_elevation_at(self, elevation_idx: int) -> Elevation:
+        if elevation_idx not in self.elevations_map.keys():
+            return None
+        return self.elevations_map[elevation_idx]
+    
 
     def __str__(self) -> str:
         string = f"Chunk: x={self.x}, y={self.y}, w={self.width}, h={self.height}, elevation_idx={self.min_elevation_idx}-{self.max_elevation_idx}, tilesets_ids={self.tilesets_ids}, elevations[{self.elevations_count}]:\n"

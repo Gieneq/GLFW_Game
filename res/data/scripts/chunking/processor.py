@@ -159,20 +159,20 @@ class ChunkingProcessor:
             for elevation_idx in range(min_elevation_idx, max_elevation_idx + 1):
                 combined_elevation = Elevation(index=elevation_idx)
 
-                found_elevations: list[Elevation] = []
+                # : list[tuple[tuple[int, int], Elevation]
+                found_elevations = []
 
                 for map_data in intersecting_maps:
                     if elevation_idx in map_data.elevations_map.keys():
-                        found_elevations.append(map_data.elevations_map[elevation_idx])
+                        found_world_position = (map_data.outline.x, map_data.outline.y)
+                        found_elevations.append((found_world_position, map_data.elevations_map[elevation_idx]))
 
                 """ Populate elevation layers with combined layers from intersecting elevations """
 
-                has_floor_layer = any([elevation.floor_layer is not None for elevation in found_elevations])
-                has_details_layer = any([elevation.details_layer is not None for elevation in found_elevations])
-                objects_layers_count = max([len(elevation.objects_layers) for elevation in found_elevations])
-
-                layers_count = objects_layers_count + (1 if has_floor_layer else 0) + (1 if has_details_layer else 0)
-
+                has_floor_layer = any([elevation.floor_layer is not None for _, elevation in found_elevations])
+                has_details_layer = any([elevation.details_layer is not None for _, elevation in found_elevations])
+                
+                layers_count = max([elevation.get_layers_count() for _, elevation in found_elevations])
                 for layer_idx in range(layers_count):
                     layer_name = "objects"
                     if layer_idx == 0:
@@ -195,41 +195,32 @@ class ChunkingProcessor:
                     )
 
                     found_layers: list[Layer] = []
-                    for elevation in found_elevations:
+                    for world_pos, elevation in found_elevations:
                         equal_level_layer = elevation.get_all_layers()[layer_idx]
                         if equal_level_layer is not None:
-                            found_layers.append(equal_level_layer)
-
+                            found_layers.append((world_pos, equal_level_layer))
 
                     """ Create layer data """
                     combined_layer.set_data([self.config.void_tile_gid] * window_chunk.width * window_chunk.height, self.config)
 
-                    nonvoid_gids_count = 0
-                    high_gids = 0
                     for iy in range(window_chunk.height):
                         for ix in range(window_chunk.width):
-                            for found_layer in found_layers:
-                                found_gid = found_layer.get_gid_at(ix, iy)
+                            world_x = window_chunk.x + ix
+                            world_y = window_chunk.y + iy
+                            for found_layer_position, found_layer in found_layers:
+                                found_gid = found_layer.get_gid_at(
+                                    x=-found_layer_position[0] + world_x,
+                                    y=-found_layer_position[1] + world_y
+                                )
                                 if found_gid is not None and found_gid != self.config.void_tile_gid:
-                                    if combined_layer.get_gid_at(ix, iy) != self.config.void_tile_gid and combined_layer.get_gid_at(ix, iy) != found_gid:
+                                    if combined_layer.get_gid_at(ix, iy) != self.config.void_tile_gid:
                                         raise Exception(f"combined_layer.get_git_at(ix, iy) not null and found_gid also: {combined_layer.get_gid_at(ix, iy)} != {found_gid}")
                                     combined_layer.set_gid_at(ix, iy, found_gid)
-                                    nonvoid_gids_count += 1
-                                    if found_gid > 900:
-                                        high_gids += 1
 
-                    print(f"@ elevation {elevation_idx}: Creating layer '{layer_name}' [{layer_idx}] with {nonvoid_gids_count} nonvoid gids, higher: {high_gids} ")
                     """ Prevent creating void layers """
-                    # if combined_layer.is_void_filled():
-                    #     layers_count -= 1
+                    if not combined_layer.is_void_filled():
+                        combined_elevation.add_layer(combined_layer)
 
-                    combined_elevation.add_layer(combined_layer)
-
-
-                """ Check layers count """
-                # if combined_elevation.get_layers_count() != layers_count:
-                #     raise Exception(f"combined_elevation.get_layers_count() != layers_count: {combined_elevation.get_layers_count()} != {layers_count}")
-                
                 #todo prevent empty elevations
                 elevations[elevation_idx] = combined_elevation
 

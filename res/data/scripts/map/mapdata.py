@@ -49,6 +49,12 @@ class MapData:
         self.locked = True
         return True
     
+
+    def get_elevation_at(self, elevation_idx: int) -> Elevation:
+        if elevation_idx not in self.elevations_map.keys():
+            return None
+        return self.elevations_map[elevation_idx]
+    
     
     def get_gid_at(self, global_x: int, global_y: int, elevation_idx: int, layer_idx: int) -> int:
         local_x = global_x - self.outline.x

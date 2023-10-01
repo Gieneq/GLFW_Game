@@ -106,17 +106,95 @@ if __name__ == '__main__':
         print(chunk)
     print("")
 
-    """ Statistics """
+    """ Checksum chunks and world data """
     print("-------------------------------------------------------------")
-    print("Statistics:")
-    
-    # gids_counts = {}
-    # for chunk in chunks:
-    #     for _, elevation in chunk.elevations_map.items():
-    #         elevations_layes = elevation.get_all_layers()
-    ### warning - laye cna be None
-    #         for layer in elevations_layes:
-    #             layer_gids_counts = layer.get_gids_c
+    print("Checksum:")
 
+    min_elevation_idx = -8
+    max_elevation_idx = 8
+    min_layer_idx = 0
+    max_layer_idx = 6
+
+    map_data_gids_counts = {}
+    chunks_gids_counts = {}
+    for elevation_idx in range(min_elevation_idx, max_elevation_idx + 1):
+        map_data_gids_counts[elevation_idx] = {}
+        chunks_gids_counts[elevation_idx] = {}
+        for layer_idx in range(min_layer_idx, max_layer_idx + 1):
+
+            """ count gids not void and not default """
+            map_data_level_gids_counts = {}
+            chunks_level_gids_counts = {}
+
+            """ count gids of maps datas """
+            for map_data in maps_data:
+                map_data_elevation = map_data.get_elevation_at(elevation_idx)
+                if map_data_elevation is None:
+                    continue
+                map_data_layer = map_data_elevation.get_layer_at(layer_idx)
+                if map_data_layer is None:
+                    continue
+                m_gids_counts = map_data_layer.get_gids_counts([config.default_tile_gid, config.void_tile_gid])
+                # remove void and default
+
+                for gid, count in m_gids_counts.items():
+                    if gid not in map_data_level_gids_counts.keys():
+                        map_data_level_gids_counts[gid] = 0
+                    map_data_level_gids_counts[gid] += count
+            map_data_gids_counts[elevation_idx][layer_idx] = map_data_level_gids_counts
+
+            """ count gids of chunks """
+            for chunk in chunks:
+                chunk_elevation = chunk.get_elevation_at(elevation_idx)
+                if chunk_elevation is None:
+                    continue
+                chunk_layer = chunk_elevation.get_layer_at(layer_idx)
+                if chunk_layer is None:
+                    continue
+                ch_gids_counts = chunk_layer.get_gids_counts([config.default_tile_gid, config.void_tile_gid])
+                # remove void and default
+
+                for gid, count in ch_gids_counts.items():
+                    if gid not in chunks_level_gids_counts.keys():
+                        chunks_level_gids_counts[gid] = 0
+                    chunks_level_gids_counts[gid] += count
+            chunks_gids_counts[elevation_idx][layer_idx] = chunks_level_gids_counts
+
+            if elevation_idx == 3:
+                pass
+
+    """ compare """
+    test_gids_sets_passed = True
+    test_gids_counts_passed = True
+    for elevation_idx in range(min_elevation_idx, max_elevation_idx + 1):
+        map_data_elevation_gids_counts = map_data_gids_counts[elevation_idx]
+        chunks_elevation_gids_counts = chunks_gids_counts[elevation_idx]
+
+        for layer_idx in range(min_layer_idx, max_layer_idx + 1):
+            map_data_level_gids_counts = map_data_elevation_gids_counts[layer_idx]
+            chunks_level_gids_counts = chunks_elevation_gids_counts[layer_idx]
+
+            map_data_gids = set(map_data_level_gids_counts.keys())
+            chunks_gids = set(chunks_level_gids_counts.keys())
+            if map_data_gids != chunks_gids:
+                # diff_gids = map_data_gids.symmetric_difference(chunks_gids)
+                test_gids_sets_passed = False
+                print(f"Error @ {elevation_idx},{layer_idx}: map data gids != chunks gids, diff: {map_data_gids} vs. {chunks_gids} - FAILED!")
+            
+            gids_keys = list(map_data_gids.intersection(chunks_gids))
+            for gid in gids_keys:
+                if map_data_level_gids_counts[gid] != chunks_level_gids_counts[gid]:
+                    print(f"Error @ {elevation_idx},{layer_idx}: count of {gid}: map data gids [{map_data_level_gids_counts[gid]}] != chunks gids [{chunks_level_gids_counts[gid]}]")
+                    test_gids_counts_passed = False
+
+    if not test_gids_sets_passed:
+        print("GIDs sets equal - FAIELD!")
+        abort_and_exit()
+    print("GIDs sets equal - PASSED!")
+
+    if not test_gids_counts_passed:
+        print("GIDs counts equal - FAIELD!")
+        abort_and_exit()
+    print("GIDs counts equal - PASSED!")
 
     """ Save chunks and world data """
