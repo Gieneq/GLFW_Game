@@ -12,6 +12,13 @@ After many changes collision system, with elevation changing was finally introdu
     <img src="img/current_state_capture.PNG" width="500" alt="Recent state">
 </p>
 
+Maps chunking
+
+
+<p align="center">
+    <img src="img/chunking_img.PNG" width="500" alt="Maps chunking">
+</p>
+
 ## Changelog
 
 - 22.03.2023: Entity-Component-System introduction
@@ -21,6 +28,7 @@ After many changes collision system, with elevation changing was finally introdu
 - 08.08.2023: Tiles animation with common timing listeners
 - 10.08.2023: Collision detection
 - 04.09.2023: Functional stairs
+- 02.10.2023: Chunking maps preprocessor for world streaming
 
 ## Dependencies:
 - https://github.com/glfw/glfw

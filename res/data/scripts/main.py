@@ -4,6 +4,7 @@ import os
 from common.config import Config
 from map.loader import MapsLoader
 from chunking.processor import ChunkingProcessor
+from visualization.visualization import Visualization2D
 
 def abort_and_exit():
     print('Aborting with error...')
@@ -196,5 +197,18 @@ if __name__ == '__main__':
         print("GIDs counts equal - FAIELD!")
         abort_and_exit()
     print("GIDs counts equal - PASSED!")
+
+    """ Visualization """
+    print("-------------------------------------------------------------")
+    print("Visualization:")
+    visualization = Visualization2D(config)
+    visualization.set_boundings(chunker.bounding_rect_not_aligned, chunker.bounding_rect_aligned)
+    for chunk in chunks:
+        visualization.append_chunk(chunk)
+
+    for map_data in maps_data:
+        visualization.append_map_data(map_data)
+
+    visualization.show()
 
     """ Save chunks and world data """
