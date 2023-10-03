@@ -1,38 +1,13 @@
 import argparse
-import shutil
-import os
 from common.config import Config
 from map.loader import MapsLoader
 from chunking.processor import ChunkingProcessor
 from visualization.visualization import Visualization2D
+from saving.saver_world import WorldSaving
 
 def abort_and_exit():
     print('Aborting with error...')
     exit(1)
-
-
-def remove_dir_if_exists(directory_path) -> bool:
-    if os.path.exists(directory_path):
-        try:
-            shutil.rmtree(directory_path)
-            print(f"Directory '{directory_path}' and its contents have been removed.")
-            return True
-        except Exception as e:
-            print(f"An error occurred: {e}")
-            return False
-    else:
-        """ Not exists - no problem """
-        return True
-        
-
-def create_dir_if_possible(directory_path) -> bool:
-    try:
-        os.makedirs(directory_path)
-        print(f"Directory '{directory_path}' has been created.")
-        return True
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return False
     
 
 if __name__ == '__main__':
@@ -61,19 +36,6 @@ if __name__ == '__main__':
 
     if config.verbose:
         print(config, end="\n\n")
-
-    """ Clear output dirs """
-    # if not remove_dir_if_possible(config.output_root_dir):
-    #     print("Removing output directory failed")
-    #     return False
-
-    # if not create_dir_if_possible(config.output_root_dir):
-    #     print("Creating output directory failed")
-    #     return False
-
-    # if not create_dir_if_possible(config.output_data_dir):
-    #     print("Creating output data directory failed")
-    #     return False
 
     """ Load all maps data """
     maps_loader = MapsLoader(config)
@@ -198,6 +160,24 @@ if __name__ == '__main__':
         abort_and_exit()
     print("GIDs counts equal - PASSED!")
 
+    """ Save chunks and world data """
+    print("-------------------------------------------------------------")
+    print("Saving:")
+    world_saving = WorldSaving(config, maps_loader.tilesetsDatabase)
+
+    """ Save chunks data """
+    for chunk in chunks:
+        if not world_saving.save_chunk(chunk):
+            print("Saving chunk failed")
+            abort_and_exit()
+
+    world_saving.chunks_done()
+
+    """ Save world data """
+    if not world_saving.save_world_data():
+        print("Saving world data failed")
+        abort_and_exit()
+            
     """ Visualization """
     print("-------------------------------------------------------------")
     print("Visualization:")
@@ -210,5 +190,3 @@ if __name__ == '__main__':
         visualization.append_map_data(map_data)
 
     visualization.show()
-
-    """ Save chunks and world data """

@@ -27,12 +27,17 @@ class Tileset:
             return self.first_gid <= gid
         return self.first_gid <= gid <= self.last_gid
 
-    def as_dist(self):
-        return {
+    def as_dist(self, use_forward_slash_path=False):
+        result = {
             "first_gid": self.first_gid,
             "last_gid": self.last_gid,
             "path": self.path
         }
+
+        if use_forward_slash_path:
+            result["path"] = result["path"].replace("\\", "/")
+
+        return result
     
 
 class TilesetsDatabase:
@@ -135,3 +140,6 @@ class TilesetsDatabase:
 
     def __len__(self):
         return len(self.assignment)
+    
+    def to_dict(self, use_forward_slash_path=False):
+        return [{str(idx): tileset.as_dist(use_forward_slash_path)} for idx, tileset in enumerate(self.assignment.values())]

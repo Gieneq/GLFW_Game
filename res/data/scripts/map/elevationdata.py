@@ -88,6 +88,12 @@ class Layer:
         return f"Layer(name={self.name}, w={self.width}, h={self.height}, void_gids_count={self.get_gids_count(self.void_gid)}), common_gid={counts})"
 
 
+    def to_dict(self) -> dict:
+        return {
+            "name": self.name,
+            "data": self.data
+        }
+
 class Elevation:
     def __init__(self, index: int) -> None:
         self.index = index
@@ -181,6 +187,17 @@ class Elevation:
         s += ")"
         return s
     
+
+    def to_dict(self) -> dict:
+        result = {
+            "floor_layer": self.floor_layer.to_dict() if self.floor_layer else None,
+            "details_layer": self.details_layer.to_dict() if self.details_layer else None,
+            "objects_layers": []
+        }
+        for layer in self.objects_layers:
+            result["objects_layers"].append(layer.to_dict())
+        return {str(self.index): result}
+
 
 def calculate_z_index(offset_y: int, tile_height: int) -> int:
     if offset_y == 0:

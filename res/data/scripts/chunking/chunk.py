@@ -58,4 +58,17 @@ class Chunk:
         return string
 
 
+    def to_dict(self) -> dict:
+        result = {
+            "x": self.x,
+            "y": self.y,
+            "width": self.width,
+            "height": self.height,
+            "min_elevation_idx": self.min_elevation_idx,
+            "max_elevation_idx": self.max_elevation_idx,
+            "elevations_count": self.elevations_count,
+            "tilesets_ids": self.tilesets_ids,
+            "elevations": [elevation.to_dict() for elevation in self.elevations_map.values()]
+        }
 
+        return result
