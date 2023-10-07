@@ -1,6 +1,6 @@
 #pragma once 
 #include "GLCommon.h"
-// #include <iostream>
+#include <iostream>
 
 class TextureData;
 class TextureID {
@@ -43,4 +43,5 @@ private:
 
     friend class TextureData;
     friend class LoaderBase;
+    friend class ImagesManager;
 };

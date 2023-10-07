@@ -32,6 +32,12 @@ bool GameBase::init() {
     collisionsSystem.init();
     
     /* Loader loading */
+    result = Loader::getLoader().init();
+    if(!result) {
+        std::cerr << "Loader::init() failed" << std::endl;
+        return false;
+    }
+    
     result = Loader::getLoader().loadAssets();
     if(!result) {
         std::cerr << "Loader::loadAssets() failed" << std::endl;

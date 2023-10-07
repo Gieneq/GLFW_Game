@@ -11,6 +11,39 @@ class TilesetData;
 class MapData;
 class Loader;
 
+class ImageRaw {
+public:
+    ImageRaw() = default;
+
+    // ImageRaw(int width, int height, std::vector<unsigned char> rgbaPixelsData) : width(width), height(height), rgbaPixelsData(rgbaPixelsData) {}
+    
+    ImageRaw(int width, int height, std::vector<unsigned char>&& rgbaPixelsData, const std::string& path) : width(width), height(height), rgbaPixelsData(std::move(rgbaPixelsData)) {}
+
+    ImageRaw(ImageRaw&& other) noexcept : width(other.width), height(other.height), rgbaPixelsData(std::move(other.rgbaPixelsData)) {}
+    
+    inline int getWidth() const {
+        return width;
+    }
+    
+    inline int getHeight() const {
+        return height;
+    }
+    
+    inline std::vector<unsigned char> getData() const {
+        return rgbaPixelsData;
+    }
+
+    inline const std::string& getPath() const {
+        return path;
+    }
+
+private:
+    int width;
+    int height;
+    std::string path;
+    std::vector<unsigned char> rgbaPixelsData;
+};
+
 class TileData {
 public:
     bool hasAnimation() const {

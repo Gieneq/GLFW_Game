@@ -81,6 +81,7 @@ public:
         return Rect4F(u1, v1, u2-u1, v2-v1);
     }
 
+    TextureData() = default;
 private:    
     std::string absolute_path{""};
     std::string name{""};
@@ -93,7 +94,7 @@ private:
     int tilesCount{15*15};
     TextureID id{};
 
-    TextureData() = default;
     TextureData(const std::string& absolute_path, int imageWidth, int imageHeight, TextureID id, const std::string& name) : absolute_path(absolute_path), imageWidth(imageWidth), imageHeight(imageHeight), id(id), name(name) {}
     friend class LoaderBase;
+    friend class ImagesManager;
 };

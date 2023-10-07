@@ -3,11 +3,86 @@
 #include "Settings.h"
 #include "lodepng.h"
 #include "IOPath.h"
+#include <fstream>
+#include <windows.h>
+
+//add unique pointer
+#include <memory>
+
+#define CPPPATH_SEP "/"
+#include <cpppath.h>
+
+bool LoaderBase::init() {
+    bool result = true;
+
+    const auto worldFilePath = cpppath::join({Settings::Resources::RES_ROOT_DIRPATH, 
+        Settings::Resources::WORLD_DIRPATH,
+        Settings::Resources::WORLD_FILENAME});
+
+    std::cout << "worldFilePath: " << worldFilePath << std::endl;
+
+    auto textContent = getFileTextOrThrow(worldFilePath);
+
+    auto jsonWrapper = getFileJSONOrThrow(worldFilePath);
+
+    const auto jsonWrapperText = cJSON_Print(jsonWrapper.value());
+
+    std::cout << "jsonWrapper: " << jsonWrapperText << std::endl;
+
+    // throw std::runtime_error("LoaderBase::init() not implemented");
+    return result;
+}
+
+
+std::string LoaderBase::getFileTextOrThrow(const std::string& absolutePath) {
+    if (cpppath::exists(absolutePath) == false) {
+        throw std::runtime_error("LoaderBase::getFileTextOrThrow() - file does not exist: " + absolutePath);
+    }
+
+    std::ifstream ifs(absolutePath);
+    std::string content((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
+    return content;
+}
+
+
+CJSONWrapper LoaderBase::getFileJSONOrThrow(const std::string& absolutePath) {
+    const auto fileText = getFileTextOrThrow(absolutePath);
+    auto json = cJSON_Parse(fileText.c_str());
+    if (json == nullptr) {
+        throw std::runtime_error("LoaderBase::getFileJSONOrThrow() - error parsing json: " + std::string(cJSON_GetErrorPtr()));
+    }
+
+    return CJSONWrapper(json);
+}
+
+
+ImageRaw LoaderBase::getPNGOrThrow(const std::string& absolutePath) {
+    if (cpppath::exists(absolutePath) == false) {
+        throw std::runtime_error("LoaderBase::getFileTextOrThrow() - file does not exist: " + absolutePath);
+    }
+
+    std::vector<unsigned char> image;
+    unsigned imageWidth, imageHeight;
+    unsigned loadingDecodingError = lodepng::decode(image, imageWidth, imageHeight, absolutePath.c_str());
+    bool hasError = loadingDecodingError != 0;
+    if(hasError) {
+        throw std::runtime_error("LoaderBase::getPNGOrThrow() - error loading png: " + std::string(lodepng_error_text(loadingDecodingError)));
+    }
+
+    return ImageRaw(imageWidth, imageHeight, std::move(image), absolutePath);
+}
+
+
+
+
+
+
 
 
 bool LoaderBase::hasTextureDataWithID(TextureID textureID) {
     return getTextureDataByID(textureID).has_value();
 }
+
 
 std::optional<TextureData*> LoaderBase::getTextureDataByID(TextureID textureID) {
     auto it = std::find_if(textureDatas.begin(), textureDatas.end(), [textureID](const TextureData& textureData) {

@@ -36,6 +36,11 @@ namespace Settings {
         static constexpr char* ASSETS_PATH  = "../../res/assets/";
         static constexpr char* DATA_PATH  = "../../res/data/";
         static constexpr char* MAPS_DIR  = "maps/";
+        static constexpr char* RES_ROOT_DIRPATH  = "../../res/";
+        static constexpr char* WORLD_DIRPATH  = "data/generated/";
+        static constexpr char* WORLD_FILENAME  = "world.json";
+        static constexpr char* GENERATED_DIRPATH  = "../../res/data/generated/";
+        static constexpr char* CHUNKS_DIRPATH  = "../../res/data/generated/chunks/";
         static constexpr bool USE_VERTICAL_SHIFT{false};
     };
 
@@ -45,6 +50,18 @@ namespace Settings {
         static constexpr float INITIAL_Y = 12.0F;
         static constexpr int INITIAL_ELEVATION_IDX = 0;
         static constexpr float INITIAL_Z = 0.0F;
+    };
+
+    struct Debug {
+        static constexpr int NONE = 0;
+        static constexpr int SOME = 1;
+        static constexpr int MORE = 2;
+        static constexpr int ALL = 3;
+        static constexpr int VERBOSE_LEVEL = SOME;
+        static constexpr bool VERBOSE_IS_NONE = VERBOSE_LEVEL <= NONE;
+        static constexpr bool VERBOSE_IS_SOME = VERBOSE_LEVEL >= SOME;
+        static constexpr bool VERBOSE_IS_MORE = VERBOSE_LEVEL >= MORE;
+        static constexpr bool VERBOSE_IS_ALL = VERBOSE_LEVEL >= ALL;
     };
     
     struct General {

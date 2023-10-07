@@ -6,17 +6,37 @@
 
 #include "TextureData.h"
 #include "TextureId.h"
+#include "TilesetsLoader.h"
+#include "ChunksLoader.h"
+#include "cJSON.h"
+#include "cJSON_Wrapper.hpp"
+#include "LoaderDatatypes.h"
+#include "ImagesManager.h"
 
 class LoaderBase {
 protected:
     LoaderBase() = default;
     ~LoaderBase() = default;
 public:
-    // static LoaderBase& getInstance() {
-    //     static LoaderBase loader;
-    //     return loader;
-    // }
+    virtual bool init();
     
+    static std::string getFileTextOrThrow(const std::string& absolutePath);
+
+    static CJSONWrapper getFileJSONOrThrow(const std::string& absolutePath);
+    
+    // OptionalString getFileXMLOrThrow(const std::string& absolutePath);
+
+    static ImageRaw getPNGOrThrow(const std::string& absolutePath);
+
+
+
+
+
+
+
+
+
+
     friend std::ostream& operator<<(std::ostream& os, const LoaderBase& loader) {
         os << "LoaderBase: " << loader.textureDatas.size() << " textures:" << std::endl;
         for(const auto& textureData : loader.textureDatas) {
@@ -46,7 +66,15 @@ protected:
     std::string getTilesetImageAbsolutePath(const std::string& tilesetAbsolutePath, const std::string& imageName);
 
 private:    
-    std::optional<TextureID> storeInGPUMemory(std::vector<unsigned char>& pixels, int width, int height); 
+    std::optional<TextureID> storeInGPUMemory(std::vector<unsigned char>& pixels, int width, int height);
+
+    // std::vector<std::string> getAllChunksPaths();
     
     std::vector<TextureData> textureDatas{};
+
+    ChunksLoader chunksLoader{};
+
+
+    
+    ImagesManager imagesManager{};
 };

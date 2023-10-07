@@ -5,6 +5,8 @@ list(APPEND LIB_DEPENDENCIES
   utils
   lodepng
   pugixml
+  cpppath
+  cJSON
   world
   entity
   core
@@ -13,8 +15,11 @@ list(APPEND LIB_DEPENDENCIES
 message(STATUS "   -> ${LIB_DEPENDENCIES}")
 
 add_library(loader 
+  ImagesManager.cpp
   LoaderDatatypes.cpp
   LoaderBase.cpp
+  ChunksLoader.cpp
+  TilesetsLoader.cpp
   Loader.cpp
 )
 

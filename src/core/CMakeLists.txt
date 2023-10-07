@@ -11,7 +11,6 @@ add_library(core
   Timers.cpp
   Core.cpp
   Errors.cpp
-  Settings.cpp
   Window.cpp
 )
 
